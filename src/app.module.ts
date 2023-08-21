@@ -8,7 +8,6 @@ import { NfcTagModule } from './nfc_tag/nfc_tag.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guards/auth.guard';
-import { RolesGuard } from './auth/guards/roles.guard';
  
 @Module({
   imports: [

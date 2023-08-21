@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document } from "mongoose";
+import mongoose, { Document } from "mongoose";
 import { Role } from "utils/enums/roles.enum";
 import { CreditCard } from "./credit-card.schema";
 import { ItemInCart } from "./item-in-cart.schema";
@@ -14,7 +14,7 @@ import { RecentTransactions } from "./recent-transactions.schema";
 
 export class User extends Document {
     @Prop()
-    full_name:string;
+    fullName:string;
 
     @Prop()
     role: Role
@@ -23,7 +23,7 @@ export class User extends Document {
     email: string;
 
     @Prop()
-    credit_cards: CreditCard[];
+    creditCards: CreditCard[];
 
     @Prop()
     password: string;
@@ -59,6 +59,42 @@ export class User extends Document {
     recentItems: RecentItem[]
 
     @Prop()
+    recentTransactions: RecentTransactions[]
+}   
+export interface IUser  {
+
+    _id?:mongoose.Types.ObjectId;
+
+    fullName:string;
+
+    role: Role
+
+    email: string;
+
+    creditCards: CreditCard[];
+
+    password: string;
+
+    cart: ItemInCart[]
+
+    gender:Gender
+
+    birthDate: Date
+
+    isActive: boolean
+
+    schemaVersion: number
+
+    deviceToken: string
+    
+    createdAt: Date
+
+    transactionsAmount: number
+
+    lastActivity: Date
+
+    recentItems: RecentItem[]
+
     recentTransactions: RecentTransactions[]
 }   
 

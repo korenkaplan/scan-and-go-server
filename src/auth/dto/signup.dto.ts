@@ -1,27 +1,29 @@
-import { IsNotEmpty, IsString, IsEmail, MinLength, IsEnum } from "class-validator";
+import {IsNotEmpty, IsString, IsEmail, MinLength, IsEnum } from "class-validator";
 import { Gender } from "utils/enums/gender.enum";
-
-
 export class SignUpDto {
 
-    //@IsNotEmpty()
+    @IsNotEmpty()
     @IsString()
     readonly fullName: string;
 
-    //@IsNotEmpty()
+    @IsNotEmpty()
     @IsEmail({},{message:"Please enter a valid email address"})
     readonly email: string;
 
-   // @IsNotEmpty()
+    @IsNotEmpty()
     @IsString()
     @MinLength(6)
     readonly password: string;
 
-    //@IsNotEmpty()
+    @IsNotEmpty()
     @IsEnum(Gender,{message: 'Please enter a valid gender'})
     readonly gender: Gender
 
-    //@IsNotEmpty()
+    @IsNotEmpty()
     @IsString()
-    readonly device_token: string;
+    readonly deviceToken: string;
+
+    @IsNotEmpty()
+    readonly birthDate: string;
+
 }
