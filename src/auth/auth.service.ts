@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { IUser, User } from 'src/user/schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -8,13 +8,15 @@ import { LoginDto } from './dto/login.dto';
 import { Role } from 'utils/enums/roles.enum';
 import * as bcrypt from 'bcryptjs'
 import * as moment from 'moment';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         @InjectModel(User.name)
         private userModel: Model<User>,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private mailService: MailService
     ) { }
     async signUp(dto: SignUpDto): Promise<{ token: string }> {
         const user = await this.createUserFromSignUpDto(dto);
@@ -70,5 +72,8 @@ export class AuthService {
 
         }
         return user
+    }
+    async sendResetPasswordMail(email:string):Promise<string>{
+        return await this.mailService.sendResetPasswordEmail(email);
     }
 }

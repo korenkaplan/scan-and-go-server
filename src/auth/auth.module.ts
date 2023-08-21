@@ -7,9 +7,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserSchema } from 'src/user/schemas/user.schema';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports:[
+    MailModule,
     PassportModule.register({defaultStrategy: 'jwt'}),
     JwtModule.registerAsync({
       inject: [ConfigService],

@@ -8,6 +8,7 @@ import { NfcTagModule } from './nfc_tag/nfc_tag.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guards/auth.guard';
+import { MailModule } from './mail/mail.module';
  
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { AuthGuard } from './auth/guards/auth.guard';
     AuthModule,
     ItemModule,
     NfcTagModule,
-    TransactionsModule
+    TransactionsModule,
+    MailModule
   ],
   controllers: [],
   providers: [

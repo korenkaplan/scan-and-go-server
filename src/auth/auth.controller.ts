@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body,Query,Get} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public-guard.decorator';
 import { SignUpDto } from './dto/signup.dto';
@@ -19,5 +19,11 @@ export class AuthController {
     @Public()
     login(@Body() dto: LoginDto): Promise<{ token: string }> {
         return this.authService.login(dto);
+    }
+
+    @Get('/verifyEmail')
+    @Public()
+    verifyEmail(@Query('email') email:string):Promise<string>{
+        return this.authService.sendResetPasswordMail(email);
     }
 }
