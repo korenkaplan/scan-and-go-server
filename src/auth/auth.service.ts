@@ -47,7 +47,6 @@ export class AuthService {
     }
     convertDate(date: string): Date{
         const isoDate = moment(date, "DD-MM-YYYY").toDate();
-        console.log(isoDate);
         return isoDate;
     }
     async createUserFromSignUpDto(dto: SignUpDto): Promise<IUser> {
