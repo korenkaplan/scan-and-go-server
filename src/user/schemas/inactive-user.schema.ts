@@ -2,24 +2,24 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { Document } from "mongoose";
 import { Role } from "utils/enums/roles.enum";
 import { CreditCard } from "./credit-card.schema";
-import { ItemInCart } from "./item-in-cart.schema";
+import { ItemInCart } from "./item-in-cart.interface";
 import { Gender } from "utils/enums/gender.enum";
-import { RecentItem } from "./recent-items.schema";
-import { RecentTransactions } from "./recent-transactions.schema";
+import { RecentItem } from "./recent-items.interface";
+import { RecentTransactions } from "./recent-transactions.interface";
 
 @Schema({
-    timestamps:{createdAt:true, updatedAt:false},
-    collection:'inactiveUsers',
+    timestamps: { createdAt: true, updatedAt: false },
+    collection: 'inactiveUsers',
 })
 
 export class InactiveUser extends Document {
     @Prop()
-    fullName:string;
+    fullName: string;
 
     @Prop()
     roles: Role[]
 
-    @Prop({unique:true})
+    @Prop({ unique: true })
     email: string;
 
     @Prop()
@@ -32,7 +32,7 @@ export class InactiveUser extends Document {
     cart: ItemInCart[]
 
     @Prop()
-    gender:Gender
+    gender: Gender
 
     @Prop()
     birthDate: Date
@@ -45,14 +45,14 @@ export class InactiveUser extends Document {
 
     @Prop()
     deviceToken: string
-    
+
     @Prop()
     createdAt: Date
 
     @Prop()
     transactionsAmount: number
 
-    @Prop({index:1}) // Create an index on lastActivity field, sorted in ascending order (oldest to newest)
+    @Prop({ index: 1 }) // Create an index on lastActivity field, sorted in ascending order (oldest to newest)
     lastActivity: Date
 
     @Prop()
@@ -60,12 +60,12 @@ export class InactiveUser extends Document {
 
     @Prop()
     recentTransactions: RecentTransactions[]
-}   
-export interface IinactiveUser  {
+}
+export interface IinactiveUser {
 
-    _id?:mongoose.Types.ObjectId;
+    _id?: mongoose.Types.ObjectId;
 
-    fullName:string;
+    fullName: string;
 
     roles: Role[]
 
@@ -77,7 +77,7 @@ export interface IinactiveUser  {
 
     cart: ItemInCart[]
 
-    gender:Gender
+    gender: Gender
 
     birthDate: Date
 
@@ -86,7 +86,7 @@ export interface IinactiveUser  {
     schemaVersion: number
 
     deviceToken: string
-    
+
     createdAt: Date
 
     transactionsAmount: number
@@ -96,6 +96,6 @@ export interface IinactiveUser  {
     recentItems: RecentItem[]
 
     recentTransactions: RecentTransactions[]
-}   
+}
 
 export const InactiveUserSchema = SchemaFactory.createForClass(InactiveUser)
