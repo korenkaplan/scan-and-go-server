@@ -10,7 +10,7 @@ import { Item } from "src/item/schemas/item.schema";
 
 export class NfcTag extends Document{
 
-    @Prop({required: true, unique:true})
+    @Prop({unique:true})
     code: string
 
     @Prop({type:mongoose.Schema.Types.ObjectId,ref:'Item'})

@@ -10,7 +10,7 @@ import mongoose from "mongoose";
 
 export class Item extends Document{
 
-    @Prop()
+    @Prop({unique: true})
     name: string;
 
     @Prop()

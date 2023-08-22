@@ -6,7 +6,7 @@ import mongoose from "mongoose";
     collection:'coupons',
 })
 export class Coupon extends Document {
-    @Prop()
+    @Prop({unique:true})
     code: string; // The coupon code 
   
     @Prop()

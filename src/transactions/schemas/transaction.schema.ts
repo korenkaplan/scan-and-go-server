@@ -9,12 +9,12 @@ import { ITransactionItem } from "./transaction-item.interface";
 })
 export class Transaction {
     
-    @Prop({type:mongoose.Schema.Types.ObjectId,ref:'User'})
+    @Prop({type:mongoose.Schema.Types.ObjectId,ref:'User',index:1})
     userId:User
 
     @Prop()
     cardNumber:string
-
+ 
     @Prop()
     cardType:string
 
