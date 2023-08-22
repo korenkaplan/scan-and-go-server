@@ -13,8 +13,6 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { CouponModule } from './coupon/coupon.module';
 import { ReportedProblemModule } from './reported-problem/reported-problem.module';
 import { PaidItemModule } from './paid-item/paid-item.module';
-import { TstModule } from './tst/tst.module';
-import { TstModule } from './tst/tst.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -31,7 +29,6 @@ import { TstModule } from './tst/tst.module';
     CouponModule,
     ReportedProblemModule,
     PaidItemModule,
-    TstModule
   ],
   controllers: [],
   providers: [
