@@ -16,7 +16,7 @@ export class User extends Document {
     @Prop()
     fullName:string;
 
-    @Prop()
+    @Prop({default:[Role.USER]})
     roles: Role[]
 
     @Prop({unique:true})
@@ -37,10 +37,10 @@ export class User extends Document {
     @Prop()
     birthDate: Date
 
-    @Prop()
+    @Prop({default:true})
     isActive: boolean
 
-    @Prop()
+    @Prop({default:1})
     schemaVersion: number
 
     @Prop()
@@ -49,7 +49,7 @@ export class User extends Document {
     @Prop()
     createdAt: Date
 
-    @Prop()
+    @Prop({default:0})
     transactionsAmount: number
 
     @Prop({index:1}) // Create an index on lastActivity field, sorted in ascending order (oldest to newest)
