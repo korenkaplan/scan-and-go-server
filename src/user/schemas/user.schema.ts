@@ -17,7 +17,7 @@ export class User extends Document {
     fullName:string;
 
     @Prop()
-    role: Role
+    roles: Role[]
 
     @Prop({unique:true})
     email: string;
@@ -52,7 +52,7 @@ export class User extends Document {
     @Prop()
     transactionsAmount: number
 
-    @Prop()
+    @Prop({index:1}) // Create an index on lastActivity field, sorted in ascending order (oldest to newest)
     lastActivity: Date
 
     @Prop()
@@ -67,7 +67,7 @@ export interface IUser  {
 
     fullName:string;
 
-    role: Role
+    roles: Role[]
 
     email: string;
 

@@ -8,9 +8,11 @@ import { ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserSchema } from 'src/user/schemas/user.schema';
 import { MailModule } from 'src/mail/mail.module';
+import {ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports:[
+    ThrottlerModule.forRoot({ttl:60,limit:5}),
     MailModule,
     PassportModule.register({defaultStrategy: 'jwt'}),
     JwtModule.registerAsync({

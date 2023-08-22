@@ -9,7 +9,10 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { MailModule } from './mail/mail.module';
- 
+import { RolesGuard } from './auth/guards/roles.guard';
+import { CouponModule } from './coupon/coupon.module';
+import { ReportedProblemModule } from './reported-problem/reported-problem.module';
+import { PaidItemModule } from './paid-item/paid-item.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -22,7 +25,10 @@ import { MailModule } from './mail/mail.module';
     ItemModule,
     NfcTagModule,
     TransactionsModule,
-    MailModule
+    MailModule,
+    CouponModule,
+    ReportedProblemModule,
+    PaidItemModule
   ],
   controllers: [],
   providers: [
@@ -30,10 +36,10 @@ import { MailModule } from './mail/mail.module';
       provide: APP_GUARD,
       useClass: AuthGuard
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: RolesGuard
-    // }
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard
+    },
   ],
 })
 export class AppModule {}

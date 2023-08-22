@@ -15,8 +15,7 @@ export class UserService {
         return users
     }
     async getUser(query:ExpressQuery): Promise<User>{
-      console.log(query);
-      
+         console.log(query);
         return await this.userModel.findOne(query,{password:0});
          
     }

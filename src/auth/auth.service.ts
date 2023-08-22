@@ -9,6 +9,7 @@ import { Role } from 'utils/enums/roles.enum';
 import * as bcrypt from 'bcryptjs'
 import * as moment from 'moment';
 import { MailService } from 'src/mail/mail.service';
+import { VerificationEmailResponse } from 'src/mail/dto/verification-respond.dto';
 
 @Injectable()
 export class AuthService {
@@ -41,7 +42,6 @@ export class AuthService {
     }
     async hashPassword(password: string): Promise<string> {
         const hashedPassword =  await bcrypt.hash(password, 10);
-        console.log('hashPassword:'+ hashedPassword);
         return hashedPassword
 
     }
@@ -57,7 +57,7 @@ export class AuthService {
 
         const user: IUser = {
             password: hashedPassword,
-            role: Role.USER,
+            roles: [Role.USER],
             schemaVersion: 1,
             isActive: true,
             lastActivity: today,
@@ -73,7 +73,7 @@ export class AuthService {
         }
         return user
     }
-    async sendResetPasswordMail(email:string):Promise<string>{
+    async sendResetPasswordMail(email:string):Promise<VerificationEmailResponse>{
         return await this.mailService.sendResetPasswordEmail(email);
     }
 }
