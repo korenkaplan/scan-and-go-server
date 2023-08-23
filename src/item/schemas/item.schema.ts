@@ -1,14 +1,14 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Category, Color, Fabric, Season } from "../items.enum";
 import { Gender } from "utils/enums/gender.enum";
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
 
 
 @Schema({
     timestamps:{createdAt:true, updatedAt:false},
 })
 
-export class Item extends Document{
+export class Item extends Document {
 
     @Prop({unique: true})
     name: string;

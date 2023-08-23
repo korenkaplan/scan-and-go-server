@@ -31,15 +31,15 @@ import { PaidItemModule } from './paid-item/paid-item.module';
     PaidItemModule,
   ],
   controllers: [],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: AuthGuard
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard
-    },
+  providers: [ //TODO: Return the guards after testing
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: AuthGuard
+    // },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: RolesGuard
+    // },
   ],
 })
 export class AppModule {}
