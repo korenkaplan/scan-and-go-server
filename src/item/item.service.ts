@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Item } from './schemas/item.schema';
 import { Model } from 'mongoose';
-import { GetQueryDto } from 'src/globals/global-dto/get-query.dto';
+import { GetQueryDto } from 'src/user/global-dto/get-query.dto';
 
 @Injectable()
 export class ItemService {

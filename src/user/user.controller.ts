@@ -2,8 +2,8 @@ import { Controller, Get, Delete, Body, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './schemas/user.schema';
 import { FilterQuery } from 'mongoose';
-import { GetQueryDto } from 'src/globals/global-dto/get-query.dto';
-import { UpdateQueryDto } from 'src/globals/global-dto/update-query.dto';
+import { GetQueryDto } from 'src/user/global-dto/get-query.dto';
+import { UpdateQueryDto } from 'src/user/global-dto/update-query.dto';
 
 @Controller('users')
 export class UserController {

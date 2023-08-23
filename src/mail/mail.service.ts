@@ -3,7 +3,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { randomInt } from 'crypto';
 import { UserService } from 'src/user/user.service';
 import { VerificationEmailResponse } from './dto/verification-respond.dto';
-import { GetQueryDto } from 'src/globals/global-dto/get-query.dto';
+import { GetQueryDto } from 'src/user/global-dto/get-query.dto';
 import { User } from 'src/user/schemas/user.schema';
 
 @Injectable()
