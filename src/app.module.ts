@@ -28,7 +28,7 @@ import { AppService } from './app.service';
     // ItemModule,
     // NfcTagModule,
     TransactionsModule,
-    MailModule,
+    //MailModule,
     CouponModule,
     ReportedProblemModule,
     PaidItemModule,
