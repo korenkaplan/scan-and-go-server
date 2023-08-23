@@ -4,6 +4,7 @@ import { CreditCard } from "./credit-card.schema";
 import { ItemInCart } from "./item-in-cart.interface";
 import { RecentItem } from "./recent-items.interface";
 import { RecentTransactions } from "./recent-transactions.interface";
+import { UserGender } from "../enums/gender-user.enum";
 enum Role {
     USER = "user",
     ADMIN = "admin",
@@ -37,7 +38,7 @@ export class User extends Document {
     cart: ItemInCart[]
 
     @Prop()
-    gender: Gender
+    gender: UserGender
 
     @Prop()
     birthDate: Date
@@ -82,7 +83,7 @@ export interface IUser {
 
     cart: ItemInCart[]
 
-    gender: Gender
+    gender: UserGender
 
     birthDate: Date
 

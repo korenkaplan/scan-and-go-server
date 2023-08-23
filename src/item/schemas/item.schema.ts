@@ -1,9 +1,12 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Category, Color, Fabric, Season } from "../items.enum";
-import { Gender } from "src/globals/enums/gender.enum";
 import mongoose, { Document } from "mongoose";
 
-
+enum Gender {
+    M= "male",
+    F= "female",
+    U= "unisex"
+}
 @Schema({
     timestamps: { createdAt: true, updatedAt: false },
 })

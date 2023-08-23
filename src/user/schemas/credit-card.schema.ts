@@ -1,4 +1,4 @@
-import { CardType } from "src/globals/enums/credit-cards.enum";
+import { CardType } from "src/user/enums/credit-cards.enum";
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema()

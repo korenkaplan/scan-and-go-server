@@ -16,6 +16,7 @@ import { PaidItemModule } from './paid-item/paid-item.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
+import { GlobalModule } from './global/global.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { DatabaseModule } from './database/database.module';
      ReportedProblemModule,
      PaidItemModule,
      DatabaseModule,
+     GlobalModule,
   ],
   controllers: [AppController],
   providers: [ 
