@@ -6,19 +6,32 @@ import  { Model } from 'mongoose';
 
 @Injectable()
 export class TransactionsService {
-    
-    constructor( @InjectModel(Transaction.name)
-     private transactionModel:Model<Transaction>)
-     {}
-    async getMany(dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
-        const { query, projection } = dto
+    // constructor( @InjectModel(Transaction.name)
+    // private transactionModel:Model<Transaction>)
+    // {}
+   async getMany(dto: GetQueryDto<Transaction>): Promise<string> {
+       const { query, projection } = dto
 
-        const users = await this.transactionModel.find(query, projection);
-        return users
-    }
-    async getOne(dto: GetQueryDto<Transaction>): Promise<Transaction> {
-        const { query, projection } = dto
+      // const users = await this.transactionModel.find(query, projection);
+       return 'users'
+   }
+   async getOne(dto: GetQueryDto<Transaction>): Promise<string> {
+       const { query, projection } = dto
 
-        return await this.transactionModel.findOne(query, projection);
-    }
+       return 'await this.transactionModel.findOne(query, projection)';
+   }
+    // constructor( @InjectModel(Transaction.name)
+    //  private transactionModel:Model<Transaction>)
+    //  {}
+    // async getMany(dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
+    //     const { query, projection } = dto
+
+    //     const users = await this.transactionModel.find(query, projection);
+    //     return users
+    // }
+    // async getOne(dto: GetQueryDto<Transaction>): Promise<Transaction> {
+    //     const { query, projection } = dto
+
+    //     return await this.transactionModel.findOne(query, projection);
+    // }
 }
