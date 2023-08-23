@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Transaction } from './schemas/transaction.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { GetQueryDto } from './transaction.dto';
+import { GetQueryDto } from 'src/global/global.dto';
 
 @Injectable()
 export class TransactionsService {
