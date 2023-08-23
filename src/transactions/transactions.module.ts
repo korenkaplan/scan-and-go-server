@@ -5,7 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { TransactionSchema } from './schemas/transaction.schema';
 
 @Module({
- // imports:[MongooseModule.forFeature([{name:'Transaction',schema:TransactionSchema}])],
+  imports:[MongooseModule.forFeature([{name:'Transaction',schema:TransactionSchema}])],
   providers: [TransactionsService],
   controllers: [TransactionsController],
   exports:[TransactionsService]
