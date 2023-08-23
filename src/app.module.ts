@@ -18,20 +18,20 @@ import { AppService } from './app.service';
 
 @Module({
   imports: [
-    // ConfigModule.forRoot({
-    //   envFilePath: '.env',
-    //   isGlobal: true
-    // }),
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true
+    }),
     //  MongooseModule.forRoot(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}${process.env.MONGO_PATH}`,{dbName: process.env.DB_NAME}),
-     UserModule,
-    AuthModule,
-    ItemModule,
-    NfcTagModule,
-    TransactionsModule,
-    MailModule,
-    CouponModule,
-    ReportedProblemModule,
-    PaidItemModule,
+    //  UserModule,
+    // AuthModule,
+    // ItemModule,
+    // NfcTagModule,
+    // TransactionsModule,
+    // MailModule,
+    // CouponModule,
+    // ReportedProblemModule,
+    // PaidItemModule,
   ],
   controllers: [AppController],
   providers: [ 
