@@ -30,8 +30,8 @@ import { AppService } from './app.service';
     // TransactionsModule,
     // MailModule,
     // CouponModule,
-    // ReportedProblemModule,
-    // PaidItemModule,
+     ReportedProblemModule,
+     PaidItemModule,
   ],
   controllers: [AppController],
   providers: [ 
