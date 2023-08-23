@@ -5,12 +5,14 @@ import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
-import { Role } from 'src/globals/enums/roles.enum';
 import * as bcrypt from 'bcryptjs'
 import * as moment from 'moment';
 import { MailService } from 'src/mail/mail.service';
 import { VerificationEmailResponse } from 'src/mail/dto/verification-respond.dto';
-
+enum Role {
+    USER = "user",
+    ADMIN = "admin",
+}
 @Injectable()
 export class AuthService {
     constructor(
