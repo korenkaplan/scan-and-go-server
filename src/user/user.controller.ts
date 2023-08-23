@@ -1,4 +1,4 @@
-import { Controller, Get, Delete, Body, Patch } from '@nestjs/common';
+import { Controller, Get, Delete, Body, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './schemas/user.schema';
 import { FilterQuery } from 'mongoose';
@@ -17,7 +17,7 @@ export class UserController {
         return await this.userService.deleteMany(query);
     }
 
-    @Patch('/updateAll')
+    @Put('/updateAll')
     async updateUsers(@Body() dto: UpdateQueryDto<User>): Promise<number> {
         return await this.userService.updateMany(dto);
     }

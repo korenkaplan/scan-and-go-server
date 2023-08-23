@@ -13,6 +13,9 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { CouponModule } from './coupon/coupon.module';
 import { ReportedProblemModule } from './reported-problem/reported-problem.module';
 import { PaidItemModule } from './paid-item/paid-item.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -30,16 +33,17 @@ import { PaidItemModule } from './paid-item/paid-item.module';
     ReportedProblemModule,
     PaidItemModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [ //TODO: Return the guards after testing
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: AuthGuard
-    // },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: RolesGuard
-    // },
+  AppService,
+  {
+      provide: APP_GUARD,
+      useClass: AuthGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard
+    },
   ],
 })
 export class AppModule {}
