@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Category, Color, Fabric, Season } from "../items.enum";
 import mongoose, { Document } from "mongoose";
+import { Category, Color, Fabric, Season } from "src/global/global.enum";
 
 enum Gender {
     M= "male",

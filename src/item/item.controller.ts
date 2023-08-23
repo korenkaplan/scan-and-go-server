@@ -1,7 +1,7 @@
 import { ItemService } from './item.service';
 import { Body, Controller, Get } from '@nestjs/common';
 import { Item } from './schemas/item.schema';
-import { GetQueryDto } from 'src/user/global-dto/get-query.dto';
+import { GetQueryDto } from 'src/global/global.dto';
 
 @Controller('item')
 export class ItemController {

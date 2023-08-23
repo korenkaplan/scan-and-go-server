@@ -4,8 +4,7 @@ import { User } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as bcrypt from 'bcryptjs'
-import { GetQueryDto } from './global-dto/get-query.dto';
-import { UpdateQueryDto } from './global-dto/update-query.dto';
+import { GetQueryDto, UpdateQueryDto } from 'src/global/global.dto';
 
 @Injectable()
 export class UserService {

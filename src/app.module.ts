@@ -15,7 +15,6 @@ import { ReportedProblemModule } from './reported-problem/reported-problem.modul
 import { PaidItemModule } from './paid-item/paid-item.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DatabaseModule } from './database/database.module';
 import { GlobalModule } from './global/global.module';
 
 @Module({
@@ -34,7 +33,6 @@ import { GlobalModule } from './global/global.module';
      CouponModule,
      ReportedProblemModule,
      PaidItemModule,
-     DatabaseModule,
      GlobalModule,
   ],
   controllers: [AppController],

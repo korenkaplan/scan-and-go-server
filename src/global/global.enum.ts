@@ -1,3 +1,21 @@
+export enum Gender {
+    M= "male",
+    F= "female",
+}
+export enum ClothingGender {
+  M= "male",
+  F= "female",
+  U= "unisex"
+}
+export enum Role {
+    USER = "user",
+    ADMIN = "admin",
+}
+export enum CardType {
+    MAS='mastercard',
+    VIS='visa',
+    AMR='american express',
+}
 export enum Category {
     Jeans = "Jeans",
     Jackets = "Jackets",
@@ -38,7 +56,7 @@ export enum ClotheGender {
     Female = "Female",
     Unisex = "Unisex",
   }
-  export enum Season {
+export enum Season {
     SpringSummer = "Spring/Summer",
     FallWinter = "Fall/Winter",
     Yearly = "Yearly"

@@ -4,7 +4,7 @@ import { CreditCard } from "./credit-card.schema";
 import { ItemInCart } from "./item-in-cart.interface";
 import { RecentItem } from "./recent-items.interface";
 import { RecentTransactions } from "./recent-transactions.interface";
-import { Gender, Role } from "../user.enum";
+import { Gender, Role } from "src/global/global.enum";
 
 @Schema({
     timestamps: { createdAt: true, updatedAt: false },
