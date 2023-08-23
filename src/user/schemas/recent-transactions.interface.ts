@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { CardType } from "src/utils/enums/credit-cards.enum";
+import { CardType } from "src/globals/enums/credit-cards.enum";
 
 export interface RecentTransactions {
     transactionId: mongoose.Schema.Types.ObjectId

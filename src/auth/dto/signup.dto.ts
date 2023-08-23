@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsString, IsEmail, MinLength, IsEnum } from "class-validator";
-import { Gender } from "src/utils/enums/gender.enum";
+import { Gender } from "src/globals/enums/gender.enum";
 export class SignUpDto {
 
     @IsNotEmpty()

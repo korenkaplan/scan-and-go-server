@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { Document } from "mongoose";
-import { Role } from "src/utils/enums/roles.enum";
+import { Role } from "src/globals/enums/roles.enum";
 import { CreditCard } from "./credit-card.schema";
 import { ItemInCart } from "./item-in-cart.interface";
-import { Gender } from "src/utils/enums/gender.enum";
+import { Gender } from "src/globals/enums/gender.enum";
 import { RecentItem } from "./recent-items.interface";
 import { RecentTransactions } from "./recent-transactions.interface";
 
