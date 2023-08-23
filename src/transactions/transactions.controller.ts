@@ -7,15 +7,6 @@ import { GetQueryDto } from 'utils/global-dto/get-query.dto';
 export class TransactionsController {
 
     constructor(private transactionService: TransactionsService){}
-    @Get('/getAll')
-    async getUsers(@Body() dto: GetQueryDto<Transaction>): Promise<string> {
-        return await this.transactionService.getMany(dto);
-    }
-
-    @Get('/getOne')
-    async getTransactions(@Body() dto: GetQueryDto<Transaction>): Promise<string> {
-        return await this.transactionService.getMany(dto);
-    }
     // @Get('/getAll')
     // async getUsers(@Body() dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
     //     return await this.transactionService.getMany(dto);
