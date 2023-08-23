@@ -2,12 +2,15 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { Document } from "mongoose";
 import { CreditCard } from "./credit-card.schema";
 import { ItemInCart } from "./item-in-cart.interface";
-import { Gender } from "src/utils/enums/gender.enum";
 import { RecentItem } from "./recent-items.interface";
 import { RecentTransactions } from "./recent-transactions.interface";
 enum Role {
     USER = "user",
     ADMIN = "admin",
+}
+enum Gender {
+    M= "male",
+    F= "female"
 }
 @Schema({
     timestamps: { createdAt: true, updatedAt: false },
