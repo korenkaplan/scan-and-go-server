@@ -1,5 +1,5 @@
-import { CardType } from "src/user/enums/credit-cards.enum";
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import { CardType } from '../user.enum';
 
 @Schema()
 export class CreditCard {
