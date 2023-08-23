@@ -15,6 +15,7 @@ import { ReportedProblemModule } from './reported-problem/reported-problem.modul
 import { PaidItemModule } from './paid-item/paid-item.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { AppService } from './app.service';
      CouponModule,
      ReportedProblemModule,
      PaidItemModule,
+     DatabaseModule,
   ],
   controllers: [AppController],
   providers: [ 
