@@ -3,7 +3,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { randomInt } from 'crypto';
 import { UserService } from 'src/user/user.service';
 import { VerificationEmailResponse } from './dto/verification-respond.dto';
-import { GetQueryDto } from 'utils/global-dto/get-query.dto';
+import { GetQueryDto } from 'src/utils/global-dto/get-query.dto';
 import { User } from 'src/user/schemas/user.schema';
 
 @Injectable()
@@ -29,9 +29,9 @@ export class MailService {
     }
 
     async verifyEmail(email: string): Promise<boolean> {
-        const dto:GetQueryDto<User> = {
-            query: { email},
-            projection:{}
+        const dto: GetQueryDto<User> = {
+            query: { email },
+            projection: {}
         }
         const user = await this.userService.getOne(dto);
         return user ? true : false;

@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
-import { Role } from 'utils/enums/roles.enum';
+import { Role } from 'src/utils/enums/roles.enum';
 import * as bcrypt from 'bcryptjs'
 import * as moment from 'moment';
 import { MailService } from 'src/mail/mail.service';

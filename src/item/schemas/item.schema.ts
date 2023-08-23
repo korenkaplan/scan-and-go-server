@@ -1,20 +1,20 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Category, Color, Fabric, Season } from "../items.enum";
-import { Gender } from "utils/enums/gender.enum";
+import { Gender } from "src/utils/enums/gender.enum";
 import mongoose, { Document } from "mongoose";
 
 
 @Schema({
-    timestamps:{createdAt:true, updatedAt:false},
+    timestamps: { createdAt: true, updatedAt: false },
 })
 
 export class Item extends Document {
 
-    @Prop({unique: true})
+    @Prop({ unique: true })
     name: string;
 
     @Prop()
-    category:Category
+    category: Category
 
     @Prop()
     price: number
@@ -23,30 +23,30 @@ export class Item extends Document {
     imageSource: string
 
     @Prop()
-    fabric:Fabric
+    fabric: Fabric
 
     @Prop()
-    gender:Gender
+    gender: Gender
 
     @Prop()
-    season:Season
+    season: Season
 
     @Prop()
-    colors:Color[]
+    colors: Color[]
 
     @Prop()
     createdAt: Date
 }
 export class IItem {
-    _id?:mongoose.Types.ObjectId;
+    _id?: mongoose.Types.ObjectId;
     name: string;
     category: Category;
     price: number;
     imageSource: string;
     fabric: Fabric;
-    gender:Gender;
+    gender: Gender;
     season: Season;
-    colors:Color[]
-    createdAt:Date
+    colors: Color[]
+    createdAt: Date
 }
 export const ItemSchema = SchemaFactory.createForClass(Item);

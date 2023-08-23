@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Item } from './schemas/item.schema';
 import { Model } from 'mongoose';
-import { GetQueryDto } from 'utils/global-dto/get-query.dto';
+import { GetQueryDto } from 'src/utils/global-dto/get-query.dto';
 
 @Injectable()
 export class ItemService {
-    constructor(@InjectModel(Item.name) private itemModel: Model<Item> ){}
+    constructor(@InjectModel(Item.name) private itemModel: Model<Item>) { }
 
     async getMany(dto: GetQueryDto<Item>): Promise<Item[]> {
         const { query, projection } = dto

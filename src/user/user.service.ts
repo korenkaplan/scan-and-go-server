@@ -2,8 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import mongoose, { FilterQuery, UpdateWriteOpResult }from 'mongoose';
 import { User } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { GetQueryDto } from 'utils/global-dto/get-query.dto';
-import { UpdateQueryDto } from 'utils/global-dto/update-query.dto';
+import { GetQueryDto } from 'src/utils/global-dto/get-query.dto';
+import { UpdateQueryDto } from 'src/utils/global-dto/update-query.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as bcrypt from 'bcryptjs'
 
