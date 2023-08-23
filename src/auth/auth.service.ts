@@ -9,10 +9,7 @@ import * as bcrypt from 'bcryptjs'
 import * as moment from 'moment';
 import { MailService } from 'src/mail/mail.service';
 import { VerificationEmailResponse } from 'src/mail/dto/verification-respond.dto';
-enum Role {
-    USER = "user",
-    ADMIN = "admin",
-}
+import { Role } from 'src/user/enums/roles.enum';
 @Injectable()
 export class AuthService {
     constructor(
