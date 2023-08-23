@@ -23,7 +23,8 @@ import { DatabaseModule } from './database/database.module';
       envFilePath: '.env',
       isGlobal: true
     }),
-      MongooseModule.forRoot(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}${process.env.MONGO_PATH}`,{dbName: process.env.DB_NAME}),
+     // MongooseModule.forRootAsync(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}${process.env.MONGO_PATH}`,{dbName: process.env.DB_NAME}),
+      MongooseModule.forRootAsync({useFactory: () =>({uri:`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}${process.env.MONGO_PATH}`,dbName: process.env.DB_NAME})}),
     //  UserModule,
     // AuthModule,
      //ItemModule, --- problem on deployment
