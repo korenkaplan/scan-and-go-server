@@ -27,8 +27,8 @@ import { AppService } from './app.service';
     // AuthModule,
      //ItemModule, --- problem on deployment
      NfcTagModule,
-     //TransactionsModule,
-     //MailModule,
+     //TransactionsModule,  --- problem on deployment
+     MailModule,
      CouponModule,
      ReportedProblemModule,
      PaidItemModule,
