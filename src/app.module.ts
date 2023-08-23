@@ -24,11 +24,11 @@ import { AppService } from './app.service';
     }),
       MongooseModule.forRoot(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}${process.env.MONGO_PATH}`,{dbName: process.env.DB_NAME}),
     //  UserModule,
-    // AuthModule,
+     AuthModule,
      //ItemModule, --- problem on deployment
      NfcTagModule,
      //TransactionsModule,  --- problem on deployment
-     MailModule,
+     //MailModule,  --- problem on deployment
      CouponModule,
      ReportedProblemModule,
      PaidItemModule,
