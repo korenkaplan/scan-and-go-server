@@ -2,36 +2,23 @@ import { Controller, Get, Delete, Body, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './schemas/user.schema';
 import { FilterQuery } from 'mongoose';
-import { GetQueryDto } from 'src/user/global-dto/get-query.dto';
-import { UpdateQueryDto } from 'src/user/global-dto/update-query.dto';
+import { GetQueryDto } from './global-dto/get-query.dto';
+import { UpdateQueryDto } from './global-dto/update-query.dto';
 
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) { }
     @Get('/getAll')
-    async getUsers(@Body() dto): Promise<User[]> {
+    async getUsers(@Body() dto: GetQueryDto<User>): Promise<User[]> {
         return await this.userService.getMany(dto);
     }
     @Delete('/deleteAll')
-    async deleteUsers(@Body() query): Promise<number> {
+    async deleteUsers(@Body() query: FilterQuery<User>): Promise<number> {
         return await this.userService.deleteMany(query);
     }
 
     @Put('/updateAll')
-    async updateUsers(@Body() dto): Promise<number> {
+    async updateUsers(@Body() dto: UpdateQueryDto<User>): Promise<number> {
         return await this.userService.updateMany(dto);
     }
-    // @Get('/getAll')
-    // async getUsers(@Body() dto: GetQueryDto<User>): Promise<User[]> {
-    //     return await this.userService.getMany(dto);
-    // }
-    // @Delete('/deleteAll')
-    // async deleteUsers(@Body() query: FilterQuery<User>): Promise<number> {
-    //     return await this.userService.deleteMany(query);
-    // }
-
-    // @Put('/updateAll')
-    // async updateUsers(@Body() dto: UpdateQueryDto<User>): Promise<number> {
-    //     return await this.userService.updateMany(dto);
-    // }
 }
