@@ -1,34 +1,35 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose from "mongoose";
+import mongoose, { HydratedDocument } from "mongoose";
 import { User } from "src/user/schemas/user.schema";
 import { ITransactionItem } from "./transaction-item.interface";
 
-@Schema({
-    timestamps:{createdAt:true, updatedAt:false,},
-    collection:'transactions'
-})
+
+export type TransactionDocument = HydratedDocument<Transaction>
+
+//@Schema({timestamps:{createdAt:true, updatedAt:false}})
+@Schema()
 export class Transaction {
-    
-    @Prop({type:mongoose.Schema.Types.ObjectId,ref:'User',index:1})
-    userId:User
+
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', index: 1 })
+    userId: User
 
     @Prop()
-    cardNumber:string
- 
-    @Prop()
-    cardType:string
+    cardNumber: string
 
     @Prop()
-    amount:number
+    cardType: string
 
     @Prop()
-    products:ITransactionItem[]
+    amount: number
+
+    @Prop()
+    products: ITransactionItem[]
 
     @Prop()
     schemaVersion: number
 
     @Prop()
-    formattedDate:string
+    formattedDate: string
 
     @Prop()
     createdAt: Date
@@ -36,15 +37,15 @@ export class Transaction {
 
 }
 export interface ITransaction {
-    _id:mongoose.Schema.Types.ObjectId
-    userId:mongoose.Schema.Types.ObjectId
-    cardNumber:string
-    cardType:string
-    amount:number
-    products:ITransactionItem[]
-    schemaVersion:number
-    formattedDate:string
-    createdAt:Date
+    _id: mongoose.Schema.Types.ObjectId
+    userId: mongoose.Schema.Types.ObjectId
+    cardNumber: string
+    cardType: string
+    amount: number
+    products: ITransactionItem[]
+    schemaVersion: number
+    formattedDate: string
+    createdAt: Date
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);
