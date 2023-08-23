@@ -5,7 +5,7 @@ import { ItemInCart } from "./item-in-cart.interface";
 import { RecentItem } from "./recent-items.interface";
 import { RecentTransactions } from "./recent-transactions.interface";
 import { Role } from "../enums/roles.enum";
-import { UserGender } from "../enums/gender-user.enum";
+import { Gender } from "../enums/gender-user.enum";
 
 @Schema({
     timestamps: { createdAt: true, updatedAt: false },
@@ -32,7 +32,7 @@ export class InactiveUser extends Document {
     cart: ItemInCart[]
 
     @Prop()
-    gender: UserGender
+    gender: Gender
 
     @Prop()
     birthDate: Date
@@ -77,7 +77,7 @@ export interface IinactiveUser {
 
     cart: ItemInCart[]
 
-    gender: UserGender
+    gender: Gender
 
     birthDate: Date
 

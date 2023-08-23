@@ -4,15 +4,9 @@ import { CreditCard } from "./credit-card.schema";
 import { ItemInCart } from "./item-in-cart.interface";
 import { RecentItem } from "./recent-items.interface";
 import { RecentTransactions } from "./recent-transactions.interface";
-import { UserGender } from "../enums/gender-user.enum";
-enum Role {
-    USER = "user",
-    ADMIN = "admin",
-}
-enum Gender {
-    M= "male",
-    F= "female"
-}
+import { Gender } from "../enums/gender-user.enum";
+import { Role } from "../enums/roles.enum";
+
 @Schema({
     timestamps: { createdAt: true, updatedAt: false },
     collection: 'users',
@@ -38,7 +32,7 @@ export class User extends Document {
     cart: ItemInCart[]
 
     @Prop()
-    gender: UserGender
+    gender: Gender
 
     @Prop()
     birthDate: Date
@@ -83,7 +77,7 @@ export interface IUser {
 
     cart: ItemInCart[]
 
-    gender: UserGender
+    gender: Gender
 
     birthDate: Date
 
