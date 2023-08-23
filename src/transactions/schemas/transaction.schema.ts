@@ -4,10 +4,10 @@ import { User } from "src/user/schemas/user.schema";
 import { ITransactionItem } from "./transaction-item.interface";
 
 
+
 export type TransactionDocument = HydratedDocument<Transaction>
 
-//@Schema({timestamps:{createdAt:true, updatedAt:false}})
-@Schema()
+ @Schema({timestamps:{createdAt:true, updatedAt:false}})
 export class Transaction {
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', index: 1 })
