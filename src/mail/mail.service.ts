@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { randomInt } from 'crypto';
 import { UserService } from 'src/user/user.service';
@@ -8,7 +8,7 @@ import { GetQueryDto } from 'src/global/global.dto';
 
 @Injectable()
 export class MailService {
-    constructor(private mailerService: MailerService, private userService: UserService) { }
+    constructor(private mailerService: MailerService,@Inject(forwardRef(()=>UserService)) private userService: UserService) { }
 
     async sendResetPasswordEmail(email: string): Promise<VerificationEmailResponse> {
         const isExist = await this.verifyEmail(email);

@@ -8,8 +8,7 @@ import { GlobalModule } from 'src/global/global.module';
 @Module({
   imports:[
     MongooseModule.forFeature([{name:'User', schema:UserSchema}]),
-    GlobalModule
-
+    GlobalModule,
   ],
   providers: [UserService],
   controllers: [UserController],

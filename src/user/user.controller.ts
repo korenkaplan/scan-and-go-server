@@ -1,4 +1,4 @@
-import { Controller, Get, Delete, Body, Patch, UsePipes } from '@nestjs/common';
+import { Controller, Get, Delete, Body, Patch, UsePipes , Post} from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './schemas/user.schema';
 import { FilterQuery } from 'mongoose';
@@ -6,10 +6,12 @@ import { GetQueryDto, UpdateQueryDto } from 'src/global/global.dto';
 import { UpdatePasswordQueryDto } from './dto/update-password.dto';
 import { PasswordValidationPipe } from 'src/global/Validation/password-validation.pipe';
 import { ResetPasswordQueryDto } from './dto/reset-password.dto';
+import { CreateCreditCardDto } from './dto/create-credit-card.dto';
 
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) { }
+
     @Get('/getAll')
     async getUsers(@Body() dto: GetQueryDto<User>): Promise<User[]> {
         return await this.userService.getMany(dto);
@@ -31,5 +33,10 @@ export class UserController {
     @Patch('/resetPassword')
     async resetPassword(@Body() dto: ResetPasswordQueryDto):Promise<void>{
         return await this.userService.resetPassword(dto);
+    }
+
+    @Post('/paymentMethods/addCreditCard')
+    async addCreditCard(@Body() dto: CreateCreditCardDto):Promise<string>{
+        return await this.userService.addCreditCard(dto);
     }
 }

@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { IUser, User } from 'src/user/schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -11,10 +11,14 @@ import { MailService } from 'src/mail/mail.service';
 import { VerificationEmailResponse } from 'src/mail/dto/verification-respond.dto';
 import { Role } from 'src/global/global.enum';
 import { GlobalService } from 'src/global/global.service';
+import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
+import { promisify } from 'util';
+import { UserService } from 'src/user/user.service';
 @Injectable()
 export class AuthService {
     constructor(
         @InjectModel(User.name)
+        @Inject(forwardRef(()=>UserService))
         private userModel: Model<User>,
         private jwtService: JwtService,
         private mailService: MailService,
@@ -41,7 +45,7 @@ export class AuthService {
         const token = this.jwtService.sign({ id: user._id })
         return { token }
     }
-    convertDate(date: string): Date {
+     convertDate(date: string): Date {
         const isoDate = moment(date, "DD-MM-YYYY").toDate();
         return isoDate;
     }
@@ -71,4 +75,6 @@ export class AuthService {
     async sendResetPasswordMail(email: string): Promise<VerificationEmailResponse> {
         return await this.mailService.sendResetPasswordEmail(email);
     }
+
+
 }

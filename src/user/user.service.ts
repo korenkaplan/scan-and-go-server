@@ -1,5 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import mongoose, { FilterQuery, UpdateWriteOpResult } from 'mongoose';
+import { BadRequestException,  Injectable, NotFoundException} from '@nestjs/common';
+import mongoose, { FilterQuery, Types, UpdateWriteOpResult } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs'
@@ -7,13 +7,17 @@ import { GetQueryDto, UpdateQueryDto } from 'src/global/global.dto';
 import { GlobalService } from 'src/global/global.service';
 import { UpdatePasswordQueryDto } from './dto/update-password.dto';
 import { ResetPasswordQueryDto } from './dto/reset-password.dto';
+import { CreateCreditCardDto } from './dto/create-credit-card.dto';
+import { CreditCard } from './schemas/credit-card.schema';
 
 @Injectable()
 export class UserService {
+    private MAX_AMOUNT_OF_CREDIT_CARDS = 5
     constructor(
+        
         @InjectModel(User.name)
         private userModel: mongoose.Model<User>,
-        private globalService: GlobalService
+        private globalService: GlobalService,
     ) { }
 
     async updatePassword(dto: UpdatePasswordQueryDto): Promise<void> {
@@ -36,7 +40,7 @@ export class UserService {
         await user.save()
     }
     async resetPassword(dto: ResetPasswordQueryDto): Promise<void> {
-        const {newPassword, userId } = dto;
+        const { newPassword, userId } = dto;
 
         //find the user with the id
         const user = await this.userModel.findById(userId);
@@ -48,17 +52,100 @@ export class UserService {
         user.password = await this.globalService.hashPassword(newPassword)
         await user.save()
     }
+    //#region Credit Cards
+    async addCreditCard(dto: CreateCreditCardDto): Promise<string> {
+        // let str = 'koren';
+        // str = await this.globalService.encryptText(str);
+        // str = await this.globalService.decryptText(str);
+        // return str;
+        const { userId, creditCard } = dto;
+        //find the user
+        const user = await this.userModel.findById(userId);
+
+        //throw error if user not exists
+        if (!user) throw new NotFoundException(`No user with id ${userId} was found in the database`);
+
+        // check if the limit is reached (MAX_AMOUNT_OF_CREDIT_CARDS)
+        if (user.creditCards.length >= this.MAX_AMOUNT_OF_CREDIT_CARDS) throw new BadRequestException(`credit cards limit reached (${this.MAX_AMOUNT_OF_CREDIT_CARDS} cards) can't add this credit card`)
+
+        //validate the credit card 
+        if (!this.validateCreditCard(creditCard)) throw new BadRequestException(`Invalid Credit Card`);
+
+        //encrypt the credit card
+        const encryptedCard: CreditCard = await this.encryptCreditCard(creditCard);
+        
+        //Add _id to the card
+        encryptedCard._id = new mongoose.Types.ObjectId();
+        
+        //update the user credit cards array
+        user.creditCards.push(encryptedCard);
+
+        //check if default set the other as not default
+        if (creditCard.isDefault) 
+             this.setDefaultCard(user,encryptedCard._id)
+        await user.save()
+
+        return 'Credit Card Added successfully'; 
+    }
+    async validateCreditCard(card: CreditCard): Promise<boolean> {
+        return await true;
+    }
+    async decryptCreditCard(card:CreditCard):Promise<CreditCard>{
+        const decryptCreditCard: CreditCard = {
+            cardNumber: await this.globalService.decryptText(card.cardNumber),
+            expirationDate: await this.globalService.decryptText(card.expirationDate),
+            cardholderName: await this.globalService.decryptText(card.cardholderName),
+            cvv: await this.globalService.decryptText(card.cvv),
+            cardType: await this.globalService.decryptText(card.cardType),
+            isDefault: card.isDefault,
+            _id: card._id
+        }
+        return decryptCreditCard;
+    }
+    async encryptCreditCard(card: CreditCard): Promise<CreditCard> {
+        const CreditCard: CreditCard = {
+            cardNumber: await this.globalService.encryptText(card.cardNumber),
+            expirationDate: await this.globalService.encryptText(card.expirationDate),
+            cardholderName: await this.globalService.encryptText(card.cardholderName),
+            cvv: await this.globalService.encryptText(card.cvv),
+            cardType: await this.globalService.encryptText(card.cardType),
+            isDefault: card.isDefault,
+            _id: new Types.ObjectId()
+        }
+        return CreditCard
+    }
+    async decryptUserCreditCards(user: User): Promise<User> {
+        user.creditCards = await Promise.all(user.creditCards.map(async (card) => {
+            return await this.decryptCreditCard(card);
+        }));
+        return user;
+    }
+     setDefaultCard(user:User, _id: Types.ObjectId):void {
+        user.creditCards = user.creditCards.map(card => {
+            if(card.isDefault &&card._id != _id )
+            {
+            card.isDefault = false;
+                console.log('changed default card');
+            }
+            return card;
+        })
+    }
+
+    //#endregion
     //#region CRUD OPERATIONS
     async getMany(dto: GetQueryDto<User>): Promise<User[]> {
         const { query, projection } = dto
 
         const users = await this.userModel.find(query, projection);
-        return users
+        return await Promise.all(users.map(async (user) =>{
+            return await this.decryptUserCreditCards(user);
+        }))
     }
     async getOne(dto: GetQueryDto<User>): Promise<User> {
         const { query, projection } = dto
 
-        return await this.userModel.findOne(query, projection);
+        const user =  await this.userModel.findOne(query, projection);
+        return await this.decryptUserCreditCards(user)
     }
     async updateOne(dto: UpdateQueryDto<User>): Promise<User> {
         const { query, updateQuery } = dto
@@ -78,3 +165,5 @@ export class UserService {
     }
     //#endregion
 }
+
+

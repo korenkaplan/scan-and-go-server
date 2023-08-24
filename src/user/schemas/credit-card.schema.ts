@@ -1,26 +1,11 @@
-import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { CardType } from 'src/global/global.enum';
+import mongoose from 'mongoose';
 
-@Schema()
 export class CreditCard {
-
-    @Prop()
+    _id: mongoose.Types.ObjectId;
     cardNumber: string;
-
-    @Prop()
     expirationDate: string;
-
-    @Prop()
     cardholderName: string;
-
-    @Prop()
     cvv: string;
-
-    @Prop()
-    cardType: CardType;
-
-    @Prop()
-    isDefault:boolean
+    cardType: string;
+    isDefault: boolean;
 }
-
-export const CreditCardSchema = SchemaFactory.createForClass(CreditCard);

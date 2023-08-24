@@ -9,14 +9,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UserSchema } from 'src/user/schemas/user.schema';
 import { MailModule } from 'src/mail/mail.module';
 import {ThrottlerModule } from '@nestjs/throttler';
-import { UserModule } from 'src/user/user.module';
 import { GlobalModule } from 'src/global/global.module';
 
 @Module({
   imports:[
     GlobalModule,
     ThrottlerModule.forRoot({ttl:60,limit:5}),
-    UserModule,
     MailModule,
     PassportModule.register({defaultStrategy: 'jwt'}),
     JwtModule.registerAsync({

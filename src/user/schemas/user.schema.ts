@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { Document } from "mongoose";
-import { CreditCard } from "./credit-card.schema";
+import { CreditCard} from "./credit-card.schema";
 import { ItemInCart } from "./item-in-cart.interface";
 import { RecentItem } from "./recent-items.interface";
 import { RecentTransactions } from "./recent-transactions.interface";
@@ -12,6 +12,7 @@ import { Gender, Role } from "src/global/global.enum";
 })
 
 export class User extends Document {
+
     @Prop()
     fullName: string;
 
@@ -22,7 +23,7 @@ export class User extends Document {
     email: string;
 
     @Prop()
-    creditCards: CreditCard[];
+    creditCards:  CreditCard[];
 
     @Prop()
     password: string;
@@ -96,5 +97,6 @@ export interface IUser {
 
     recentTransactions: RecentTransactions[]
 }
-
 export const UserSchema = SchemaFactory.createForClass(User)
+
+

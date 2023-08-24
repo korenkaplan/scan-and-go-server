@@ -7,22 +7,23 @@ import {Throttle, ThrottlerGuard} from '@nestjs/throttler'
 import { VerificationEmailResponse } from 'src/mail/dto/verification-respond.dto';
 import { PasswordValidationPipe } from 'src/global/Validation/password-validation.pipe';
 @Controller('auth')
-@Public()
 @UseGuards(ThrottlerGuard)
 export class AuthController {
 
     constructor(private authService: AuthService) { }
-    
+    @Public()
     @UsePipes(PasswordValidationPipe)
     @Post('/signup')
     signup(@Body() dto: SignUpDto): Promise<{ token: string }> {
         return this.authService.signUp(dto);
     }
+    @Public()
     @Post('/login')
     login(@Body() dto: LoginDto): Promise<{ token: string }> {
         return this.authService.login(dto);
     }
 
+    @Public()
     @Get('/verifyEmail')
     @Throttle(2,60)
     verifyEmail(@Query('email') email:string):Promise<VerificationEmailResponse>{
