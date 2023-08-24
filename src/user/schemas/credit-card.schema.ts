@@ -18,6 +18,9 @@ export class CreditCard {
 
     @Prop()
     cardType: CardType;
+
+    @Prop()
+    isDefault:boolean
 }
 
 export const CreditCardSchema = SchemaFactory.createForClass(CreditCard);

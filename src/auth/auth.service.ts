@@ -10,13 +10,15 @@ import * as moment from 'moment';
 import { MailService } from 'src/mail/mail.service';
 import { VerificationEmailResponse } from 'src/mail/dto/verification-respond.dto';
 import { Role } from 'src/global/global.enum';
+import { GlobalService } from 'src/global/global.service';
 @Injectable()
 export class AuthService {
     constructor(
         @InjectModel(User.name)
         private userModel: Model<User>,
         private jwtService: JwtService,
-        private mailService: MailService
+        private mailService: MailService,
+        private globalService: GlobalService
     ) { }
     async signUp(dto: SignUpDto): Promise<{ token: string }> {
         const user = await this.createUserFromSignUpDto(dto);
@@ -39,18 +41,14 @@ export class AuthService {
         const token = this.jwtService.sign({ id: user._id })
         return { token }
     }
-    async hashPassword(password: string): Promise<string> {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        return hashedPassword
-    }
     convertDate(date: string): Date {
         const isoDate = moment(date, "DD-MM-YYYY").toDate();
         return isoDate;
     }
     async createUserFromSignUpDto(dto: SignUpDto): Promise<IUser> {
         const today = new Date()
-        const { birthDate, password, ...rest } = dto;
-        const hashedPassword = await this.hashPassword(password);
+        const { birthDate, newPassword, ...rest } = dto;
+        const hashedPassword = await this.globalService.hashPassword(newPassword);
 
         const user: IUser = {
             password: hashedPassword,

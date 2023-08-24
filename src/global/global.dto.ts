@@ -9,6 +9,7 @@ export class UpdateQueryDto<T> {
     query: FilterQuery<T>
     updateQuery: UpdateQuery<T>
 }
+
 export class HttpResponse<T> {
     message: string;
     status: number;

@@ -2,39 +2,51 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import mongoose, { FilterQuery, UpdateWriteOpResult } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as bcrypt from 'bcryptjs'
 import { GetQueryDto, UpdateQueryDto } from 'src/global/global.dto';
+import { GlobalService } from 'src/global/global.service';
+import { UpdatePasswordQueryDto } from './dto/update-password.dto';
+import { ResetPasswordQueryDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class UserService {
     constructor(
         @InjectModel(User.name)
-        private userModel: mongoose.Model<User>
+        private userModel: mongoose.Model<User>,
+        private globalService: GlobalService
     ) { }
 
-    async updatePassword(dto: UpdatePasswordDto): Promise<void> {
+    async updatePassword(dto: UpdatePasswordQueryDto): Promise<void> {
         const { oldPassword, newPassword, userId } = dto;
 
         //find the user with the id
         const user = await this.userModel.findById(userId);
 
         //if not found throw error
-        if (!user) throw new NotFoundException('No user with id ' + userId + ' found in database');
+        if (!user) throw new NotFoundException(`No user with id ${userId} found in database`);
 
         //hash oldPassword and compare to user.password
         const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
 
-        //if not match return return old password incorrect
+        //if not match  return old password incorrect
         if (!isPasswordMatch) throw new BadRequestException('Old password does not match')
 
         //hash new password and update user password
-        user.password = await this.hashPassword(newPassword)
+        user.password = await this.globalService.hashPassword(newPassword)
         await user.save()
     }
-    async hashPassword(password: string): Promise<string> {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        return hashedPassword
+    async resetPassword(dto: ResetPasswordQueryDto): Promise<void> {
+        const {newPassword, userId } = dto;
+
+        //find the user with the id
+        const user = await this.userModel.findById(userId);
+
+        //if not found throw error
+        if (!user) throw new NotFoundException(`No user with id ${userId} found in database`);
+
+        //hash new password and update user password
+        user.password = await this.globalService.hashPassword(newPassword)
+        await user.save()
     }
     //#region CRUD OPERATIONS
     async getMany(dto: GetQueryDto<User>): Promise<User[]> {
@@ -64,5 +76,5 @@ export class UserService {
         return (await this.userModel.deleteMany(query)).deletedCount;
 
     }
-    // //#endregion
+    //#endregion
 }
