@@ -9,6 +9,8 @@ import { UpdatePasswordQueryDto } from './dto/update-password.dto';
 import { ResetPasswordQueryDto } from './dto/reset-password.dto';
 import { CreateCreditCardDto } from './dto/create-credit-card.dto';
 import { CreditCard } from './schemas/credit-card.schema';
+import { ChangeDefaultCardDto } from './dto/change-default-card.dto';
+import { DeleteCreditCardDto } from './dto/delete-credit-card.dto';
 
 @Injectable()
 export class UserService {
@@ -82,12 +84,17 @@ export class UserService {
 
         //check if default set the other as not default
         if (creditCard.isDefault) 
-             this.setDefaultCard(user,encryptedCard._id)
-        await user.save()
-
+        {
+            const changeCardDto: ChangeDefaultCardDto = {
+                userId:user.id,
+                cardId:encryptedCard._id
+            }
+            await this.setDefaultCard(changeCardDto)
+        }
         return 'Credit Card Added successfully'; 
     }
     async validateCreditCard(card: CreditCard): Promise<boolean> {
+        //TODO: create validation for the credit cards
         return await true;
     }
     async decryptCreditCard(card:CreditCard):Promise<CreditCard>{
@@ -120,17 +127,42 @@ export class UserService {
         }));
         return user;
     }
-     setDefaultCard(user:User, _id: Types.ObjectId):void {
+    async setDefaultCard(dto: ChangeDefaultCardDto):Promise<void> {
+        const {userId, cardId} = dto;
+        const user =await this.userModel.findById(userId);
+        if(!user)
+            throw new NotFoundException(`No user with id ${userId} was found`);
         user.creditCards = user.creditCards.map(card => {
-            if(card.isDefault &&card._id != _id )
+            if(card.isDefault &&card._id != cardId )
             {
             card.isDefault = false;
                 console.log('changed default card');
             }
             return card;
         })
+        await user.save()
     }
+    async deleteCreditCard(dto: DeleteCreditCardDto):Promise<string> {
+        const {userId, cardId} = dto
+       //find the user
+        const user = await this.userModel.findById(userId)
 
+        if(!user)
+        throw new NotFoundException(`User not found with id: ${userId}`);
+        //get the length before the removal of the card
+        const beforeLength = user.creditCards.length
+
+       //find the card and delete
+        user.creditCards = user.creditCards.filter(card => card._id != cardId)
+
+        //compare the lengths before and after the removal
+        if(user.creditCards.length == beforeLength)
+        throw new NotFoundException(`Credit card not found with id: ${cardId}`);
+
+        //save the user
+        await user.save()
+        return 'deleted successfully';
+     }
     //#endregion
     //#region CRUD OPERATIONS
     async getMany(dto: GetQueryDto<User>): Promise<User[]> {

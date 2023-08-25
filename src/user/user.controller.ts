@@ -1,4 +1,4 @@
-import { Controller, Get, Delete, Body, Patch, UsePipes , Post} from '@nestjs/common';
+import { Controller, Get, Delete, Body, Patch, UsePipes, Post } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './schemas/user.schema';
 import { FilterQuery } from 'mongoose';
@@ -7,6 +7,8 @@ import { UpdatePasswordQueryDto } from './dto/update-password.dto';
 import { PasswordValidationPipe } from 'src/global/Validation/password-validation.pipe';
 import { ResetPasswordQueryDto } from './dto/reset-password.dto';
 import { CreateCreditCardDto } from './dto/create-credit-card.dto';
+import { ChangeDefaultCardDto } from './dto/change-default-card.dto';
+import { DeleteCreditCardDto } from './dto/delete-credit-card.dto';
 
 @Controller('users')
 export class UserController {
@@ -26,17 +28,28 @@ export class UserController {
     }
     @UsePipes(PasswordValidationPipe)
     @Patch('/updatePassword')
-    async updatePassword(@Body() dto: UpdatePasswordQueryDto):Promise<void>{
+    async updatePassword(@Body() dto: UpdatePasswordQueryDto): Promise<void> {
         return await this.userService.updatePassword(dto);
     }
     @UsePipes(PasswordValidationPipe)
     @Patch('/resetPassword')
-    async resetPassword(@Body() dto: ResetPasswordQueryDto):Promise<void>{
+    async resetPassword(@Body() dto: ResetPasswordQueryDto): Promise<void> {
         return await this.userService.resetPassword(dto);
     }
 
     @Post('/paymentMethods/addCreditCard')
-    async addCreditCard(@Body() dto: CreateCreditCardDto):Promise<string>{
+    async addCreditCard(@Body() dto: CreateCreditCardDto): Promise<string> {
         return await this.userService.addCreditCard(dto);
+    }
+
+    @Patch('/paymentMethods/changeDefault')
+    async changeDefaultCard(@Body() dto: ChangeDefaultCardDto): Promise<string> {
+        await this.userService.setDefaultCard(dto);
+        return 'Changed default card';
+    }
+    //card: 64e76056b76e50b30217fb3e -> "cardNumber": "123", user: 64e4624cac9453ef60727a0c
+    @Delete('/paymentMethods/deleteCreditCard')
+    async deleteCreditCard(@Body() dto: DeleteCreditCardDto): Promise<string> {
+        return await this.userService.deleteCreditCard(dto);
     }
 }
