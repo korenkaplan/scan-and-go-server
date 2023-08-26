@@ -170,18 +170,22 @@ export class UserService {
 
         const users = await this.userModel.find(query, projection);
         return await Promise.all(users.map(async (user) =>{
-            return await this.decryptUserCreditCards(user);
+            return user.creditCards? await this.decryptUserCreditCards(user): user
         }))
     }
     async getOne(dto: GetQueryDto<User>): Promise<User> {
         const { query, projection } = dto
 
         const user =  await this.userModel.findOne(query, projection);
-        return await this.decryptUserCreditCards(user)
+        return user.creditCards? await this.decryptUserCreditCards(user): user
     }
     async updateOne(dto: UpdateQueryDto<User>): Promise<User> {
         const { query, updateQuery } = dto
-        return await this.userModel.findOneAndUpdate(query, updateQuery, { new: true });
+        const user = await this.userModel.findOneAndUpdate(query, updateQuery, { new: true });
+        if(!user)
+        throw new NotFoundException('the query did\'nt found any user ')
+
+        return await this.decryptUserCreditCards(user)
     }
     async updateMany(dto: UpdateQueryDto<User>): Promise<number> {
         const { query, updateQuery } = dto
@@ -189,7 +193,10 @@ export class UserService {
         return result.modifiedCount
     }
     async deleteOne(query: FilterQuery<User>): Promise<User> {
-        return await this.userModel.findOneAndDelete(query);
+        const user = await this.userModel.findOneAndDelete(query);
+        if(!user)
+        throw new NotFoundException('the query did\'nt found any user ')
+    return await this.decryptUserCreditCards(user)
     }
     async deleteMany(query: FilterQuery<User>): Promise<number> {
         return (await this.userModel.deleteMany(query)).deletedCount;
