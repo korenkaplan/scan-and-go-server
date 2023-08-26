@@ -56,10 +56,6 @@ export class UserService {
     }
     //#region Credit Cards
     async addCreditCard(dto: CreateCreditCardDto): Promise<string> {
-        // let str = 'koren';
-        // str = await this.globalService.encryptText(str);
-        // str = await this.globalService.decryptText(str);
-        // return str;
         const { userId, creditCard } = dto;
         //find the user
         const user = await this.userModel.findById(userId);
