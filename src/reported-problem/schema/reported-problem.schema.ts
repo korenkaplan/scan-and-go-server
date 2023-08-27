@@ -3,7 +3,6 @@ import mongoose, { Document }  from "mongoose";
 import { User } from "src/user/schemas/user.schema";
 import { DeviceInfo } from "./device-info.interface";
 import { ProblemType, Status } from "../reported-problem.enum";
-
 @Schema({
     timestamps:{createdAt:true, updatedAt:false},
     collection:'reportedProblems',

@@ -1,20 +1,36 @@
-import { Controller, Post, UseInterceptors } from '@nestjs/common';
-import { ReportedProblem } from './schema/reported-problem.schema';
+import { Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-
+import { Express } from 'express'
+import { ReportedProblem } from './schema/reported-problem.schema';
+import { CreateProblemDto } from './dto/create-problem-dto';
+import { ReportedProblemService } from './reported-problem.service';
 @Controller('reported-problem')
 export class ReportedProblemController {
-    @Post('/createProblem')
-    @UseInterceptors(FileInterceptor('file', {
-        storage:diskStorage({
-            destination:'src\\reported-problem\\uploads',
-            filename:(req, file, cb)=> {
-                cb(null,`${file.originalname}`)
-            }
-        })
-    }))
-    async createProblem():Promise<string>{
-        return 'successfully created';
-    }
+constructor(private reportedProblemService: ReportedProblemService){}
+@Post('createProblem')
+@UseInterceptors(FileInterceptor('file'))
+async createProblem(@UploadedFile() file: Express.Multer.File, @Body() reportedProblem: ReportedProblem) {
+  const newProblem:CreateProblemDto= {
+    problem:reportedProblem,
+    file
+  }
+  return await this.reportedProblemService.createProblem(newProblem)
+
+}
+
+
+    // @Post('/createProblem')
+    // @UseInterceptors(FileInterceptor('file', {
+    //     storage:diskStorage({
+    //         destination:'./uploads',
+    //         filename:(req, file, cb)=> {
+    //             const fileName = Date.now().toString();
+    //             cb(null,`${fileName}.jpg`)
+    //         }
+    //     })
+    // }))
+    // async createProblem():Promise<string>{
+    //     return 'successfully created';
+    // }
 }

@@ -9,11 +9,22 @@ import { ResetPasswordQueryDto } from './dto/reset-password.dto';
 import { CreateCreditCardDto } from './dto/create-credit-card.dto';
 import { ChangeDefaultCardDto } from './dto/change-default-card.dto';
 import { DeleteCreditCardDto } from './dto/delete-credit-card.dto';
+import { AddToCartDto } from './dto/add-to-cart.dto';
+import { ItemInCart } from './schemas/item-in-cart.interface';
+import { RemoveItemFromCartDto } from './dto/remove-from-cart.dto';
 
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) { }
-
+    
+    @Delete('/removeFromCart')
+    async removeFromCart(@Body() dto: RemoveItemFromCartDto):Promise<ItemInCart[]>{
+     return await this.userService.removeItemFromCart(dto)
+    }
+    @Post('/addToCart')
+    async addToCart(@Body() dto:AddToCartDto):Promise<ItemInCart[]>{
+        return await this.userService.addToCart(dto)
+    }
     @Get('/getAll')
     async getUsers(@Body() dto: GetQueryDto<User>): Promise<User[]> {
         return await this.userService.getMany(dto);
@@ -36,12 +47,10 @@ export class UserController {
     async resetPassword(@Body() dto: ResetPasswordQueryDto): Promise<void> {
         return await this.userService.resetPassword(dto);
     }
-
     @Post('/paymentMethods/addCreditCard')
     async addCreditCard(@Body() dto: CreateCreditCardDto): Promise<string> {
         return await this.userService.addCreditCard(dto);
     }
-
     @Patch('/paymentMethods/changeDefault')
     async changeDefaultCard(@Body() dto: ChangeDefaultCardDto): Promise<string> {
         await this.userService.setDefaultCard(dto);
