@@ -16,13 +16,13 @@ import { RemoveItemFromCartDto } from './dto/remove-from-cart.dto';
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) { }
-    
+
     @Delete('/removeFromCart')
-    async removeFromCart(@Body() dto: RemoveItemFromCartDto):Promise<ItemInCart[]>{
-     return await this.userService.removeItemFromCart(dto)
+    async removeFromCart(@Body() dto: RemoveItemFromCartDto): Promise<ItemInCart[]> {
+        return await this.userService.removeItemFromCart(dto)
     }
     @Post('/addToCart')
-    async addToCart(@Body() dto:AddToCartDto):Promise<ItemInCart[]>{
+    async addToCart(@Body() dto: AddToCartDto): Promise<ItemInCart[]> {
         return await this.userService.addToCart(dto)
     }
     @Get('/getAll')
@@ -38,12 +38,12 @@ export class UserController {
         return await this.userService.updateMany(dto);
     }
     @UsePipes(PasswordValidationPipe)
-    @Patch('/updatePassword')
+    @Patch('/updatePassword') //TODO: Change to put 
     async updatePassword(@Body() dto: UpdatePasswordQueryDto): Promise<void> {
         return await this.userService.updatePassword(dto);
     }
     @UsePipes(PasswordValidationPipe)
-    @Patch('/resetPassword')
+    @Patch('/resetPassword') //TODO: Change to put 
     async resetPassword(@Body() dto: ResetPasswordQueryDto): Promise<void> {
         return await this.userService.resetPassword(dto);
     }
