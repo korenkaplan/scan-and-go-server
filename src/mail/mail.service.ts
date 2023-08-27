@@ -5,15 +5,16 @@ import { UserService } from 'src/user/user.service';
 import { VerificationEmailResponse } from './dto/verification-respond.dto';
 import { User } from 'src/user/schemas/user.schema';
 import { GetQueryDto } from 'src/global/global.dto';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class MailService {
-    constructor(private mailerService: MailerService,@Inject(forwardRef(()=>UserService)) private userService: UserService) { }
+    constructor(private mailerService: MailerService, @Inject(forwardRef(() => UserService)) private userService: UserService) { }
 
     async sendResetPasswordEmail(email: string): Promise<VerificationEmailResponse> {
-        const isExist = await this.verifyEmail(email);
+        const [isExist, userId] = await this.verifyEmail(email);
         if (!isExist) {
-            return this.createResObject(isExist, '00000'); // if the email don't exists return 5 digits so the user can't input a correct code without letting it know the email don't exist
+            return this.createResObject(isExist, '00000', userId); // if the email don't exists return 5 digits so the user can't input a correct code without letting it know the email don't exist
         }
         const number = randomInt(1000, 9999).toString();
         await this.mailerService.sendMail({
@@ -25,24 +26,25 @@ export class MailService {
                 digits: number
             }
         });
-        return this.createResObject(isExist, number);
+        return this.createResObject(isExist, number, userId);
     }
 
-    async verifyEmail(email: string): Promise<boolean> {
+    async verifyEmail(email: string): Promise<[boolean, mongoose.Types.ObjectId]> {
         const dto: GetQueryDto<User> = {
             query: { email },
-            projection: {}
+            projection: { _id: 1 }
         }
         const user = await this.userService.getOne(dto);
-        return user ? true : false;
+        return user ? [true, user._id] : [false, null]
     }
-    createResObject(isExist: boolean, digits: string): VerificationEmailResponse {
+    createResObject(isExist: boolean, digits: string, userId: mongoose.Types.ObjectId): VerificationEmailResponse {
         const expireIn = new Date();
         expireIn.setMinutes(expireIn.getMinutes() + 5)
         const res: VerificationEmailResponse = {
             isExist,
             expireIn,
-            digits: digits
+            digits: digits,
+            userId
         }
         return res;
     }

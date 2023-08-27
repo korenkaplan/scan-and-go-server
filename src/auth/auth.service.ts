@@ -11,8 +11,6 @@ import { MailService } from 'src/mail/mail.service';
 import { VerificationEmailResponse } from 'src/mail/dto/verification-respond.dto';
 import { Role } from 'src/global/global.enum';
 import { GlobalService } from 'src/global/global.service';
-import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
-import { promisify } from 'util';
 import { UserService } from 'src/user/user.service';
 @Injectable()
 export class AuthService {
