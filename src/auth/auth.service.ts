@@ -49,7 +49,7 @@ export class AuthService {
     }
     async createUserFromSignUpDto(dto: SignUpDto): Promise<IUser> {
         const today = new Date()
-        const { birthDate, newPassword, ...rest } = dto;
+        const { newPassword, ...rest } = dto;
         const hashedPassword = await this.globalService.hashPassword(newPassword);
 
         const user: IUser = {
@@ -64,7 +64,6 @@ export class AuthService {
             recentItems: [],
             recentTransactions: [],
             cart: [],
-            birthDate: this.convertDate(birthDate),
             ...rest,
 
         }

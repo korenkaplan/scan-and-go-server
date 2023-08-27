@@ -23,6 +23,6 @@ export class SignUpDto {
     readonly deviceToken: string;
 
     @IsNotEmpty()
-    readonly birthDate: string;
+    readonly birthDate: Date;
 
 }
