@@ -14,5 +14,7 @@ export class HttpResponse<T> {
     message: string;
     status: number;
     data?: T;
+    success:boolean
     error?: string
+    tokenError?:boolean;
 }
