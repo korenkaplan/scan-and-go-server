@@ -9,6 +9,7 @@ export class ReportedProblemController {
   constructor(private reportedProblemService: ReportedProblemService) { }
 
   //TODO: End point 1: get the problem object and return the Id. (create the problem)
+  //TODO: Fix env is uploading to github. add AWS env variables to render
   @Post('uploadFile')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
