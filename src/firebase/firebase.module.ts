@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { FirebaseService } from './firebase.service';
 import * as admin from 'firebase-admin';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const serviceAccount = require('./firebase-admin-sdk.json')
+const serviceAccount = require('../')
 
 @Module({
   providers: [

@@ -16,7 +16,6 @@ import { PaidItemModule } from './paid-item/paid-item.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GlobalModule } from './global/global.module';
-//import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
   imports: [
@@ -35,7 +34,6 @@ import { GlobalModule } from './global/global.module';
      ReportedProblemModule,
      PaidItemModule,
      GlobalModule,
-     //FirebaseModule,
   ],
   controllers: [AppController],
   providers: [ 
