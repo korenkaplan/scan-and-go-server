@@ -17,7 +17,7 @@ import { USER_SCHEMA_VERSION } from 'src/global/global.schema-versions';
 export class AuthService {
     constructor(
         @InjectModel(User.name)
-        @Inject(forwardRef(()=>UserService))
+        @Inject(forwardRef(() => UserService))
         private userModel: Model<User>,
         private jwtService: JwtService,
         private mailService: MailService,
@@ -41,10 +41,10 @@ export class AuthService {
         return this.generateToken(user)
     }
     async generateToken(user: IUser): Promise<{ token: string }> {
-        const token = this.jwtService.sign({ id: user._id })
+        const token = this.jwtService.sign({ id: user._id, roles: user.roles })
         return { token }
     }
-     convertDate(date: string): Date {
+    convertDate(date: string): Date {
         const isoDate = moment(date, "DD-MM-YYYY").toDate();
         return isoDate;
     }
