@@ -15,7 +15,7 @@ export class ReportedProblem extends Document {
     
     @Prop()
     description:string
-
+    @IsOptional()
     @Prop()
     screenShot: string
 
@@ -40,7 +40,7 @@ export class IReportedProblem{
     _id?:mongoose.Types.ObjectId
     userId:mongoose.Types.ObjectId
     description:string
-    screenShot:string
+    screenShot?:string
     createdAt:Date
     deviceInfo:DeviceInfo
     status:Status
