@@ -1,7 +1,7 @@
-import { OperatingSystem } from "../reported-problem.enum";
 
 export class DeviceInfo {
-    os: OperatingSystem
-    deviceModel: string
+    os: string
+    deviceId: string
+    systemVersion: string
     appVersion: number
 }

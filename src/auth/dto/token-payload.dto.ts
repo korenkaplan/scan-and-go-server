@@ -6,5 +6,6 @@ export class TokenPayload {
     @IsNotEmpty()
     @IsString()
     id: string;
+    @IsNotEmpty()
     roles: Role[]
 }
