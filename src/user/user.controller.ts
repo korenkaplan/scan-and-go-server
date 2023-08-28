@@ -26,9 +26,13 @@ export class UserController {
     async addToCart(@Body() dto: AddToCartDto): Promise<ItemInCart[]> {
         return await this.userService.addToCart(dto)
     }
-    @Get('/getAll')
+    @Post('/getAll')
     async getUsers(@Body() dto: GetQueryDto<User>): Promise<User[]> {
         return await this.userService.getMany(dto);
+    }
+    @Post('/getOne')
+    async getOne(@Body() dto: GetQueryDto<User>): Promise<User> {
+        return await this.userService.getOne(dto);
     }
     @Delete('/deleteAll')
     async deleteUsers(@Body() query: FilterQuery<User>): Promise<number> {
@@ -39,13 +43,13 @@ export class UserController {
         return await this.userService.updateMany(dto);
     }
     @UsePipes(PasswordValidationPipe)
-    @Put('/updatePassword') 
+    @Put('/updatePassword')
     async updatePassword(@Body() dto: UpdatePasswordQueryDto): Promise<void> {
         return await this.userService.updatePassword(dto);
     }
     @Public()
     @UsePipes(PasswordValidationPipe)
-    @Put('/resetPassword') 
+    @Put('/resetPassword')
     async resetPassword(@Body() dto: ResetPasswordQueryDto): Promise<void> {
         return await this.userService.resetPassword(dto);
     }
