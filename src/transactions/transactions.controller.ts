@@ -1,7 +1,7 @@
 import { Body, Controller, Get } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { Transaction } from './schemas/transaction.schema';
-import { GetQueryDto } from './transaction.dto';
+import { GetQueryDto } from 'src/global/global.dto';
 
 @Controller('transactions')
 export class TransactionsController {

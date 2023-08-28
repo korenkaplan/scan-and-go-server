@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
 import { User } from "src/user/schemas/user.schema";
-import { ITransactionItem } from "./transaction-item.interface";
+import { ITransactionItem } from "../dto/transaction-item.interface";
 
 
 

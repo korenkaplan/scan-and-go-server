@@ -6,9 +6,9 @@ import { GetQueryDto } from 'src/global/global.dto';
 
 @Injectable()
 export class TransactionsService {
-    constructor( @InjectModel(Transaction.name)
-     private transactionModel:Model<Transaction>)
-     {}
+    //TODO: Continue with transaction service
+    constructor(@InjectModel(Transaction.name)
+    private transactionModel: Model<Transaction>) { }
     async getMany(dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
         const { query, projection } = dto
 
