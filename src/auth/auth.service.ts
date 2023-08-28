@@ -12,6 +12,7 @@ import { VerificationEmailResponse } from 'src/mail/dto/verification-respond.dto
 import { Role } from 'src/global/global.enum';
 import { GlobalService } from 'src/global/global.service';
 import { UserService } from 'src/user/user.service';
+import { USER_SCHEMA_VERSION } from 'src/global/global.schema-versions';
 @Injectable()
 export class AuthService {
     constructor(
@@ -55,7 +56,7 @@ export class AuthService {
         const user: IUser = {
             password: hashedPassword,
             roles: [Role.USER],
-            schemaVersion: 1,
+            schemaVersion: USER_SCHEMA_VERSION,
             isActive: true,
             lastActivity: today,
             createdAt: today,

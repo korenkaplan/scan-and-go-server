@@ -1,4 +1,4 @@
-import { Controller, Get, Delete, Body, Patch, UsePipes, Post } from '@nestjs/common';
+import { Controller, Get, Delete, Body, Patch, UsePipes, Post, Put } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './schemas/user.schema';
 import { FilterQuery } from 'mongoose';
@@ -12,6 +12,7 @@ import { DeleteCreditCardDto } from './dto/delete-credit-card.dto';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { ItemInCart } from './schemas/item-in-cart.interface';
 import { RemoveItemFromCartDto } from './dto/remove-from-cart.dto';
+import { Public } from 'src/auth/decorators/public-guard.decorator';
 
 @Controller('users')
 export class UserController {
@@ -38,12 +39,13 @@ export class UserController {
         return await this.userService.updateMany(dto);
     }
     @UsePipes(PasswordValidationPipe)
-    @Patch('/updatePassword') //TODO: Change to put 
+    @Put('/updatePassword') 
     async updatePassword(@Body() dto: UpdatePasswordQueryDto): Promise<void> {
         return await this.userService.updatePassword(dto);
     }
+    @Public()
     @UsePipes(PasswordValidationPipe)
-    @Patch('/resetPassword') //TODO: Change to put 
+    @Put('/resetPassword') 
     async resetPassword(@Body() dto: ResetPasswordQueryDto): Promise<void> {
         return await this.userService.resetPassword(dto);
     }
@@ -56,7 +58,6 @@ export class UserController {
         await this.userService.setDefaultCard(dto);
         return 'Changed default card';
     }
-    //card: 64e76056b76e50b30217fb3e -> "cardNumber": "123", user: 64e4624cac9453ef60727a0c
     @Delete('/paymentMethods/deleteCreditCard')
     async deleteCreditCard(@Body() dto: DeleteCreditCardDto): Promise<string> {
         return await this.userService.deleteCreditCard(dto);

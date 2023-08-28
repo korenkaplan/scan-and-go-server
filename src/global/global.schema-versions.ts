@@ -1,0 +1,7 @@
+export const REPORTED_PROBLEM_SCHEMA_VERSION = 1.0;
+export const COUPON_SCHEMA_VERSION = 1.0;
+export const ITEM_SCHEMA_VERSION = 1.0;
+export const PAID_ITEM_SCHEMA_VERSION = 1.0;
+export const TRANSACTION_SCHEMA_VERSION = 1.0;
+export const USER_SCHEMA_VERSION = 1.0;
+export const NFC_TAG_SCHEMA_VERSION = 1.0;

@@ -3,6 +3,7 @@ import mongoose, { Document }  from "mongoose";
 import { User } from "src/user/schemas/user.schema";
 import { DeviceInfo } from "./device-info.interface";
 import { ProblemType, Status } from "../reported-problem.enum";
+import { IsOptional } from "class-validator";
 @Schema({
     timestamps:{createdAt:true, updatedAt:false},
     collection:'reportedProblems',
@@ -35,9 +36,9 @@ export class ReportedProblem extends Document {
 
 }
 
-export interface IReportedProblem{
-    _id:mongoose.Schema.Types.ObjectId
-    userId:mongoose.Schema.Types.ObjectId
+export class IReportedProblem{
+    _id?:mongoose.Types.ObjectId
+    userId:mongoose.Types.ObjectId
     description:string
     screenShot:string
     createdAt:Date

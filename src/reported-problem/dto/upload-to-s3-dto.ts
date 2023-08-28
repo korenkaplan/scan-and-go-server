@@ -1,4 +1,4 @@
-export class UploadToS3Dto{
-    Key: string;
-    Body: Buffer;
+export class UploadToS3Dto {
+    fileName: string;
+    file: Buffer;
 }
