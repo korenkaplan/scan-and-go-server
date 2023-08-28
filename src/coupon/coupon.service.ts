@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Coupon, ICoupon } from './schemas/coupon.schema';
 import mongoose, { Model } from 'mongoose';
-import { GlobalService } from 'src/global/global.service';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { GetQueryDto, UpdateQueryDto } from 'src/global/global.dto';
 import { COUPON_SCHEMA_VERSION } from 'src/global/global.schema-versions';
