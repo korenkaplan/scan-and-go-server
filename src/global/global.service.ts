@@ -20,10 +20,10 @@ export class GlobalService {
         return originalText;
     }
     configPagination<T>(dto: GetQueryDto<T>, locals: LocalPaginationConfig): LocalPaginationConfig {
-        const sort = dto.sort || locals.sort;
-        const limit = dto.limit || locals.limit;
-        const currantPage = dto.currantPage || locals.currantPage;
-        const result: LocalPaginationConfig = {sort,limit, currantPage}
+        const sort = dto?.sort || locals.sort;
+        const limit = dto?.limit || locals.limit;
+        const currantPage = dto?.currantPage || locals.currantPage;
+        const result: LocalPaginationConfig = {sort, limit, currantPage}
         return result          
     }
 

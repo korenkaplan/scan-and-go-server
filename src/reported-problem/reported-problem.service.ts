@@ -14,27 +14,26 @@ import { GlobalService } from 'src/global/global.service';
 @Injectable()
 export class ReportedProblemService {
     private readonly s3Client = new S3Client({ region: this.configService.getOrThrow('AWS_S3_REGION') });
-    // Image url Example: https://scan-and-go.s3.eu-north-1.amazonaws.com/example.jpeg
+    // Image url Example: https://scan-and-go.s3.eu-north-1.amazonaws.com/donwload.jpeg
     private s3PrefixUrl = `https://${this.configService.getOrThrow('AWS_BUCKET_NAME')}.s3.${this.configService.getOrThrow('AWS_S3_REGION')}.amazonaws.com/`
-    private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = {sort:{'_id': -1}, limit:15,currantPage:0}
+    private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 15, currantPage: 0 }
     constructor(
         private readonly configService: ConfigService,
         private readonly globalService: GlobalService,
         @InjectModel(ReportedProblem.name)
         private readonly reportedProblemModel: Model<ReportedProblem>
-    ) {}
-    async createProblem(dto:CreateProblemDto):Promise<ReportedProblem>{
-        const {...rest} = dto
+    ) { }
+    async createProblem(dto: CreateProblemDto): Promise<ReportedProblem> {
+        const { ...rest } = dto
         //create the problem 
         const problem: IReportedProblem = {
-            schemaVersion:REPORTED_PROBLEM_SCHEMA_VERSION,
-            status:Status.Open,
-            createdAt:new Date(),
+            schemaVersion: REPORTED_PROBLEM_SCHEMA_VERSION,
+            status: Status.Open,
+            createdAt: new Date(),
             ...rest
         }
         const newProblem = await this.reportedProblemModel.create(problem)
         // return the problem 
-        console.log(newProblem)
         return newProblem
     }
 
@@ -56,20 +55,16 @@ export class ReportedProblemService {
 
 
     }
-    async getAllProblems(dto:GetQueryDto<ReportedProblem>):Promise<ReportedProblem[]>{
-        console.log(dto);
-        const {limit, sort, query, projection, skipAmount} = dto
-        return await this.reportedProblemModel.find(query,projection).skip(skipAmount).limit(limit).sort(sort)
+    async getAllProblems(dto: GetQueryDto<ReportedProblem>): Promise<ReportedProblem[]> {
+        const { query, projection } = dto;
+        const { limit, sort, currantPage } = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG)
+        const skipAmount = currantPage * limit
+        return await this.reportedProblemModel.find(query, projection).skip(skipAmount).limit(limit).sort(sort)
     }
 
-    async getAllTypeCategories(){
+    async getAllTypeCategories() {
         const enumValues = Object.values(ProblemType)
         return enumValues
     }
-    // async getAllProblems(dto:GetQueryDto<ReportedProblem>):Promise<ReportedProblem[]>{
-    //     const {currantPage, limit, sort}: LocalPaginationConfig = this.globalService.configPagination(dto,this.LOCAL_PAGINATION_CONFIG)
-    //     const skipAmount = currantPage * limit
-    //     return await this.reportedProblemModel.find(dto.query).skip(skipAmount).limit(limit).sort(sort)
-    // }
 
 }

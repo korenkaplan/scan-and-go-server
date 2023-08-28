@@ -25,7 +25,7 @@ export class ReportedProblemController {
   }
   @Public()
   @Get('getAll')
-  async getAllProblems(dto: GetQueryDto<ReportedProblem>){
+  async getAllProblems(@Body() dto: GetQueryDto<ReportedProblem>){
   return await this.reportedProblemService.getAllProblems(dto);
   }
 

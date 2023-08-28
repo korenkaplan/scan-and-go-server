@@ -1,7 +1,7 @@
 
 export class DeviceInfo {
     os: string
-    deviceId: string
+    deviceModel: string
     systemVersion: string
     appVersion: number
 }

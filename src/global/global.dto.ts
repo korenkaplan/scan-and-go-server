@@ -6,7 +6,6 @@ export class GetQueryDto<T> {
     currantPage?: number = 0
     limit?: number = 10
     sort?: Record<string,-1| 1> ={'_id':-1}
-    skipAmount?: number = this.currantPage * this.limit
 }
 
 export class UpdateQueryDto<T> {
