@@ -1,5 +1,5 @@
 import { Schema,SchemaFactory, Prop } from "@nestjs/mongoose";
-import mongoose from "mongoose";
+import mongoose, {Document} from "mongoose";
 
 @Schema({
     timestamps:{createdAt:true, updatedAt:false},
@@ -44,6 +44,6 @@ export interface ICoupon {
     currentUsageCount: number;
     isActive: boolean;
     createdAt: Date;
-    updatedAt: Date;
+    schemaVersion:number
   }
   export const CouponSchema = SchemaFactory.createForClass(Coupon);
