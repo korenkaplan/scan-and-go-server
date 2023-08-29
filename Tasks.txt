@@ -1,0 +1,5 @@
+1.Create the Scanner resource (for the store exit)
+//TODO: Remove the nfc chip from collection only after store exit
+2.Create the Payment Gateway resource (for the card validations);
+
+

@@ -115,7 +115,7 @@ export class UserService {
         if (user.creditCards.length >= this.MAX_AMOUNT_OF_CREDIT_CARDS) throw new BadRequestException(`credit cards limit reached (${this.MAX_AMOUNT_OF_CREDIT_CARDS} cards) can't add this credit card`)
 
         //validate the credit card 
-        if (!this.validateCreditCard(creditCard)) throw new BadRequestException(`Invalid Credit Card`);
+        if (!this.globalService.validateCreditCart(creditCard)) throw new BadRequestException(`Invalid Credit Card`);
 
         //encrypt the credit card
         const encryptedCard: CreditCard = await this.encryptCreditCard(creditCard);
@@ -136,10 +136,7 @@ export class UserService {
         }
         return 'Credit Card Added successfully';
     }
-    async validateCreditCard(card: CreditCard): Promise<boolean> {
-        //TODO: create validation for the credit cards
-        return await true;
-    }
+   
     async decryptCreditCard(card: CreditCard): Promise<CreditCard> {
         const decryptCreditCard: CreditCard = {
             cardNumber: await this.globalService.decryptText(card.cardNumber),

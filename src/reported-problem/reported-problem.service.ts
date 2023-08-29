@@ -16,7 +16,8 @@ export class ReportedProblemService {
     private readonly s3Client = new S3Client({ region: this.configService.getOrThrow('AWS_S3_REGION') });
     // Image url Example: https://scan-and-go.s3.eu-north-1.amazonaws.com/donwload.jpeg
     private s3PrefixUrl = `https://${this.configService.getOrThrow('AWS_BUCKET_NAME')}.s3.${this.configService.getOrThrow('AWS_S3_REGION')}.amazonaws.com/`
-    private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 15, currantPage: 0 }
+    private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 15, currentPage: 0 }
+    
     constructor(
         private readonly configService: ConfigService,
         private readonly globalService: GlobalService,
@@ -36,14 +37,12 @@ export class ReportedProblemService {
         // return the problem 
         return newProblem
     }
-
     async uploadToS3(file: Express.Multer.File): Promise<uploadToS3ResDto> {
         const dto: UploadToS3Dto = { fileName: Date.now().toString() + ".jpeg", file: file.buffer }
         await this.uploadToS3Action(dto)
         const resDto: uploadToS3ResDto = { "imageUrl": this.s3PrefixUrl + dto.fileName }
         return resDto
     }
-
     private async uploadToS3Action(dto: UploadToS3Dto): Promise<void> {
         const { fileName, file } = dto;
         await this.s3Client.send(new PutObjectCommand({
@@ -55,13 +54,16 @@ export class ReportedProblemService {
 
 
     }
-    async getAllProblems(dto: GetQueryDto<ReportedProblem>): Promise<ReportedProblem[]> {
+    async getAllProblemsPagination(dto: GetQueryDto<ReportedProblem>): Promise<ReportedProblem[]> {
         const { query, projection } = dto;
-        const { limit, sort, currantPage } = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG)
-        const skipAmount = currantPage * limit
+        const { limit, sort, currentPage } = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG)
+        const skipAmount = currentPage * limit
         return await this.reportedProblemModel.find(query, projection).skip(skipAmount).limit(limit).sort(sort)
     }
-
+    async getAllProblems(dto: GetQueryDto<ReportedProblem>): Promise<ReportedProblem[]> {
+        const { query, projection } = dto;
+        return await this.reportedProblemModel.find(query, projection)
+    }
     async getAllTypeCategories() {
         const enumValues = Object.values(ProblemType)
         return enumValues

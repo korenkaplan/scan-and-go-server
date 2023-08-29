@@ -1,11 +1,11 @@
-import { FilterQuery, ProjectionFields, UpdateQuery} from "mongoose";
+import { FilterQuery, ProjectionFields, UpdateQuery } from "mongoose";
 
 export class GetQueryDto<T> {
     query: FilterQuery<T>
     projection: ProjectionFields<T>
-    currantPage?: number = 0
-    limit?: number = 10
-    sort?: Record<string,-1| 1> ={'_id':-1}
+    currentPage?: number
+    limit?: number
+    sort?: Record<string, -1 | 1>
 }
 
 export class UpdateQueryDto<T> {
@@ -13,15 +13,15 @@ export class UpdateQueryDto<T> {
     updateQuery: UpdateQuery<T>
 }
 export class LocalPaginationConfig {
-    currantPage: number
-    limit:number
-    sort: Record<string,-1| 1>
+    currentPage: number
+    limit: number
+    sort: Record<string, -1 | 1>
 }
 export class HttpResponse<T> {
     message: string;
     status: number;
     data?: T;
-    success:boolean
+    success: boolean
     error?: string
-    tokenError?:boolean;
+    tokenError?: boolean;
 }

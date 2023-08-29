@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose from "mongoose";
+import mongoose, {Document} from "mongoose";
 import { Item } from "src/item/schemas/item.schema";
 
 
@@ -9,7 +9,6 @@ import { Item } from "src/item/schemas/item.schema";
 })
 
 export class NfcTag extends Document {
-
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Item' })
     itemId: Item
@@ -22,9 +21,8 @@ export class NfcTag extends Document {
 }
 
 export interface INfcTag {
-    _id: mongoose.Schema.Types.ObjectId,
-    code: string;
-    itemId: mongoose.Schema.Types.ObjectId
+    _id?: mongoose.Schema.Types.ObjectId,
+    itemId: mongoose.Types.ObjectId
     createdAt: Date,
     schemaVersion: number,
 }

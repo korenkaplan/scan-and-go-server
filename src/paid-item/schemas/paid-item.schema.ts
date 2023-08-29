@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose from "mongoose";
+import mongoose, {Document} from "mongoose";
 import { Item } from "src/item/schemas/item.schema";
+import { Transaction } from "src/transactions/schemas/transaction.schema";
 import { User } from "src/user/schemas/user.schema";
 
 @Schema({
@@ -9,12 +10,15 @@ import { User } from "src/user/schemas/user.schema";
 })
 export class PaidItem extends Document {
     @Prop()
-    tag_code:string
+    nfcTagId:string
 
     @Prop({type: mongoose.Schema.Types.ObjectId,ref:'Item'})
     itemId: Item
+    
+    @Prop({type: mongoose.Schema.Types.ObjectId,ref:'Transaction'})
+    transactionId: Transaction
 
-    @Prop({type: mongoose.Schema.Types.ObjectId,ref:'User'})
+    @Prop({type: mongoose.Schema.Types.ObjectId,ref:User.name})
     userId:User
 
     @Prop()
@@ -25,10 +29,11 @@ export class PaidItem extends Document {
 }
 
 export interface IPaidItem {
-    _id:mongoose.Schema.Types.ObjectId
-    tagCode:string
-    itemId: mongoose.Schema.Types.ObjectId
-    userId: mongoose.Schema.Types.ObjectId
+    _id?:mongoose.Types.ObjectId
+    nfcTagId:mongoose.Types.ObjectId
+    transactionId:mongoose.Types.ObjectId
+    itemId: mongoose.Types.ObjectId
+    userId: mongoose.Types.ObjectId
     createdAt: Date,
     schemaVersion:number
 }

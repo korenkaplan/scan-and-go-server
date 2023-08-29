@@ -20,7 +20,7 @@ export class Transaction {
     cardType: string
 
     @Prop()
-    amount: number
+    amountToCharge: number
 
     @Prop()
     products: ITransactionItem[]
@@ -37,11 +37,11 @@ export class Transaction {
 
 }
 export interface ITransaction {
-    _id: mongoose.Schema.Types.ObjectId
-    userId: mongoose.Schema.Types.ObjectId
+    _id?: mongoose.Types.ObjectId
+    userId: mongoose.Types.ObjectId
     cardNumber: string
     cardType: string
-    amount: number
+    amountToCharge: number
     products: ITransactionItem[]
     schemaVersion: number
     formattedDate: string

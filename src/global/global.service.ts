@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt'
 import * as CryptoJS from 'crypto-js'
 import { GetQueryDto, LocalPaginationConfig } from './global.dto';
+import { CreditCard } from 'src/user/schemas/credit-card.schema';
 @Injectable()
 export class GlobalService {
     constructor() { }
@@ -22,9 +23,17 @@ export class GlobalService {
     configPagination<T>(dto: GetQueryDto<T>, locals: LocalPaginationConfig): LocalPaginationConfig {
         const sort = dto?.sort || locals.sort;
         const limit = dto?.limit || locals.limit;
-        const currantPage = dto?.currantPage || locals.currantPage;
-        const result: LocalPaginationConfig = {sort, limit, currantPage}
-        return result          
+        const currentPage = dto?.currentPage || locals.currentPage;
+        const result: LocalPaginationConfig = { sort, limit, currentPage }
+        return result
+    }
+    async validateCreditCart(card:CreditCard): Promise<boolean> {
+        //TODO: Create credit card validation
+        return await true;
+    }
+    async chargeCreditCard(card:CreditCard,amountToCharge: number): Promise<boolean> {
+       //TODO: Create credit card validation
+       return await true; 
     }
 
 

@@ -3,7 +3,7 @@ import mongoose, { Document } from "mongoose";
 import { CreditCard} from "./credit-card.schema";
 import { ItemInCart } from "./item-in-cart.interface";
 import { RecentItem } from "./recent-items.interface";
-import { RecentTransactions } from "./recent-transactions.interface";
+import { RecentTransaction } from "./recent-transactions.interface";
 import { Gender, Role } from "src/global/global.enum";
 
 @Schema({
@@ -59,7 +59,7 @@ export class User extends Document {
     recentItems: RecentItem[]
 
     @Prop()
-    recentTransactions: RecentTransactions[]
+    recentTransactions: RecentTransaction[]
 }
 export interface IUser {
 
@@ -95,7 +95,7 @@ export interface IUser {
 
     recentItems: RecentItem[]
 
-    recentTransactions: RecentTransactions[]
+    recentTransactions: RecentTransaction[]
 }
 export const UserSchema = SchemaFactory.createForClass(User)
 
