@@ -42,6 +42,10 @@ export class UserController {
     async updateUsers(@Body() dto: UpdateQueryDto<User>): Promise<number> {
         return await this.userService.updateMany(dto);
     }
+    @Patch('/updateOne')
+    async updateUser(@Body() dto: UpdateQueryDto<User>): Promise<User> {
+        return await this.userService.updateOne(dto);
+    }
     @UsePipes(PasswordValidationPipe)
     @Put('/updatePassword')
     async updatePassword(@Body() dto: UpdatePasswordQueryDto): Promise<void> {

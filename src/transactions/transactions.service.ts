@@ -32,10 +32,6 @@ export class TransactionsService {
     private globalService: GlobalService,
     ) { }
 
-  
-    
-    // 
-
     async PaymentPipeline(dto: CreateTransactionDto): Promise<void> {
         //#region
         //* Step 1: Validation
