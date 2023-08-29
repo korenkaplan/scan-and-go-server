@@ -118,7 +118,7 @@ export class TransactionsService {
         user.transactionsAmount = user.transactionsAmount + 1;
         //* Step 3.3: update the user's cart and save user
         user.cart = []
-        //TODO: send email to the user with the details
+        //TODO: send email to the user with the details of the transaction
         await user.save()
         //* Step 4: Update the paid items collection
         //add the items (nfc chip) to the paid items collection
