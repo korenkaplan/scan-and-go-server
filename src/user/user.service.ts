@@ -122,7 +122,11 @@ export class UserService {
 
         //Add _id to the card
         encryptedCard._id = new mongoose.Types.ObjectId();
+        console.log(creditCard);
+        console.log(encryptedCard);
 
+        if (user.creditCards.length == 0)
+            encryptedCard.isDefault = true;
         //update the user credit cards array
         user.creditCards.push(encryptedCard);
 
@@ -134,9 +138,11 @@ export class UserService {
             }
             await this.setDefaultCard(changeCardDto)
         }
+
+        await user.save();
         return 'Credit Card Added successfully';
     }
-   
+
     async decryptCreditCard(card: CreditCard): Promise<CreditCard> {
         const decryptCreditCard: CreditCard = {
             cardNumber: await this.globalService.decryptText(card.cardNumber),

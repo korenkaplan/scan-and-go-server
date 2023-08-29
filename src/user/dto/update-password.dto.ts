@@ -1,4 +1,4 @@
-import {  IsString} from "class-validator"
+import { IsString } from "class-validator"
 import mongoose from "mongoose"
 
 export class UpdatePasswordQueryDto {
@@ -6,5 +6,5 @@ export class UpdatePasswordQueryDto {
     oldPassword: string
     @IsString()
     newPassword: string
-    userId: mongoose.Schema.Types.ObjectId
+    userId: mongoose.Types.ObjectId
 }

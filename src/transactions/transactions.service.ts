@@ -19,65 +19,63 @@ export class TransactionsService {
     private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 10, currentPage: 0 }
 
     constructor(
-    @InjectModel(Transaction.name)
-    private transactionModel: Model<Transaction>,
-    @InjectModel(User.name)
-    private userModel: Model<User>,
-    @InjectModel(Coupon.name)
-    private couponModel: Model<Coupon>,
-    @InjectModel(NfcTag.name)
-    private nfcTagModel: Model<NfcTag>,  
-    @InjectModel(PaidItem.name)
-    private paidItemModel: Model<PaidItem>,  
-    private globalService: GlobalService,
+        @InjectModel(Transaction.name)
+        private transactionModel: Model<Transaction>,
+        @InjectModel(User.name)
+        private userModel: Model<User>,
+        @InjectModel(Coupon.name)
+        private couponModel: Model<Coupon>,
+        @InjectModel(NfcTag.name)
+        private nfcTagModel: Model<NfcTag>,
+        @InjectModel(PaidItem.name)
+        private paidItemModel: Model<PaidItem>,
+        private globalService: GlobalService,
     ) { }
 
     async PaymentPipeline(dto: CreateTransactionDto): Promise<void> {
         //#region
         //* Step 1: Validation
-        const {userId, cardId, couponId, ...rest} = dto
+        const { userId, cardId, couponId, ...rest } = dto
         //* Step 1.1: validate user and card
         // validate the user
         const user = await this.userModel.findById(userId)
-        if(!user)
+        if (!user)
             throw new NotFoundException(`user with the id ${userId} not found`)
 
         // validate the card
         const card = user.creditCards.find(card => card._id == cardId)
-        if(!card)
+        if (!card)
             throw new NotFoundException(`card with the id ${cardId} was not found`)
 
-        if(! await this.globalService.validateCreditCart(card))
+        if (! await this.globalService.validateCreditCart(card))
             throw new BadRequestException(`card with the id ${cardId} is invalid`);
 
         //* Step 1.2: validate coupon if coupon is used in the transaction
         // validate the coupon(if exists update amount used in the coupon and change the price accordingly)
         const coupon = await this.couponModel.findById(couponId)
-        if(!coupon)
+        if (!coupon)
             throw new BadRequestException(`coupon with the id ${couponId} wan't found`);
-        if(!coupon.isActive)
+        if (!coupon.isActive)
             throw new BadRequestException(`coupon with the id ${couponId} is not active`);
         const currantDate = new Date();
-         if(!(coupon.validFrom < currantDate && coupon.validUntil > currantDate))
-         {
+        if (!(coupon.validFrom < currantDate && coupon.validUntil > currantDate)) {
             coupon.isActive = false
             throw new BadRequestException(`coupon with the id ${couponId} date is invalid and now is not active`);
-         }
-         if(coupon.maxUsageCount <= coupon.currentUsageCount)
-         {
+        }
+        if (coupon.maxUsageCount <= coupon.currentUsageCount) {
             coupon.isActive = false
             throw new BadRequestException(`coupon with the id ${couponId} has reached max usages and now  is not active`);
-         }
-         //* Step 1.3: update coupon and transaction price
+        }
+        //* Step 1.3: update coupon and transaction price
         coupon.currentUsageCount = coupon.currentUsageCount + 1
         const discountPercentage = coupon.discountPercentage;
         const amountToCharge = dto.amountToCharge
         dto.amountToCharge = amountToCharge - (amountToCharge * (discountPercentage / 100));
 
         //* Step 1.4: charge the credit card
-         // charge the credit card
-         const isCharged = await this.globalService.chargeCreditCard(card,amountToCharge);
-         if(!isCharged)
+        // charge the credit card
+        const isCharged = await this.globalService.chargeCreditCard(card, amountToCharge);
+        if (!isCharged)
             throw new BadRequestException(`Problem charging credit card: ${card._id}`);
 
 
@@ -100,14 +98,14 @@ export class TransactionsService {
         const latestTransaction: RecentTransaction = {
             transactionId: newTransaction._id,
             amount: transaction.amountToCharge,
-            formattedDate:transaction.formattedDate,
+            formattedDate: transaction.formattedDate,
             cardType: transaction.cardType
         }
         const latestItems: RecentItem[] = transaction.products.map(product => {
             const recentItem: RecentItem = {
-              itemId:product.itemId,
-              imageSource:product.imageSource,
-              name:product.name,  
+                itemId: product.itemId,
+                imageSource: product.imageSource,
+                name: product.name,
             }
             return recentItem
         })
@@ -117,8 +115,10 @@ export class TransactionsService {
         user.recentTransactions.splice(20)
         user.recentItems.unshift(...latestItems)
         user.recentItems.splice(20)
+        user.transactionsAmount = user.transactionsAmount + 1;
         //* Step 3.3: update the user's cart and save user
         user.cart = []
+        //TODO: send email to the user with the details
         await user.save()
         //* Step 4: Update the paid items collection
         //add the items (nfc chip) to the paid items collection
@@ -134,9 +134,9 @@ export class TransactionsService {
             return paidItem
         })
 
-         await this.paidItemModel.insertMany(paidItems)
+        await this.paidItemModel.insertMany(paidItems)
         //#endregion
-    }   
+    }
     //TODO: decrypt the credit card details for all the get requests
     async getManyPagination(dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
         const { query, projection } = dto;
