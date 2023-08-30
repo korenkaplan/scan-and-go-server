@@ -122,8 +122,6 @@ export class UserService {
 
         //Add _id to the card
         encryptedCard._id = new mongoose.Types.ObjectId();
-        console.log(creditCard);
-        console.log(encryptedCard);
 
         if (user.creditCards.length == 0)
             encryptedCard.isDefault = true;
@@ -173,7 +171,7 @@ export class UserService {
         }));
         return user;
     }
-    async setDefaultCard(dto: ChangeDefaultCardDto): Promise<void> {
+    async setDefaultCard(dto: ChangeDefaultCardDto): Promise<string> {
         const { userId, cardId } = dto;
         const user = await this.userModel.findById(userId);
         if (!user)
@@ -186,7 +184,8 @@ export class UserService {
             return card;
         })
         user.markModified('creditCards');
-        await user.save();
+        await user.save();  
+        return 'default card changed successfully' 
     }
 
     async deleteCreditCard(dto: DeleteCreditCardDto): Promise<string> {

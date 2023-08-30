@@ -63,7 +63,7 @@ export class UserController {
         return await this.userService.addCreditCard(dto);
     }
     @Patch('/paymentMethods/changeDefault')
-    async changeDefaultCard(@Body() dto: ChangeDefaultCardDto): Promise<void> {
+    async changeDefaultCard(@Body() dto: ChangeDefaultCardDto): Promise<string> {
         return await this.userService.setDefaultCard(dto);
     }
     @Delete('/paymentMethods/deleteCreditCard')
