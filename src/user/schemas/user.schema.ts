@@ -5,6 +5,7 @@ import { ItemInCart } from "./item-in-cart.interface";
 import { RecentItem } from "./recent-items.interface";
 import { RecentTransaction } from "./recent-transactions.interface";
 import { Gender, Role } from "src/global/global.enum";
+import { Exclude } from "class-transformer";
 
 @Schema({
     timestamps: { createdAt: true, updatedAt: false },
@@ -24,7 +25,8 @@ export class User extends Document {
 
     @Prop()
     creditCards:  CreditCard[];
-
+    
+    @Exclude()
     @Prop()
     password: string;
 
@@ -60,6 +62,8 @@ export class User extends Document {
 
     @Prop()
     recentTransactions: RecentTransaction[]
+
+
 }
 export interface IUser {
 

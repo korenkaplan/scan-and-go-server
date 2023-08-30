@@ -178,15 +178,17 @@ export class UserService {
         const user = await this.userModel.findById(userId);
         if (!user)
             throw new NotFoundException(`No user with id ${userId} was found`);
-        user.creditCards = user.creditCards.map(card => {
+        const cards = user.creditCards
+         user.creditCards =   cards.map( card => {
             if (card.isDefault && card._id != cardId) {
                 card.isDefault = false;
-                console.log('changed default card');
             }
             return card;
         })
-        await user.save()
+        user.markModified('creditCards');
+        await user.save();
     }
+
     async deleteCreditCard(dto: DeleteCreditCardDto): Promise<string> {
         const { userId, cardId } = dto
         //find the user
@@ -209,7 +211,7 @@ export class UserService {
         return 'deleted successfully';
     }
     //#endregion
-    //#region CRUD OPERATIONS
+    //#region CRUD OPERA.creditCards
     async getMany(dto: GetQueryDto<User>): Promise<User[]> {
         const { query, projection } = dto
 

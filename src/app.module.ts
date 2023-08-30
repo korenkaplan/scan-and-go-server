@@ -16,9 +16,11 @@ import { PaidItemModule } from './paid-item/paid-item.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GlobalModule } from './global/global.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: '.env',
       isGlobal: true
