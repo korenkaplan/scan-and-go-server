@@ -10,11 +10,11 @@ export class GlobalService {
         const hashedPassword = await bcrypt.hash(password, 10);
         return hashedPassword
     }
-    async encryptText(textToEncrypt: string): Promise<string> {
+     encryptText(textToEncrypt: string): string {
         const { CRYPTO_KEY } = process.env
         return CryptoJS.AES.encrypt(textToEncrypt, CRYPTO_KEY).toString()
     }
-    async decryptText(ciphertext: string): Promise<string> {
+     decryptText(ciphertext: string): string {
         const { CRYPTO_KEY } = process.env
         const bytes = CryptoJS.AES.decrypt(ciphertext, CRYPTO_KEY);
         const originalText = bytes.toString(CryptoJS.enc.Utf8);

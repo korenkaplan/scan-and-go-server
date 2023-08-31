@@ -17,9 +17,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GlobalModule } from './global/global.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
+    CacheModule.register({
+      isGlobal: true
+    }),
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       envFilePath: '.env',
@@ -48,6 +52,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       provide: APP_GUARD,
       useClass: RolesGuard
     },
+   
   ],
 })
 export class AppModule { }
