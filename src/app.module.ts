@@ -13,11 +13,9 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { CouponModule } from './coupon/coupon.module';
 import { ReportedProblemModule } from './reported-problem/reported-problem.module';
 import { PaidItemModule } from './paid-item/paid-item.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { GlobalModule } from './global/global.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -41,9 +39,7 @@ import { CACHE_MANAGER, CacheModule } from '@nestjs/cache-manager';
      PaidItemModule,
      GlobalModule,
   ],
-  controllers: [AppController],
   providers: [ 
-    AppService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard
