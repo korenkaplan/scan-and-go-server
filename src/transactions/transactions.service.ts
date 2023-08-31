@@ -15,6 +15,7 @@ import { NfcTag } from 'src/nfc_tag/schemas/nfc-tag.schema';
 import { IPaidItem, PaidItem } from 'src/paid-item/schemas/paid-item.schema';
 import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { ITransactionItem } from './dto/transaction-item.interface';
+import { MailService } from 'src/mail/mail.service';
 
 export interface Rest {
     amountToCharge: number; 
@@ -34,6 +35,7 @@ export class TransactionsService {
         @InjectModel(PaidItem.name)
         private paidItemModel: Model<PaidItem>,
         private globalService: GlobalService,
+        private mailService: MailService,
     ) { }
 
     async PaymentPipeline(dto: CreateTransactionDto): Promise<void> {
@@ -75,14 +77,14 @@ export class TransactionsService {
         //* Step 3.2: add to the user's latest transaction and latest items arrays
         await this.updateTheUser(user, latestTransaction, latestItems);
 
-        //TODO: send email to the user with the details of the transaction
-        await 
         //* Step 4: Update the paid items collection
         //add the items (nfc chip) to the paid items collection
         await this.updatePaidItemsCollection(transaction, user, newTransaction);
         //#endregion
         //commit the transaction
         await session.commitTransaction();
+        //TODO: Check the email sending
+        await this.mailService.sendOrderConfirmationEmail(user.email,transaction.products)
         } catch (error) {
             await session.abortTransaction();
             throw error

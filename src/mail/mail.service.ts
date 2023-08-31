@@ -6,7 +6,8 @@ import { VerificationEmailResponse } from './dto/verification-respond.dto';
 import { User } from 'src/user/schemas/user.schema';
 import { GetQueryDto } from 'src/global/global.dto';
 import mongoose from 'mongoose';
-
+import { ITransactionItem } from 'src/transactions/dto/transaction-item.interface';
+import * as fs from 'fs';
 @Injectable()
 export class MailService {
     constructor(private mailerService: MailerService, @Inject(forwardRef(() => UserService)) private userService: UserService) { }
@@ -21,13 +22,24 @@ export class MailService {
             to: email,
             subject: 'Scan & Go Password Reset',
             from: 'The Scan & Go Team',
-            template: 'confirmation',
+            template: 'passwordResetEmail',
             context: {
                 digits: number
             }
         });
         return this.createResObject(isExist, number, userId);
     }
+    async sendOrderConfirmationEmail(email: string, purchasedItems: ITransactionItem[]): Promise<void> {
+        await this.mailerService.sendMail({
+            to: email,
+            subject: 'Scan & Go Order Confirmation',
+            from: 'The Scan & Go Team',
+            template: 'orderConfirmation',
+            context: {
+                items: purchasedItems
+            }
+        });
+    } 
 
     async verifyEmail(email: string): Promise<[boolean, mongoose.Types.ObjectId]> {
         const dto: GetQueryDto<User> = {

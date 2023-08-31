@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You for Your Purchase</title>
+    <style>
+        /* Your CSS styles here */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="thank-you-text">Thank You for Your Purchase!</h1>
+            <p>We appreciate your business.</p>
+        </div>
+        <div class="order-details">
+            <h2 class="order-details-header">Order Details:</h2>
+            {{#each items}}
+            <div class="item">
+                <div class="item-image">
+                    <img src="{{this.imageSource}}" alt="{{this.name}} Image">
+                </div>
+                <div class="item-info">
+                    <span class="item-name">{{this.name}}</span>
+                    <span class="item-price">${{this.price}}</span>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+        <div class="footer">
+            <p>If you have any questions or concerns, please contact our support team.</p>
+            <p>&copy; {{year}} Scan & Go. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

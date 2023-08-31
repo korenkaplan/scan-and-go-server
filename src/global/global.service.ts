@@ -32,7 +32,7 @@ export class GlobalService {
         return await true;
     }
     async chargeCreditCard(card:CreditCard,amountToCharge: number): Promise<boolean> {
-       //TODO: Create credit card validation
+       //TODO: Create credit card charge
        return await true; 
     }
 
