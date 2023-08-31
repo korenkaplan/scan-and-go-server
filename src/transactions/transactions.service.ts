@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException, NotImplementedException } from '@nestjs/common';
 import { ITransaction, Transaction } from './schemas/transaction.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
@@ -16,6 +16,8 @@ import { IPaidItem, PaidItem } from 'src/paid-item/schemas/paid-item.schema';
 import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { ITransactionItem } from './dto/transaction-item.interface';
 import { MailService } from 'src/mail/mail.service';
+import {  DayOfWeek, Month } from 'src/global/global.enum';
+import { DailyPurchases, EmailItem, MonthlyPurchases, YearlyPurchases } from 'src/global/global.interface';
 
 export interface Rest {
     amountToCharge: number; 
@@ -38,6 +40,128 @@ export class TransactionsService {
         private mailService: MailService,
     ) { }
 
+    //TODO: Check Analytics Functions
+    async getWeeklyPurchases(id:mongoose.Types.ObjectId): Promise<DailyPurchases[]>{
+        const lastWeeklyPurchases = await this.transactionModel.find({userId:id,createdAt:{$gt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)}}); // number of milliseconds in seven days
+      const weekObject: DailyPurchases[] = [
+        {
+        day: DayOfWeek.Sun,
+        amount:0
+        },
+        {
+        day: DayOfWeek.Mon,
+        amount:0
+        },
+        {
+        day: DayOfWeek.Tue,
+        amount:0
+        },
+        {
+        day: DayOfWeek.Wed,
+         amount:0
+        },
+        {
+        day: DayOfWeek.Thu,
+        amount:0
+        },
+        {
+        day: DayOfWeek.Fri,
+        amount:0
+        },
+        {
+        day: DayOfWeek.Sat,
+        amount:0
+        },
+      ]
+      lastWeeklyPurchases.forEach((purchase)=>{
+        const dayNumber:number = purchase.createdAt.getDay();
+        weekObject[dayNumber].amount += 1
+      })
+      return weekObject;
+    }
+    async getMonthlyPurchases(id:mongoose.Types.ObjectId): Promise<MonthlyPurchases[]>{
+        const now = new Date();
+        const startDate = new Date(now.getFullYear(), 0, 1);
+        const endDate = new Date(now.getFullYear() + 1, 0, 1);
+        const lastYearPurchases  = await this.transactionModel.find({userId:id,createdAt:{$gte: startDate, $lt: endDate}});
+        
+        const monthsObjects: MonthlyPurchases[] = [
+            {
+                month: Month.Jan,
+                amount:0
+            },
+            {
+                month: Month.Feb,
+                amount:0
+            },
+            {
+                month: Month.Mar,
+                amount:0
+            },
+            {
+                month: Month.Apr,
+                amount:0
+            },
+            {
+                month: Month.May,
+                amount:0
+            },
+            {
+                month: Month.Jun,
+                amount:0
+            },
+            {
+                month: Month.Jul,
+                amount:0
+            },
+            {
+                month: Month.Aug,
+                amount:0
+            },
+            {
+                month: Month.Sep,
+                amount:0
+            },
+            {
+                month: Month.Oct,
+                amount:0
+            },
+            {
+                month: Month.Nov,
+                amount:0
+            },
+            {
+                month: Month.Dec,
+                amount:0
+            },
+        ]
+        lastYearPurchases.forEach((purchase)=>{
+            const monthNumber:number = purchase.createdAt.getMonth();
+            monthsObjects[monthNumber].amount += 1
+        })
+        return monthsObjects;
+    }
+    async getYearlyPurchases(id:mongoose.Types.ObjectId): Promise<YearlyPurchases[]>{
+        const userTransaction = await this.transactionModel.find({userId:id})
+        const yearlyPurchases: YearlyPurchases[]  = [];
+
+        userTransaction.forEach((transaction)=> {
+            const yearOfTransaction = transaction.createdAt.getFullYear();
+            if(!yearlyPurchases[yearOfTransaction])
+            {
+                yearlyPurchases[yearOfTransaction] = {
+                    year: yearOfTransaction,
+                    amount:0
+                }
+            }
+            else
+            {
+                yearlyPurchases[yearOfTransaction].amount += 1
+            }
+
+    })
+        return yearlyPurchases;
+    }
     async PaymentPipeline(dto: CreateTransactionDto): Promise<void> {
         const session = await this.userModel.db.startSession();
         session.startTransaction();
@@ -79,12 +203,12 @@ export class TransactionsService {
 
         //* Step 4: Update the paid items collection
         //add the items (nfc chip) to the paid items collection
-        await this.updatePaidItemsCollection(transaction, user, newTransaction);
+        await this.updatePaidItemsCollection(transaction, user._id, newTransaction);
         //#endregion
         //commit the transaction
         await session.commitTransaction();
-        //TODO: Check the email sending
-        await this.mailService.sendOrderConfirmationEmail(user.email,transaction.products)
+        //send the order confirmation email after the transaction has been committed successfully
+        await this.mailService.sendOrderConfirmationEmail(user.email,transaction.products,user.fullName)
         } catch (error) {
             await session.abortTransaction();
             throw error
@@ -95,11 +219,11 @@ export class TransactionsService {
      
     }
     //#region Sub functions for payment Pipeline
-    private async updatePaidItemsCollection(transaction: ITransaction, user: mongoose.Document<unknown, {}, User> & User & { _id: mongoose.Types.ObjectId; }, newTransaction: mongoose.Document<unknown, {}, Transaction> & Transaction & { _id: mongoose.Types.ObjectId; }) {
+    private async updatePaidItemsCollection(transaction: ITransaction, id:mongoose.Types.ObjectId, newTransaction: Transaction) {
         const paidItems: IPaidItem[] = transaction.products.map(product => {
             const paidItem: IPaidItem = {
                 nfcTagId: product.nfcId,
-                userId: user._id,
+                userId: id,
                 itemId: product.itemId,
                 transactionId: newTransaction._id,
                 createdAt: new Date(),
@@ -111,7 +235,7 @@ export class TransactionsService {
         await this.paidItemModel.insertMany(paidItems);
     }
 
-    private async updateTheUser(user: mongoose.Document<unknown, {}, User> & User & { _id: mongoose.Types.ObjectId; }, latestTransaction: RecentTransaction, latestItems: RecentItem[]) {
+    private async updateTheUser(user: User, latestTransaction: RecentTransaction, latestItems: RecentItem[]) {
         user.recentTransactions.unshift(latestTransaction);
         user.recentTransactions.splice(20);
         user.recentItems.unshift(...latestItems);
@@ -126,7 +250,7 @@ export class TransactionsService {
         await user.save();
     }
 
-    private createAbstractObjectsForUserArrays(newTransaction: mongoose.Document<unknown, {}, Transaction> & Transaction & { _id: mongoose.Types.ObjectId; }, transaction: ITransaction) {
+    private createAbstractObjectsForUserArrays(newTransaction: Transaction, transaction: ITransaction) {
         const latestTransaction: RecentTransaction = {
             transactionId: newTransaction._id,
             amount: transaction.amountToCharge,
@@ -189,7 +313,7 @@ export class TransactionsService {
         return coupon;
     }
 
-    private async validateCard(user: mongoose.Document<unknown, {}, User> & User & { _id: mongoose.Types.ObjectId; }, cardId: mongoose.Types.ObjectId) {
+    private async validateCard(user: User, cardId: mongoose.Types.ObjectId) {
         const card = user.creditCards.find(card => card._id == cardId);
         if (!card)
             throw new NotFoundException(`card with the id ${cardId} was not found`);
@@ -234,6 +358,18 @@ export class TransactionsService {
         transaction.cardNumber =  this.globalService.decryptText(transaction.cardNumber)
         transaction.cardType =  this.globalService.decryptText(transaction.cardType)
         return transaction
+    }
+    async sendOrderConfirmationEmail(email:string,products:ITransactionItem[],name: string):Promise<string> 
+    {
+        const emailItems: EmailItem[] = products.map(product => {
+            return {
+                name: product.name,
+                price: product.price,
+                imageSource: product.imageSource
+            }
+        })
+        await this.mailService.sendOrderConfirmationEmail(email, emailItems, name);
+        return 'email sent successfully'
     }
 
 }

@@ -13,12 +13,11 @@ import { AddToCartDto } from './dto/add-to-cart.dto';
 import { ItemInCart } from './schemas/item-in-cart.interface';
 import { RemoveItemFromCartDto } from './dto/remove-from-cart.dto';
 import { Public } from 'src/auth/decorators/public-guard.decorator';
-import { CreditCard } from './schemas/credit-card.schema';
 
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) { }
-
+  
     @Delete('/removeFromCart')
     async removeFromCart(@Body() dto: RemoveItemFromCartDto): Promise<ItemInCart[]> {
         return await this.userService.removeItemFromCart(dto)

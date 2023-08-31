@@ -74,5 +74,4 @@ export class AuthService {
         return await this.mailService.sendResetPasswordEmail(email);
     }
 
-
 }

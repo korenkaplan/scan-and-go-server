@@ -11,11 +11,7 @@ export enum Role {
     USER = "user",
     ADMIN = "admin",
 }
-export enum CardType {
-    MAS='mastercard',
-    VIS='visa',
-    AMR='american express',
-}
+
 export enum Category {
     Jeans = "Jeans",
     Jackets = "Jackets",
@@ -78,3 +74,40 @@ export enum Color {
     Teal = "Teal",
     Mix = "Mix",
   }
+
+
+   export enum DayOfWeek {
+   Sun,
+   Mon,
+   Tue,
+   Wed,
+   Thu,
+   Fri,
+   Sat
+   }
+   export enum Month {
+       Jan,
+       Feb,
+       Mar,
+       Apr,
+       May,
+       Jun,
+       Jul,
+       Aug,
+       Sep,
+       Oct,
+       Nov,
+       Dec
+   };
+   export enum CardValidationRegex{
+    VISA="^4[0-9]{12}(?:[0-9]{3})?$",
+    MASTERCARD="^5[1-5][0-9]{14}|^(222[1-9]|22[3-9]\\d|2[3-6]\\d{2}|27[0-1]\\d|2720)[0-9]{12}$",
+    AMERICAN_EXPRESS="/^3[47]\d{13,14}$/",
+    DISCOVER="/^(?:6011\d{12})|(?:65\d{14})$/"
+   }
+   export enum CardType {
+    MASTERCARD='Mastercard',
+    VISA='visa',
+    AMERICAN_EXPRESS='American Express',
+    DISCOVER='Discover'
+}

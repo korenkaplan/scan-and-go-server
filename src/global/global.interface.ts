@@ -1,12 +1,19 @@
-export interface EnvVariables {
-JWT_SECRET: string;
-JWT_EXPIRES: string;
-CRYPTO_KEY: string;
-MONGO_PATH: string;
-MONGO_PASSWORD: string;
-DB_NAME: string;
-PORT:number
-SMTP_PASSWORD: string;
-SMTP_USER: string;
-SMTP_HOST: string;
+import { Month, DayOfWeek } from "./global.enum"
+
+export interface MonthlyPurchases{
+    month:Month,
+    amount: number
+}
+export interface YearlyPurchases{
+    year:number,
+    amount: number
+}
+export interface DailyPurchases{
+    day:DayOfWeek,
+    amount: number
+   }
+   export interface EmailItem {
+    name: string
+    price: number
+    imageSource: string
 }

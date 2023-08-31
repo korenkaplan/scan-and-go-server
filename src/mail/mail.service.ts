@@ -7,7 +7,7 @@ import { User } from 'src/user/schemas/user.schema';
 import { GetQueryDto } from 'src/global/global.dto';
 import mongoose from 'mongoose';
 import { ITransactionItem } from 'src/transactions/dto/transaction-item.interface';
-import * as fs from 'fs';
+import { EmailItem } from 'src/global/global.interface';
 @Injectable()
 export class MailService {
     constructor(private mailerService: MailerService, @Inject(forwardRef(() => UserService)) private userService: UserService) { }
@@ -29,18 +29,21 @@ export class MailService {
         });
         return this.createResObject(isExist, number, userId);
     }
-    async sendOrderConfirmationEmail(email: string, purchasedItems: ITransactionItem[]): Promise<void> {
+   
+    async sendOrderConfirmationEmail(email: string, purchasedItems: EmailItem[],name: string): Promise<void> {
+       
         await this.mailerService.sendMail({
             to: email,
             subject: 'Scan & Go Order Confirmation',
             from: 'The Scan & Go Team',
             template: 'orderConfirmation',
             context: {
-                items: purchasedItems
+                items: purchasedItems,
+                year: new Date().getFullYear(),
+                name: name
             }
         });
     } 
-
     async verifyEmail(email: string): Promise<[boolean, mongoose.Types.ObjectId]> {
         const dto: GetQueryDto<User> = {
             query: { email },
@@ -61,3 +64,4 @@ export class MailService {
         return res;
     }
 }
+

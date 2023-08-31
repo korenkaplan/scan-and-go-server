@@ -5,17 +5,109 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thank You for Your Purchase</title>
     <style>
-        /* Your CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .thank-you-text {
+            font-size: 28px;
+            color: #007bff;
+        }
+
+        .order-details-header {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        .order-details {
+            margin-top: 20px;
+            text-align: center; /* Adjusted to left-align list items */
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .item-image img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+
+        .item-info {
+            flex-grow: 1;
+            text-align: left;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .item-price {
+            font-size: 16px;
+            color: #007bff;
+        }
+
+        .footer {
+            margin-top: 20px;
+            color: #777;
+        }
+
+        .total-cost {
+            font-size: 24px;
+            color: #007bff;
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .support-email {
+            color: #555;
+        }
+
+        .rights-reserved {
+            color: #555;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="thank-you-text">Thank You for Your Purchase!</h1>
+            <h1 class="thank-you-text">Thank You for Your Purchase {{name}}!</h1>
             <p>We appreciate your business.</p>
         </div>
         <div class="order-details">
-            <h2 class="order-details-header">Order Details:</h2>
+            <h2 class="order-details-header">Order Details</h2>
             {{#each items}}
             <div class="item">
                 <div class="item-image">
@@ -28,9 +120,12 @@
             </div>
             {{/each}}
         </div>
+        <div class="total-cost">
+            Total Cost: ${{totalPrice}}
+        </div>
         <div class="footer">
-            <p>If you have any questions or concerns, please contact our support team.</p>
-            <p>&copy; {{year}} Scan & Go. All rights reserved.</p>
+            <p>If you have any questions or concerns, please contact our support team at <span class="support-email">scanAndGoSupport@gmail.com</span></p>
+            <p class="rights-reserved">&copy; {{year}} Scan & Go. All rights reserved.</p>
         </div>
     </div>
 </body>

@@ -3,6 +3,7 @@ import * as bcrypt from 'bcrypt'
 import * as CryptoJS from 'crypto-js'
 import { GetQueryDto, LocalPaginationConfig } from './global.dto';
 import { CreditCard } from 'src/user/schemas/credit-card.schema';
+import { CardType, CardValidationRegex } from './global.enum';
 @Injectable()
 export class GlobalService {
     constructor() { }
@@ -27,14 +28,32 @@ export class GlobalService {
         const result: LocalPaginationConfig = { sort, limit, currentPage }
         return result
     }
-    async validateCreditCart(card:CreditCard): Promise<boolean> {
-        //TODO: Create credit card validation
-        return await true;
+    //TODO: Test validateCreditCart()
+     validateCreditCart(card:CreditCard): boolean {
+      switch (card.cardType) {
+        case CardType.AMERICAN_EXPRESS:{
+            return new RegExp(CardValidationRegex.AMERICAN_EXPRESS).test(card.cardNumber)
+        }
+        case CardType.VISA:{
+            return new RegExp(CardValidationRegex.VISA).test(card.cardNumber)
+        }
+        case CardType.DISCOVER:{
+            return new RegExp(CardValidationRegex.DISCOVER).test(card.cardNumber)
+        }
+        case CardType.MASTERCARD:{
+            return new RegExp(CardValidationRegex.MASTERCARD).test(card.cardNumber)
+        }
+        default:{
+            return false
+        }
+      
+      }
     }
     async chargeCreditCard(card:CreditCard,amountToCharge: number): Promise<boolean> {
-       //TODO: Create credit card charge
+       //simulate credit card charging
+       console.log(`Card charge: ${card.cardNumber} with amount: ${amountToCharge}`);
        return await true; 
     }
 
-
+    
 }

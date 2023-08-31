@@ -24,7 +24,44 @@ export class UserService {
         private userModel: mongoose.Model<User>,
         private globalService: GlobalService,
     ) { }
-    async removeItemFromCart(dto: RemoveItemFromCartDto): Promise<ItemInCart[]> {
+
+ 
+    //#region password change
+    async updatePassword(dto: UpdatePasswordQueryDto): Promise<void> {
+        const { oldPassword, newPassword, userId } = dto;
+
+        //find the user with the id
+        const user = await this.userModel.findById(userId);
+
+        //if not found throw error
+        if (!user) throw new NotFoundException(`No user with id ${userId} found in database`);
+
+        //hash oldPassword and compare to user.password
+        const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+
+        //if not match  return old password incorrect
+        if (!isPasswordMatch) throw new BadRequestException('Old password does not match')
+
+        //hash new password and update user password
+        user.password = await this.globalService.hashPassword(newPassword)
+        await user.save()
+    }
+    async resetPassword(dto: ResetPasswordQueryDto): Promise<void> {
+        const { newPassword, userId } = dto;
+
+        //find the user with the id
+        const user = await this.userModel.findById(userId);
+
+        //if not found throw error
+        if (!user) throw new NotFoundException(`No user with id ${userId} found in database`);
+
+        //hash new password and update user password
+        user.password = await this.globalService.hashPassword(newPassword)
+        await user.save()
+    }
+    //#endregion
+     //#region add remove from cart
+     async removeItemFromCart(dto: RemoveItemFromCartDto): Promise<ItemInCart[]> {
         const { userId, itemInCart } = dto
         const { nfcTagId } = itemInCart
 
@@ -70,38 +107,7 @@ export class UserService {
         //return the updated cart
         return user.cart
     }
-    async updatePassword(dto: UpdatePasswordQueryDto): Promise<void> {
-        const { oldPassword, newPassword, userId } = dto;
-
-        //find the user with the id
-        const user = await this.userModel.findById(userId);
-
-        //if not found throw error
-        if (!user) throw new NotFoundException(`No user with id ${userId} found in database`);
-
-        //hash oldPassword and compare to user.password
-        const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
-
-        //if not match  return old password incorrect
-        if (!isPasswordMatch) throw new BadRequestException('Old password does not match')
-
-        //hash new password and update user password
-        user.password = await this.globalService.hashPassword(newPassword)
-        await user.save()
-    }
-    async resetPassword(dto: ResetPasswordQueryDto): Promise<void> {
-        const { newPassword, userId } = dto;
-
-        //find the user with the id
-        const user = await this.userModel.findById(userId);
-
-        //if not found throw error
-        if (!user) throw new NotFoundException(`No user with id ${userId} found in database`);
-
-        //hash new password and update user password
-        user.password = await this.globalService.hashPassword(newPassword)
-        await user.save()
-    }
+    //#endregion
     //#region Credit Cards
     async addCreditCard(dto: CreateCreditCardDto): Promise<string> {
         const { userId, creditCard } = dto;
@@ -187,7 +193,6 @@ export class UserService {
         await user.save();  
         return 'default card changed successfully' 
     }
-
     async deleteCreditCard(dto: DeleteCreditCardDto): Promise<string> {
         const { userId, cardId } = dto
         //find the user
