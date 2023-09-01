@@ -19,13 +19,10 @@ import { RemoveItemFromCartDto } from './dto/remove-from-cart.dto';
 export class UserService {
     private MAX_AMOUNT_OF_CREDIT_CARDS = 5
     constructor(
-
         @InjectModel(User.name)
         private userModel: mongoose.Model<User>,
         private globalService: GlobalService,
     ) { }
-
- 
     //#region password change
     async updatePassword(dto: UpdatePasswordQueryDto): Promise<void> {
         const { oldPassword, newPassword, userId } = dto;
@@ -60,7 +57,7 @@ export class UserService {
         await user.save()
     }
     //#endregion
-     //#region add remove from cart
+    //#region add remove from cart
      async removeItemFromCart(dto: RemoveItemFromCartDto): Promise<ItemInCart[]> {
         const { userId, itemInCart } = dto
         const { nfcTagId } = itemInCart
@@ -147,13 +144,13 @@ export class UserService {
         return 'Credit Card Added successfully';
     }
 
-    async decryptCreditCard(card: CreditCard): Promise<CreditCard> {
+    decryptCreditCard(card: CreditCard): CreditCard {
         const decryptCreditCard: CreditCard = {
-            cardNumber: await this.globalService.decryptText(card.cardNumber),
-            expirationDate: await this.globalService.decryptText(card.expirationDate),
-            cardholderName: await this.globalService.decryptText(card.cardholderName),
-            cvv: await this.globalService.decryptText(card.cvv),
-            cardType: await this.globalService.decryptText(card.cardType),
+            cardNumber: this.globalService.decryptText(card.cardNumber),
+            expirationDate: this.globalService.decryptText(card.expirationDate),
+            cardholderName: this.globalService.decryptText(card.cardholderName),
+            cvv: this.globalService.decryptText(card.cvv),
+            cardType: this.globalService.decryptText(card.cardType),
             isDefault: card.isDefault,
             _id: card._id
         }
@@ -171,10 +168,10 @@ export class UserService {
         }
         return CreditCard
     }
-    async decryptUserCreditCards(user: User): Promise<User> {
-        user.creditCards = await Promise.all(user.creditCards.map(async (card) => {
-            return await this.decryptCreditCard(card);
-        }));
+    decryptUserCreditCards(user: User): User {
+        user.creditCards = user.creditCards.map( (card) => {
+            return this.decryptCreditCard(card);
+        });
         return user;
     }
     async setDefaultCard(dto: ChangeDefaultCardDto): Promise<string> {
@@ -221,7 +218,7 @@ export class UserService {
 
         const users = await this.userModel.find(query, projection);
         return await Promise.all(users.map(async (user) => {
-            return user.creditCards ? await this.decryptUserCreditCards(user) : user
+            return user.creditCards ? this.decryptUserCreditCards(user) : user
         }))
     }
     async getOne(dto: GetQueryDto<User>): Promise<User> {

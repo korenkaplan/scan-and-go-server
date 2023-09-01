@@ -349,7 +349,7 @@ export class TransactionsService {
     }
     //TODO: Check decryption functions
     private decryptTransactions(transactions: Transaction[]): Transaction[] {
-     const decryptedTransactions =   transactions.map(  transaction => {
+     const decryptedTransactions = transactions.map(  transaction => {
         return this.decryptTransaction(transaction)
      })
      return decryptedTransactions

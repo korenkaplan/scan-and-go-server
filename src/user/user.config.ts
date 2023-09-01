@@ -1,0 +1,1 @@
+ export const MAX_AMOUNT_OF_CREDIT_CARDS = 5

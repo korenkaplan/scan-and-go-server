@@ -21,7 +21,7 @@ export class NfcTag extends Document {
 }
 
 export interface INfcTag {
-    _id?: mongoose.Schema.Types.ObjectId,
+    _id?: mongoose.Types.ObjectId,
     itemId: mongoose.Types.ObjectId
     createdAt: Date,
     schemaVersion: number,
