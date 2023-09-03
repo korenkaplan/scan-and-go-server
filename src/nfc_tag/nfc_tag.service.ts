@@ -17,7 +17,7 @@ export class NfcTagService {
      const {itemId, tagId} = dto
      const nfcTag:INfcTag ={
         itemId: itemId,
-        _id: tagId,
+        tagId,
         createdAt: new Date(),
         schemaVersion: NFC_TAG_SCHEMA_VERSION,
      }
