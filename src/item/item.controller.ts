@@ -22,5 +22,6 @@ export class ItemController {
     async getItemsForNfc(): Promise<ItemForNfcAddition[]> {
         return await this.itemService.getAllItemsForNfcAddition();
     }
+    
     //TODO: Add CRUD Operations on this controller
 }

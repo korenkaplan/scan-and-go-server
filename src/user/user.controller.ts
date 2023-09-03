@@ -1,7 +1,7 @@
-import { Controller, Get, Delete, Body, Patch, UsePipes, Post, Put } from '@nestjs/common';
+import { Controller, Get, Delete, Body, Patch, UsePipes, Post, Put, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './schemas/user.schema';
-import { FilterQuery } from 'mongoose';
+import mongoose, { FilterQuery } from 'mongoose';
 import { GetQueryDto, UpdateQueryDto } from 'src/global/global.dto';
 import { UpdatePasswordQueryDto } from './dto/update-password.dto';
 import { PasswordValidationPipe } from 'src/global/Validation/password-validation.pipe';
@@ -68,5 +68,9 @@ export class UserController {
     @Patch('/paymentMethods/deleteCreditCard')
     async deleteCreditCard(@Body() dto: DeleteCreditCardDto): Promise<string> {
         return await this.userService.deleteCreditCard(dto);
+    }
+    @Get('/AddMockItemsToCart')
+    async AddMockItemsToCart(@Query('id') id: string): Promise<User> {
+        return await this.userService.addMockItemsToCart(id);
     }
 }

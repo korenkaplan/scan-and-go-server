@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+import { Types } from "mongoose"
 
 export class ItemInCart {
-    itemId: mongoose.Types.ObjectId
+    itemId: Types.ObjectId
     nfcTagCode: string
 }

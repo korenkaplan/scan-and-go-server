@@ -14,6 +14,8 @@ import { DeleteCreditCardDto } from './dto/delete-credit-card.dto';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { ItemInCart } from './schemas/item-in-cart.interface';
 import { RemoveItemFromCartDto } from './dto/remove-from-cart.dto';
+import { Item } from 'src/item/schemas/item.schema';
+import { INfcTag, NfcTag } from 'src/nfc_tag/schemas/nfc-tag.schema';
 
 @Injectable()
 export class UserService {
@@ -21,6 +23,8 @@ export class UserService {
     constructor(
         @InjectModel(User.name)
         private userModel: mongoose.Model<User>,
+        @InjectModel(NfcTag.name)
+        private nfcModel: mongoose.Model<NfcTag>,
         private globalService: GlobalService,
     ) { }
     //#region password change
@@ -58,7 +62,7 @@ export class UserService {
     }
     //#endregion
     //#region add remove from cart
-     async removeItemFromCart(dto: RemoveItemFromCartDto): Promise<ItemInCart[]> {
+    async removeItemFromCart(dto: RemoveItemFromCartDto): Promise<ItemInCart[]> {
         const { userId, nfcTagCode } = dto
 
         //find the user with the id
@@ -168,7 +172,7 @@ export class UserService {
         return CreditCard
     }
     decryptUserCreditCards(user: User): User {
-        user.creditCards = user.creditCards.map( (card) => {
+        user.creditCards = user.creditCards.map((card) => {
             return this.decryptCreditCard(card);
         });
         return user;
@@ -179,15 +183,15 @@ export class UserService {
         if (!user)
             throw new NotFoundException(`No user with id ${userId} was found`);
         const cards = user.creditCards
-         user.creditCards =   cards.map( card => {
+        user.creditCards = cards.map(card => {
             if (card.isDefault && card._id != cardId) {
                 card.isDefault = false;
             }
             return card;
         })
         user.markModified('creditCards');
-        await user.save();  
-        return 'default card changed successfully' 
+        await user.save();
+        return 'default card changed successfully'
     }
     async deleteCreditCard(dto: DeleteCreditCardDto): Promise<string> {
         const { userId, cardId } = dto
@@ -209,6 +213,22 @@ export class UserService {
         //save the user
         await user.save()
         return 'deleted successfully';
+    }
+    async addMockItemsToCart(userId: string): Promise<User> {
+        const user = await this.userModel.findById(userId);
+        if (!user)
+            throw new NotFoundException(`User not found with id: ${userId}`);
+        const tags: INfcTag[] = await this.nfcModel.find();
+        user.cart = tags.map(tag => {
+            const itemInCart: ItemInCart = {
+                nfcTagCode: tag.tagId,
+                itemId: tag.itemId
+            }
+            return itemInCart;
+        })
+        user.markModified('cart');
+        await user.save();
+        return user;
     }
     //#endregion
     //#region CRUD OPERA.creditCards
