@@ -12,7 +12,7 @@ export class ItemController {
     async getUsers(@Body() dto: GetQueryDto<Item>): Promise<Item[]> {
         return await this.itemService.getMany(dto);
     }
-
+    @Public()
     @Post('/getOne')
     async getItems(@Body() dto: GetQueryDto<Item>): Promise<Item[]> {
         return await this.itemService.getMany(dto);
