@@ -222,7 +222,7 @@ export class TransactionsService {
     private async updatePaidItemsCollection(transaction: ITransaction, id:mongoose.Types.ObjectId, newTransaction: Transaction) {
         const paidItems: IPaidItem[] = transaction.products.map(product => {
             const paidItem: IPaidItem = {
-                nfcTagId: product.nfcId,
+                nfcTagCode: product.nfcTagCode,
                 userId: id,
                 itemId: product.itemId,
                 transactionId: newTransaction._id,
