@@ -59,8 +59,7 @@ export class UserService {
     //#endregion
     //#region add remove from cart
      async removeItemFromCart(dto: RemoveItemFromCartDto): Promise<ItemInCart[]> {
-        const { userId, itemInCart } = dto
-        const { nfcTagId } = itemInCart
+        const { userId, nfcTagCode } = dto
 
         //find the user with the id
         const user = await this.userModel.findById(userId);
@@ -73,7 +72,7 @@ export class UserService {
         const beforeLength = user.cart.length
 
         // remove item from user cart
-        user.cart = user.cart.filter(itemInCart => itemInCart.nfcTagId != nfcTagId)
+        user.cart = user.cart.filter(itemInCart => itemInCart.nfcTagCode != nfcTagCode)
 
         //compare the lengths before and after the removal
         if (user.cart.length == beforeLength)

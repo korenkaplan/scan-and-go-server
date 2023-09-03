@@ -19,8 +19,8 @@ export class NfcTagController {
         return await this.nfcTagService.getOne(dto)
     }
     @Post('getMany')
-    async getMany(@Body() dto: GetQueryDto<NfcTag>): Promise<NfcTag> {
-        return await this.nfcTagService.getOne(dto)
+    async getMany(@Body() dto: GetQueryDto<NfcTag>): Promise<NfcTag[]> {
+        return await this.nfcTagService.getMany(dto)
     }
     @Delete('deleteOne')
     async deleteOne(@Query('id') id: mongoose.Types.ObjectId): Promise<NfcTag> {

@@ -18,7 +18,7 @@ import { Public } from 'src/auth/decorators/public-guard.decorator';
 export class UserController {
     constructor(private userService: UserService) { }
 
-    @Post('/removeFromCart')
+    @Patch('/removeFromCart')
     async removeFromCart(@Body() dto: RemoveItemFromCartDto): Promise<ItemInCart[]> {
         return await this.userService.removeItemFromCart(dto)
     }
