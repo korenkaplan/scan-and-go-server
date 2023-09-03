@@ -4,10 +4,12 @@ import { CreateNfcTagDto } from './dto/create-nfc-tag.dto';
 import { NfcTag } from './schemas/nfc-tag.schema';
 import { GetQueryDto } from 'src/global/global.dto';
 import mongoose from 'mongoose';
+import { Public } from 'src/auth/decorators/public-guard.decorator';
 
 @Controller('nfc-tag')
 export class NfcTagController {
     constructor(private nfcTagService: NfcTagService) { }
+    @Public()
     @Post('create')
     async createNfcTag(@Body() dto: CreateNfcTagDto): Promise<NfcTag> {
         return await this.nfcTagService.create(dto)
