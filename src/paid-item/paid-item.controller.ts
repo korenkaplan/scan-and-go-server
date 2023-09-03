@@ -1,4 +1,4 @@
-import { Controller, Post } from '@nestjs/common';
+import { Controller} from '@nestjs/common';
 import { PaidItemService } from './paid-item.service';
 
 @Controller('paid-item')

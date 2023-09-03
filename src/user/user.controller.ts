@@ -18,7 +18,7 @@ import { Public } from 'src/auth/decorators/public-guard.decorator';
 export class UserController {
     constructor(private userService: UserService) { }
   
-    @Delete('/removeFromCart')
+    @Post('/removeFromCart')
     async removeFromCart(@Body() dto: RemoveItemFromCartDto): Promise<ItemInCart[]> {
         return await this.userService.removeItemFromCart(dto)
     }
@@ -65,7 +65,7 @@ export class UserController {
     async changeDefaultCard(@Body() dto: ChangeDefaultCardDto): Promise<string> {
         return await this.userService.setDefaultCard(dto);
     }
-    @Delete('/paymentMethods/deleteCreditCard')
+    @Post('/paymentMethods/deleteCreditCard')
     async deleteCreditCard(@Body() dto: DeleteCreditCardDto): Promise<string> {
         return await this.userService.deleteCreditCard(dto);
     }
