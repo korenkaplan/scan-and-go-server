@@ -9,7 +9,7 @@ import { NfcTag, NfcTagSchema } from 'src/nfc_tag/schemas/nfc-tag.schema';
 
 @Module({
   imports:[
-    MongooseModule.forFeature([{name:'User', schema:UserSchema},{name:NfcTag.name, schema:NfcTagSchema}]),
+    MongooseModule.forFeature([{name:'User', schema:UserSchema},{name:NfcTag.name, schema:NfcTagSchema},{name:Item.name, schema:ItemSchema}],),
     GlobalModule,
   ],
   providers: [UserService],

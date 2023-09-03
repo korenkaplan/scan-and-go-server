@@ -14,8 +14,8 @@ import { DeleteCreditCardDto } from './dto/delete-credit-card.dto';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { ItemInCart } from './schemas/item-in-cart.interface';
 import { RemoveItemFromCartDto } from './dto/remove-from-cart.dto';
-import { Item } from 'src/item/schemas/item.schema';
 import { INfcTag, NfcTag } from 'src/nfc_tag/schemas/nfc-tag.schema';
+import { Item } from 'src/item/schemas/item.schema';
 
 @Injectable()
 export class UserService {
@@ -23,6 +23,8 @@ export class UserService {
     constructor(
         @InjectModel(User.name)
         private userModel: mongoose.Model<User>,
+        @InjectModel(Item.name)
+        private itemModel: mongoose.Model<Item>,
         @InjectModel(NfcTag.name)
         private nfcModel: mongoose.Model<NfcTag>,
         private globalService: GlobalService,
@@ -216,20 +218,42 @@ export class UserService {
     }
     async addMockItemsToCart(userId: string): Promise<User> {
         const user = await this.userModel.findById(userId);
-        if (!user)
+        if (!user) {
             throw new NotFoundException(`User not found with id: ${userId}`);
+        }
+    
         const tags: INfcTag[] = await this.nfcModel.find();
-        user.cart = tags.map(tag => {
-            const itemInCart: ItemInCart = {
-                nfcTagCode: tag.tagId,
-                itemId: tag.itemId
-            }
-            return itemInCart;
-        })
+    
+        // Use Promise.all to await all the promises and get an array of ItemInCart objects.
+        const cartItems: ItemInCart[] = await Promise.all(
+            tags.map(async (tag) => {
+                const item = await this.itemModel.findById(tag.itemId);
+                if (!item) {
+                    throw new NotFoundException(`Item not found with id: ${tag.itemId}`);
+                }
+    
+                const itemInCart: ItemInCart = {
+                    nfcTagCode: tag.tagId,
+                    itemId: tag.itemId,
+                    name: item.name,
+                    imageSource: item.imageSource,
+                    price: item.price,
+                    category: item.category,
+                };
+                return itemInCart;
+            })
+        );
+    
+        // Assign the array of ItemInCart objects to user.cart.
+        user.cart = cartItems;
+    
+        // Mark the 'cart' field as modified and save the user.
         user.markModified('cart');
         await user.save();
+    
         return user;
     }
+    
     //#endregion
     //#region CRUD OPERA.creditCards
     async getMany(dto: GetQueryDto<User>): Promise<User[]> {
