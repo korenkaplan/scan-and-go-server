@@ -25,7 +25,7 @@ export class AuthController {
 
     @Public()
     @Get('/verifyEmail')
-    @Throttle(2,60)
+    @Throttle(1,60)
     verifyEmail(@Query('email') email:string):Promise<VerificationEmailResponse>{
         return this.authService.sendResetPasswordMail(email);
     }

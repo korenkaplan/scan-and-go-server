@@ -9,13 +9,13 @@ import { User } from "src/user/schemas/user.schema";
     collection:'paidItems'
 })
 export class PaidItem extends Document {
-    @Prop()
+    @Prop({unique: true})
     nfcTagId:string
 
     @Prop({type: mongoose.Schema.Types.ObjectId,ref:'Item'})
     itemId: Item
     
-    @Prop({type: mongoose.Schema.Types.ObjectId,ref:'Transaction'})
+    @Prop({type: mongoose.Schema.Types.ObjectId,ref:'Transaction',unique:true})
     transactionId: Transaction
 
     @Prop({type: mongoose.Schema.Types.ObjectId,ref:User.name})
