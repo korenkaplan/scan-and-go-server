@@ -1,7 +1,7 @@
 import { Controller, Get, Delete, Body, Patch, UsePipes, Post, Put, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './schemas/user.schema';
-import mongoose, { FilterQuery } from 'mongoose';
+import { FilterQuery } from 'mongoose';
 import { GetQueryDto, UpdateQueryDto } from 'src/global/global.dto';
 import { UpdatePasswordQueryDto } from './dto/update-password.dto';
 import { PasswordValidationPipe } from 'src/global/Validation/password-validation.pipe';

@@ -181,16 +181,24 @@ export class UserService {
     }
     async setDefaultCard(dto: ChangeDefaultCardDto): Promise<string> {
         const { userId, cardId } = dto;
+        
         const user = await this.userModel.findById(userId);
         if (!user)
             throw new NotFoundException(`No user with id ${userId} was found`);
         const cards = user.creditCards
         user.creditCards = cards.map(card => {
+
             if (card.isDefault && card._id != cardId) {
                 card.isDefault = false;
             }
+            else if(card._id == cardId) {
+                card.isDefault = true;
+            }
+            console.log(card);
+            
             return card;
         })
+        
         user.markModified('creditCards');
         await user.save();
         return 'default card changed successfully'
