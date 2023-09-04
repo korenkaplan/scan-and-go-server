@@ -2,10 +2,9 @@ import { Injectable, NotFoundException, Query } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IPaidItem, PaidItem } from './schemas/paid-item.schema';
 import mongoose, { Model } from 'mongoose';
-import { GetQueryDto } from 'src/global/global.dto';
 import { CreatePaidItemDto } from './dto/create-pad-item.dto';
 import { PAID_ITEM_SCHEMA_VERSION } from 'src/global/global.schema-versions';
-import { Cron, CronExpression } from '@nestjs/schedule';
+//import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class PaidItemService {
@@ -19,9 +18,10 @@ export class PaidItemService {
             throw new NotFoundException(`Paid item not found with the code ${nfcTagCode}`);
         return paidItem
     }
-    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT,{
-        timeZone:'Asia/Jerusalem'
-    })
+    //TODO: Add Cron?
+    // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT,{
+    //     timeZone:'Asia/Jerusalem'
+    // })
     async cleanCollection(): Promise<string> {
         const deletedAmount: number = (await this.paidItemsModel.deleteMany({})).deletedCount;
         return `Deleted ${deletedAmount} items`;

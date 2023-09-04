@@ -15,7 +15,7 @@ export class PaidItem extends Document {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Item' })
     itemId: Item
 
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction', unique: true })
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' })
     transactionId: Transaction
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })

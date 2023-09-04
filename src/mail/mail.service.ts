@@ -6,7 +6,6 @@ import { VerificationEmailResponse } from './dto/verification-respond.dto';
 import { User } from 'src/user/schemas/user.schema';
 import { GetQueryDto } from 'src/global/global.dto';
 import mongoose from 'mongoose';
-import { ITransactionItem } from 'src/transactions/dto/transaction-item.interface';
 import { EmailItem } from 'src/global/global.interface';
 @Injectable()
 export class MailService {
@@ -30,8 +29,8 @@ export class MailService {
         return this.createResObject(isExist, number, userId);
     }
    
-    async sendOrderConfirmationEmail(email: string, purchasedItems: EmailItem[],name: string): Promise<void> {
-       
+    async sendOrderConfirmationEmail(email: string, purchasedItems: EmailItem[], name: string): Promise<void> {
+        const totalPrice = purchasedItems.reduce((total, product) => total + product.price, 0);
         await this.mailerService.sendMail({
             to: email,
             subject: 'Scan & Go Order Confirmation',
@@ -40,7 +39,8 @@ export class MailService {
             context: {
                 items: purchasedItems,
                 year: new Date().getFullYear(),
-                name: name
+                name: name,
+                totalPrice:totalPrice
             }
         });
     } 

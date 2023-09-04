@@ -30,18 +30,20 @@ export class GlobalService {
     }
     //TODO: Test validateCreditCart()
      validateCreditCart(card:CreditCard): boolean {
-      switch (card.cardType) {
+        const cardTypeDecrypted = this.decryptText(card.cardType)
+        const cardNumberDecrypted = this.decryptText(card.cardNumber)
+      switch (cardTypeDecrypted) {
         case CardType.AMERICAN_EXPRESS:{
-            return new RegExp(CardValidationRegex.AMERICAN_EXPRESS).test(card.cardNumber)
+            return new RegExp(CardValidationRegex.AMERICAN_EXPRESS).test(cardNumberDecrypted)
         }
         case CardType.VISA:{
-            return new RegExp(CardValidationRegex.VISA).test(card.cardNumber)
+            return new RegExp(CardValidationRegex.VISA).test(cardNumberDecrypted)
         }
         case CardType.DISCOVER:{
-            return new RegExp(CardValidationRegex.DISCOVER).test(card.cardNumber)
+            return new RegExp(CardValidationRegex.DISCOVER).test(cardNumberDecrypted)
         }
         case CardType.MASTERCARD:{
-            return new RegExp(CardValidationRegex.MASTERCARD).test(card.cardNumber)
+            return new RegExp(CardValidationRegex.MASTERCARD).test(cardNumberDecrypted)
         }
         default:{
             return false

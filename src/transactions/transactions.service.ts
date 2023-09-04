@@ -1,7 +1,7 @@
-import { BadRequestException, NotFoundException, NotImplementedException } from '@nestjs/common';
+import { BadRequestException, Logger, NotFoundException, NotImplementedException } from '@nestjs/common';
 import { ITransaction, Transaction } from './schemas/transaction.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { GetQueryDto, LocalPaginationConfig } from 'src/global/global.dto';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { PAID_ITEM_SCHEMA_VERSION, TRANSACTION_SCHEMA_VERSION } from 'src/global/global.schema-versions';
@@ -25,6 +25,7 @@ export interface Rest {
 }
 export class TransactionsService {
     private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 10, currentPage: 0 }
+    private readonly logger: Logger = new Logger(TransactionsService.name)
     constructor(
         @InjectModel(Transaction.name)
         private transactionModel: Model<Transaction>,
@@ -39,7 +40,34 @@ export class TransactionsService {
         private globalService: GlobalService,
         private mailService: MailService,
     ) { }
-
+    async TestPaymentPipeline(id:string): Promise<Transaction>{
+        const user = await this.userModel.findById(id)
+        const coupon = await this.couponModel.findOne();
+        let amountToCharge = 0
+        if(!user)
+        throw new NotFoundException(`User ${id} does not exist`)
+        const products:ITransactionItem[] = user.cart.map(item => {
+            const product:ITransactionItem = {
+                itemId: item.itemId,
+                nfcTagCode: item.nfcTagCode,
+                imageSource:item.imageSource,
+                name: item.name,
+                price: item.price
+            }
+            amountToCharge+= product.price;
+            return product
+        })
+        const dto:CreateTransactionDto= {
+            userId:new Types.ObjectId(user.id),
+            cardId:user.creditCards[0]._id,
+            amountToCharge: amountToCharge,
+            products: products,
+            couponId:coupon.id
+        }
+        console.log(dto);
+        
+        return await this.PaymentPipeline(dto);
+    }
     //TODO: Check Analytics Functions
     async getWeeklyPurchases(id: mongoose.Types.ObjectId): Promise<DailyPurchases[]> {
         const lastWeeklyPurchases = await this.transactionModel.find({ userId: id, createdAt: { $gt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } }); // number of milliseconds in seven days
@@ -160,7 +188,7 @@ export class TransactionsService {
         })
         return yearlyPurchases;
     }
-    async PaymentPipeline(dto: CreateTransactionDto): Promise<void> {
+    async PaymentPipeline(dto: CreateTransactionDto): Promise<Transaction> {
         const session = await this.userModel.db.startSession();
         session.startTransaction();
         try {
@@ -169,9 +197,12 @@ export class TransactionsService {
             const { userId, cardId, couponId, ...rest } = dto
             //* Step 1.1: validate user and card
             // validate the user
+            Logger.debug('userId: ' + userId)
             const user = await this.validateUser(userId);
+            Logger.debug('Validated User: ' + user.fullName)
             // validate the card
             const card = await this.validateCard(user, cardId);
+            Logger.debug('Validated Card: ' + card.cardType)
 
             if (couponId) {
                 //* Step 1.2: validate coupon if coupon is used in the transaction
@@ -180,32 +211,42 @@ export class TransactionsService {
 
                 //* Step 1.3: update coupon and transaction price
                 dto = this.discountCouponFromPrice(coupon, dto);
+                Logger.debug('Validated Coupon: ' + coupon.code)
+
             }
 
             //* Step 1.4: charge the credit card
             // charge the credit card
             await this.chargeCreditCard(card, dto);
+            Logger.debug('Charged credit card')
 
             //* Step 2: Create Transaction
 
             // create the transaction object and save to the collection
-            const { newTransaction, transaction } = await this.createTransactionAndNewTransaction(card, rest, userId)
+            const { transactionDocument, transaction } = await this.createTransactionAndNewTransaction(card, rest, userId)
+            Logger.debug('Created Transaction: ' + transactionDocument._id)
 
             //* Step 3: Update the user 
             //* Step 3.1: create the abstract transaction and recent items from transaction
-            const { latestTransaction, latestItems }: { latestTransaction: RecentTransaction; latestItems: RecentItem[]; } = this.createAbstractObjectsForUserArrays(newTransaction, transaction);
+            const { latestTransaction, latestItems }: { latestTransaction: RecentTransaction; latestItems: RecentItem[]; } = this.createAbstractObjectsForUserArrays(transactionDocument, transaction);
 
             //* Step 3.2: add to the user's latest transaction and latest items arrays
             await this.updateTheUser(user, latestTransaction, latestItems);
+            Logger.debug('updated  user transaction list length:' + user.recentTransactions.length)
 
             //* Step 4: Update the paid items collection
             //add the items (nfc chip) to the paid items collection
-            await this.updatePaidItemsCollection(transaction, user._id, newTransaction);
+            await this.updatePaidItemsCollection(transaction, user._id, transactionDocument);
+            Logger.debug('updated paid collection item')
+            
             //#endregion
-            //commit the transaction
-            await session.commitTransaction();
+         
             //send the order confirmation email after the transaction has been committed successfully
             await this.mailService.sendOrderConfirmationEmail(user.email, transaction.products, user.fullName)
+            Logger.debug('Sent order confirmation email')
+               //commit the transaction
+               await session.commitTransaction();
+            return  transactionDocument
         } catch (error) {
             await session.abortTransaction();
             throw error
@@ -226,6 +267,8 @@ export class TransactionsService {
                 createdAt: new Date(),
                 schemaVersion: PAID_ITEM_SCHEMA_VERSION,
             };
+            Logger.debug(paidItem)
+
             return paidItem;
         });
 
@@ -267,6 +310,7 @@ export class TransactionsService {
 
     async createTransactionAndNewTransaction(card: CreditCard, rest: Rest, userId: mongoose.Types.ObjectId) {
         const transaction: ITransaction = {
+            _id: new mongoose.Types.ObjectId(),
             userId,
             cardNumber: await this.globalService.encryptText(card.cardNumber),
             cardType: await this.globalService.encryptText(card.cardType),
@@ -275,8 +319,10 @@ export class TransactionsService {
             schemaVersion: TRANSACTION_SCHEMA_VERSION,
             ...rest
         }
-        const newTransaction = await this.transactionModel.create(transaction)
-        return { newTransaction, transaction }
+
+        const transactionDocument = await this.transactionModel.create(transaction)
+        Logger.debug('made it here')
+        return { transactionDocument: transactionDocument, transaction }
     }
     private async chargeCreditCard(card: CreditCard, dto: CreateTransactionDto) {
         const isCharged = await this.globalService.chargeCreditCard(card, dto.amountToCharge);
@@ -314,13 +360,16 @@ export class TransactionsService {
     }
 
     private async validateCard(user: User, cardId: mongoose.Types.ObjectId) {
-        const card = user.creditCards.find(card => card._id == cardId);
+        console.log(cardId);
+        const card = user.creditCards.filter(card => card._id.toString() == cardId.toString());
+        console.log(card.length);
+        
         if (!card)
             throw new NotFoundException(`card with the id ${cardId} was not found`);
-
-        if (!await this.globalService.validateCreditCart(card))
-            throw new BadRequestException(`card with the id ${cardId} is invalid`);
-        return card;
+        //TODO: Uncomment the validation of creditcards
+        // if (!await this.globalService.validateCreditCart(card[0]))
+        //     throw new BadRequestException(`card with the id ${cardId} is invalid`);
+        return card[0];
     }
 
     private async validateUser(userId: mongoose.Types.ObjectId) {
@@ -369,6 +418,10 @@ export class TransactionsService {
         })
         await this.mailService.sendOrderConfirmationEmail(email, emailItems, name);
         return 'email sent successfully'
+    }
+    async deleteAll():Promise<number>{
+        const deleted =await this.transactionModel.deleteMany({});
+        return deleted.deletedCount
     }
 
 }

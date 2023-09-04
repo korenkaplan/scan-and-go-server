@@ -9,12 +9,11 @@ import { IsOptional } from "class-validator";
 export type TransactionDocument = HydratedDocument<Transaction>
 
 @Schema({ timestamps: { createdAt: true, updatedAt: false } })
-export class Transaction  {
+export class Transaction {
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', index: 1 })
     userId: User
-    @IsOptional()
     @Prop()
-    _id: mongoose.Types.ObjectId
+    _id?: mongoose.Types.ObjectId
     @Prop()
     cardNumber: string
 
