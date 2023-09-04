@@ -12,12 +12,11 @@ export class PaidItemService {
         @InjectModel(PaidItem.name)
         private paidItemsModel: Model<PaidItem>
     ) { }
-    async getOne(@Query() dto: GetQueryDto<PaidItem>): Promise<PaidItem> {
-        const { query, projection } = dto;
-        const paidItem = await this.paidItemsModel.findOne(query, projection);
+    async getOne(@Query() nfcTagCode:string): Promise<PaidItem> {
+        const paidItem = await this.paidItemsModel.findOne({nfcTagCode});
         if (!paidItem)
-            throw new NotFoundException(`Paid item not found with query ${query}`);
-        return paidItem;
+            throw new NotFoundException(`Paid item not found with the code ${nfcTagCode}`);
+        return paidItem
     }
     //TODO Add scheduled event to clear the collection each end of day
     async deleteAll(): Promise<string> {
