@@ -29,8 +29,7 @@ export class MailService {
         return this.createResObject(isExist, number, userId);
     }
    
-    async sendOrderConfirmationEmail(email: string, purchasedItems: EmailItem[], name: string): Promise<void> {
-        const totalPrice = purchasedItems.reduce((total, product) => total + product.price, 0);
+    async sendOrderConfirmationEmail(email: string, purchasedItems: EmailItem[], name: string, amountToCharge:number): Promise<void> {
         await this.mailerService.sendMail({
             to: email,
             subject: 'Scan & Go Order Confirmation',
@@ -40,7 +39,7 @@ export class MailService {
                 items: purchasedItems,
                 year: new Date().getFullYear(),
                 name: name,
-                totalPrice:totalPrice
+                totalPrice:amountToCharge
             }
         });
     } 

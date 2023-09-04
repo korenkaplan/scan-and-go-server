@@ -40,32 +40,32 @@ export class TransactionsService {
         private globalService: GlobalService,
         private mailService: MailService,
     ) { }
-    async TestPaymentPipeline(id:string): Promise<Transaction>{
+    async TestPaymentPipeline(id: string): Promise<Transaction> {
         const user = await this.userModel.findById(id)
         const coupon = await this.couponModel.findOne();
         let amountToCharge = 0
-        if(!user)
-        throw new NotFoundException(`User ${id} does not exist`)
-        const products:ITransactionItem[] = user.cart.map(item => {
-            const product:ITransactionItem = {
+        if (!user)
+            throw new NotFoundException(`User ${id} does not exist`)
+        const products: ITransactionItem[] = user.cart.map(item => {
+            const product: ITransactionItem = {
                 itemId: item.itemId,
                 nfcTagCode: item.nfcTagCode,
-                imageSource:item.imageSource,
+                imageSource: item.imageSource,
                 name: item.name,
                 price: item.price
             }
-            amountToCharge+= product.price;
+            amountToCharge += product.price;
             return product
         })
-        const dto:CreateTransactionDto= {
-            userId:new Types.ObjectId(user.id),
-            cardId:user.creditCards[0]._id,
+        const dto: CreateTransactionDto = {
+            userId: new Types.ObjectId(user.id),
+            cardId: user.creditCards[0]._id,
             amountToCharge: amountToCharge,
             products: products,
-            couponId:coupon.id
+            couponId: coupon.id
         }
         console.log(dto);
-        
+
         return await this.PaymentPipeline(dto);
     }
     //TODO: Check Analytics Functions
@@ -212,7 +212,7 @@ export class TransactionsService {
                 //* Step 1.3: update coupon and transaction price
                 dto = this.discountCouponFromPrice(coupon, dto);
                 Logger.debug('Validated Coupon: ' + coupon.code)
-
+                rest.amountToCharge = dto.amountToCharge;
             }
 
             //* Step 1.4: charge the credit card
@@ -238,15 +238,15 @@ export class TransactionsService {
             //add the items (nfc chip) to the paid items collection
             await this.updatePaidItemsCollection(transaction, user._id, transactionDocument);
             Logger.debug('updated paid collection item')
-            
+
             //#endregion
-         
+
             //send the order confirmation email after the transaction has been committed successfully
-            await this.mailService.sendOrderConfirmationEmail(user.email, transaction.products, user.fullName)
+            await this.mailService.sendOrderConfirmationEmail(user.email, transaction.products, user.fullName, transaction.amountToCharge)
             Logger.debug('Sent order confirmation email')
-               //commit the transaction
-               await session.commitTransaction();
-            return  transactionDocument
+            //commit the transaction
+            await session.commitTransaction();
+            return transactionDocument
         } catch (error) {
             await session.abortTransaction();
             throw error
@@ -309,6 +309,7 @@ export class TransactionsService {
     }
 
     async createTransactionAndNewTransaction(card: CreditCard, rest: Rest, userId: mongoose.Types.ObjectId) {
+
         const transaction: ITransaction = {
             _id: new mongoose.Types.ObjectId(),
             userId,
@@ -363,7 +364,7 @@ export class TransactionsService {
         console.log(cardId);
         const card = user.creditCards.filter(card => card._id.toString() == cardId.toString());
         console.log(card.length);
-        
+
         if (!card)
             throw new NotFoundException(`card with the id ${cardId} was not found`);
         //TODO: Uncomment the validation of creditcards
@@ -416,11 +417,11 @@ export class TransactionsService {
                 imageSource: product.imageSource
             }
         })
-        await this.mailService.sendOrderConfirmationEmail(email, emailItems, name);
+        await this.mailService.sendOrderConfirmationEmail(email, emailItems, name, 0);
         return 'email sent successfully'
     }
-    async deleteAll():Promise<number>{
-        const deleted =await this.transactionModel.deleteMany({});
+    async deleteAll(): Promise<number> {
+        const deleted = await this.transactionModel.deleteMany({});
         return deleted.deletedCount
     }
 
