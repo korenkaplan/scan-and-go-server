@@ -5,6 +5,7 @@ import mongoose, { Model } from 'mongoose';
 import { GetQueryDto } from 'src/global/global.dto';
 import { CreatePaidItemDto } from './dto/create-pad-item.dto';
 import { PAID_ITEM_SCHEMA_VERSION } from 'src/global/global.schema-versions';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class PaidItemService {
@@ -18,8 +19,10 @@ export class PaidItemService {
             throw new NotFoundException(`Paid item not found with the code ${nfcTagCode}`);
         return paidItem
     }
-    //TODO Add scheduled event to clear the collection each end of day
-    async deleteAll(): Promise<string> {
+    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT,{
+        timeZone:'Asia/Jerusalem'
+    })
+    async cleanCollection(): Promise<string> {
         const deletedAmount: number = (await this.paidItemsModel.deleteMany({})).deletedCount;
         return `Deleted ${deletedAmount} items`;
     }

@@ -181,7 +181,7 @@ export class UserService {
     }
     async setDefaultCard(dto: ChangeDefaultCardDto): Promise<string> {
         const { userId, cardId } = dto;
-        
+
         const user = await this.userModel.findById(userId);
         if (!user)
             throw new NotFoundException(`No user with id ${userId} was found`);
@@ -191,14 +191,14 @@ export class UserService {
             if (card.isDefault && card._id != cardId) {
                 card.isDefault = false;
             }
-            else if(card._id == cardId) {
+            else if (card._id == cardId) {
                 card.isDefault = true;
             }
             console.log(card);
-            
+
             return card;
         })
-        
+
         user.markModified('creditCards');
         await user.save();
         return 'default card changed successfully'
@@ -229,9 +229,9 @@ export class UserService {
         if (!user) {
             throw new NotFoundException(`User not found with id: ${userId}`);
         }
-    
+
         const tags: INfcTag[] = await this.nfcModel.find();
-    
+
         // Use Promise.all to await all the promises and get an array of ItemInCart objects.
         const cartItems: ItemInCart[] = await Promise.all(
             tags.map(async (tag) => {
@@ -239,7 +239,7 @@ export class UserService {
                 if (!item) {
                     throw new NotFoundException(`Item not found with id: ${tag.itemId}`);
                 }
-    
+
                 const itemInCart: ItemInCart = {
                     nfcTagCode: tag.tagId,
                     itemId: tag.itemId,
@@ -251,17 +251,17 @@ export class UserService {
                 return itemInCart;
             })
         );
-    
+
         // Assign the array of ItemInCart objects to user.cart.
         user.cart = cartItems;
-    
+
         // Mark the 'cart' field as modified and save the user.
         user.markModified('cart');
         await user.save();
-    
+
         return user;
     }
-    
+
     //#endregion
     //#region CRUD OPERA.creditCards
     async getMany(dto: GetQueryDto<User>): Promise<User[]> {
@@ -274,9 +274,8 @@ export class UserService {
     }
     async getOne(dto: GetQueryDto<User>): Promise<User> {
         const { query, projection } = dto
-
         const user = await this.userModel.findOne(query, projection);
-        return user.creditCards ? await this.decryptUserCreditCards(user) : user
+        return user.creditCards ? this.decryptUserCreditCards(user) : user
     }
     async updateOne(dto: UpdateQueryDto<User>): Promise<User> {
         const { query, updateQuery } = dto

@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject, forwardRef, Logger } from '@nestjs/common';
 import { IUser, User } from 'src/user/schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -23,6 +23,7 @@ export class AuthService {
         private mailService: MailService,
         private globalService: GlobalService
     ) { }
+
     async signUp(dto: SignUpDto): Promise<{ token: string }> {
         const user = await this.createUserFromSignUpDto(dto);
         const createdUser = await this.userModel.create(user)

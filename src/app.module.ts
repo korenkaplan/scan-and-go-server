@@ -18,7 +18,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
-  imports: [
+  imports: [ 
     CacheModule.register({
       isGlobal: true
     }),
