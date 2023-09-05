@@ -40,34 +40,7 @@ export class TransactionsService {
         private globalService: GlobalService,
         private mailService: MailService,
     ) { }
-    async TestPaymentPipeline(id: string): Promise<Transaction> {
-        const user = await this.userModel.findById(id)
-        const coupon = await this.couponModel.findOne();
-        let amountToCharge = 0
-        if (!user)
-            throw new NotFoundException(`User ${id} does not exist`)
-        const products: ITransactionItem[] = user.cart.map(item => {
-            const product: ITransactionItem = {
-                itemId: item.itemId,
-                nfcTagCode: item.nfcTagCode,
-                imageSource: item.imageSource,
-                name: item.name,
-                price: item.price
-            }
-            amountToCharge += product.price;
-            return product
-        })
-        const dto: CreateTransactionDto = {
-            userId: new Types.ObjectId(user.id),
-            cardId: user.creditCards[0]._id,
-            amountToCharge: amountToCharge,
-            products: products,
-            couponId: coupon.id
-        }
-        console.log(dto);
-
-        return await this.PaymentPipeline(dto);
-    }
+    //#region user Analytics
     async getWeeklyPurchases(id: mongoose.Types.ObjectId): Promise<DailyPurchases[]> {
         const today = new Date();
         const weekObject: DailyPurchases[] = [];
@@ -172,126 +145,6 @@ export class TransactionsService {
         }
         return yearlyObject;
     }
-    // //TODO: Check Analytics Functions
-    // async getWeeklyPurchases(id: mongoose.Types.ObjectId): Promise<DailyPurchases[]> {
-    //     const lastWeeklyPurchases = await this.transactionModel.find({ userId: id, createdAt: { $gt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } }); // number of milliseconds in seven days
-    //     const weekObject: DailyPurchases[] = [
-    //         {
-    //             day: DayOfWeek.Sun,
-    //             sumAmount: 0
-    //         },
-    //         {
-    //             day: DayOfWeek.Mon,
-    //             sumAmount: 0
-    //         },
-    //         {
-    //             day: DayOfWeek.Tue,
-    //             sumAmount: 0
-    //         },
-    //         {
-    //             day: DayOfWeek.Wed,
-    //             sumAmount: 0
-    //         },
-    //         {
-    //             day: DayOfWeek.Thu,
-    //             sumAmount: 0
-    //         },
-    //         {
-    //             day: DayOfWeek.Fri,
-    //             sumAmount: 0
-    //         },
-    //         {
-    //             day: DayOfWeek.Sat,
-    //             sumAmount: 0
-    //         },
-    //     ]
-    //     lastWeeklyPurchases.forEach((purchase) => {
-    //         const dayNumber: number = purchase.createdAt.getDay();
-    //         weekObject[dayNumber].sumAmount += purchase.amountToCharge
-    //     })
-    //     return weekObject;
-    // }
-    // async getMonthlyPurchases(id: mongoose.Types.ObjectId): Promise<MonthlyPurchases[]> {
-    //     const now = new Date();
-    //     const startDate = new Date(now.getFullYear(), 0, 1);
-    //     const endDate = new Date(now.getFullYear() + 1, 0, 1);
-    //     const lastYearPurchases = await this.transactionModel.find({ userId: id, createdAt: { $gte: startDate, $lt: endDate } });
-
-    //     const monthsObjects: MonthlyPurchases[] = [
-    //         {
-    //             month: Month.Jan,
-    //             amount: 0
-    //         },
-    //         {
-    //             month: Month.Feb,
-    //             amount: 0
-    //         },
-    //         {
-    //             month: Month.Mar,
-    //             amount: 0
-    //         },
-    //         {
-    //             month: Month.Apr,
-    //             amount: 0
-    //         },
-    //         {
-    //             month: Month.May,
-    //             amount: 0
-    //         },
-    //         {
-    //             month: Month.Jun,
-    //             amount: 0
-    //         },
-    //         {
-    //             month: Month.Jul,
-    //             amount: 0
-    //         },
-    //         {
-    //             month: Month.Aug,
-    //             amount: 0
-    //         },
-    //         {
-    //             month: Month.Sep,
-    //             amount: 0
-    //         },
-    //         {
-    //             month: Month.Oct,
-    //             amount: 0
-    //         },
-    //         {
-    //             month: Month.Nov,
-    //             amount: 0
-    //         },
-    //         {
-    //             month: Month.Dec,
-    //             amount: 0
-    //         },
-    //     ]
-    //     lastYearPurchases.forEach((purchase) => {
-    //         const monthNumber: number = purchase.createdAt.getMonth();
-    //         monthsObjects[monthNumber].amount += 1
-    //     })
-    //     return monthsObjects;
-    // }
-    // async getYearlyPurchases(id: mongoose.Types.ObjectId): Promise<YearlyPurchases[]> {
-    //     const userTransaction = await this.transactionModel.find({ userId: id })
-    //     const yearlyPurchases: YearlyPurchases[] = [];
-
-    //     userTransaction.forEach((transaction) => {
-    //         const yearOfTransaction = transaction.createdAt.getFullYear();
-    //         if (!yearlyPurchases[yearOfTransaction]) {
-    //             yearlyPurchases[yearOfTransaction] = {
-    //                 year: yearOfTransaction,
-    //                 amount: 0
-    //             }
-    //         }
-    //         else {
-    //             yearlyPurchases[yearOfTransaction].amount += 1
-    //         }
-
-    //     })
-    //     return yearlyPurchases;
-    // }
     async PaymentPipeline(dto: CreateTransactionDto): Promise<Transaction> {
         const session = await this.userModel.db.startSession();
         session.startTransaction();
@@ -360,6 +213,7 @@ export class TransactionsService {
         }
 
     }
+    //#endregion
     //#region Sub functions for payment Pipeline
     private async updatePaidItemsCollection(transaction: ITransaction, id: mongoose.Types.ObjectId, newTransaction: Transaction) {
         const paidItems: IPaidItem[] = transaction.products.map(product => {
@@ -498,7 +352,6 @@ export class TransactionsService {
         const transaction = await this.transactionModel.findOne(query, projection);
         return this.decryptTransaction(transaction)
     }
-    //TODO: Check decryption functions
     private decryptTransactions(transactions: Transaction[]): Transaction[] {
         const decryptedTransactions = transactions.map(transaction => {
             return this.decryptTransaction(transaction)

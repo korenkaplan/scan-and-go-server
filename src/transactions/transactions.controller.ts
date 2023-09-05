@@ -23,10 +23,6 @@ export class TransactionsController {
     async createTransactions(@Body() dto: CreateTransactionDto): Promise<Transaction> {
         return await this.transactionService.PaymentPipeline(dto);
     }
-    @Post('/createTransactionTest')
-    async testCreateTransactions(@Query('id') id: string): Promise<Transaction> {
-        return await this.transactionService.TestPaymentPipeline(id);
-    }
 
     @Delete('deleteAll')
   async deleteAll(): Promise<number>{

@@ -29,7 +29,6 @@ export class GlobalService {
         const result: LocalPaginationConfig = { sort, limit, currentPage }
         return result
     }
-    //TODO: Test validateCreditCart()
      validateCreditCart(card:CreditCard): boolean {
         const cardTypeDecrypted = this.decryptText(card.cardType)
         const cardNumberDecrypted = this.decryptText(card.cardNumber)
