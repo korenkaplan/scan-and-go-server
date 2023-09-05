@@ -1,3 +1,4 @@
+import { Moment } from "moment"
 import { Month} from "./global.enum"
 
 export interface MonthlyPurchases{
@@ -12,7 +13,7 @@ export interface YearlyPurchases{
 export interface DailyPurchases{
     day:string,
     sumAmount: number
-    date:string
+    date: Date
    }
    export interface EmailItem {
     name: string

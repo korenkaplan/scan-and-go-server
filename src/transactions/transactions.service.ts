@@ -44,30 +44,33 @@ export class TransactionsService {
     async getWeeklyPurchases(id: mongoose.Types.ObjectId): Promise<DailyPurchases[]> {
         const today = new Date();
         const weekObject: DailyPurchases[] = [];
-
+        
         // Calculate the start date (last Wednesday)
         const startDate = new Date(today);
         const dayOfWeek = today.getDay();
         startDate.setDate(today.getDate() - 7);
-        Logger.debug(`Start Date: ${startDate.toDateString()}`)
         // Initialize the weekObject with default values
         for (let i = 0; i < 7; i++) {
             const day = (dayOfWeek + 6 - i) % 7; // Calculate the day of the week (0 to 6)
+        today.setDate(today.getDate() - 1);
+         
             weekObject.push({
                 day: DayOfWeek[day], // Assuming DayOfWeek is an enum
                 sumAmount: 0,
-                date: moment(today).subtract(i + 1, 'days').format('DD-MM-YY')
+                date: new Date(today), // Initialize date property
             });
         }
 
         const lastWeeklyPurchases = await this.transactionModel.find({
             userId: id,
-            createdAt: { $gte: startDate, $lte: today }, // Filter by date range
+            createdAt: { $gte: startDate, $lte: new Date() }, // Filter by date range
         });
-
         lastWeeklyPurchases.forEach((purchase) => {
-            const dayNumber: number = (purchase.createdAt.getDay() + 6) % 7; // Adjust day of the week
-            weekObject[dayNumber].sumAmount += purchase.amountToCharge;
+            const purchaseDate = purchase.createdAt.getDate()
+            const matchingDay = weekObject.find((day)=> day.date.getDate() == purchaseDate)
+            if (matchingDay) {
+                matchingDay.sumAmount += purchase.amountToCharge
+            }
         });
 
         return weekObject.reverse();
@@ -145,6 +148,7 @@ export class TransactionsService {
         }
         return yearlyObject;
     }
+    //#endregion
     async PaymentPipeline(dto: CreateTransactionDto): Promise<Transaction> {
         const session = await this.userModel.db.startSession();
         session.startTransaction();
@@ -213,7 +217,6 @@ export class TransactionsService {
         }
 
     }
-    //#endregion
     //#region Sub functions for payment Pipeline
     private async updatePaidItemsCollection(transaction: ITransaction, id: mongoose.Types.ObjectId, newTransaction: Transaction) {
         const paidItems: IPaidItem[] = transaction.products.map(product => {
