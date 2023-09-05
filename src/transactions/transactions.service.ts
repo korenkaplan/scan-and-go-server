@@ -17,7 +17,7 @@ import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { ITransactionItem } from './dto/transaction-item.interface';
 import { MailService } from 'src/mail/mail.service';
 import { DayOfWeek, Month } from 'src/global/global.enum';
-import { DailyPurchases, EmailItem, MonthlyPurchases, YearlyPurchases } from 'src/global/global.interface';
+import { DailyPurchases, EmailItem, IStats, MonthlyPurchases, YearlyPurchases } from 'src/global/global.interface';
 
 export interface Rest {
     amountToCharge: number;
@@ -41,9 +41,9 @@ export class TransactionsService {
         private mailService: MailService,
     ) { }
     //#region user Analytics
-    async getWeeklyPurchases(id: mongoose.Types.ObjectId): Promise<DailyPurchases[]> {
+    async getWeeklyPurchases(id: mongoose.Types.ObjectId): Promise<IStats[]> {
         const today = new Date();
-        const weekObject: DailyPurchases[] = [];
+        const weekObject: IStats[] = [];
         
         // Calculate the start date (last Wednesday)
         const startDate = new Date(today);
@@ -55,8 +55,8 @@ export class TransactionsService {
         today.setDate(today.getDate() - 1);
          
             weekObject.push({
-                day: DayOfWeek[day], // Assuming DayOfWeek is an enum
-                sumAmount: 0,
+                label: DayOfWeek[day], // Assuming DayOfWeek is an enum
+                value: 0,
                 date: new Date(today), // Initialize date property
             });
         }
@@ -69,15 +69,15 @@ export class TransactionsService {
             const purchaseDate = purchase.createdAt.getDate()
             const matchingDay = weekObject.find((day)=> day.date.getDate() == purchaseDate)
             if (matchingDay) {
-                matchingDay.sumAmount += purchase.amountToCharge
+                matchingDay.value += purchase.amountToCharge
             }
         });
 
         return weekObject.reverse();
     }
-    async getMonthlyPurchases(id: mongoose.Types.ObjectId): Promise<MonthlyPurchases[]> {
+    async getMonthlyPurchases(id: mongoose.Types.ObjectId): Promise<IStats[]> {
         const today = new Date();
-        const monthObject: MonthlyPurchases[] = [];
+        const monthObject: IStats[] = [];
 
         // Calculate the start date (12 months ago from today)
         const startDate = new Date(today);
@@ -89,8 +89,8 @@ export class TransactionsService {
             const month = startDate.getMonth(); // Months are 0-based, so add 1
             monthObject.push({
                 year: year,
-                month: Month[month],
-                sumAmount: 0,
+                label: Month[month],
+                value: 0,
             });
             // Move to the next month
             startDate.setMonth(startDate.getMonth() + 1);
@@ -106,19 +106,19 @@ export class TransactionsService {
             const purchaseMonth = purchase.createdAt.getMonth(); // Months are 0-based, so add 1
             // Find the corresponding month in the monthObject and update the sumAmount
             const matchingMonth = monthObject.find(
-                (month) => month.year == purchaseYear && month.month == Month[purchaseMonth]
+                (month) => month.year == purchaseYear && month.label == Month[purchaseMonth]
             );
 
             if (matchingMonth) {
-                matchingMonth.sumAmount += purchase.amountToCharge;
+                matchingMonth.value += purchase.amountToCharge;
             }
         });
 
         return monthObject;
     }
-    async getYearlyPurchases(id: mongoose.Types.ObjectId): Promise<YearlyPurchases[]> {
+    async getYearlyPurchases(id: mongoose.Types.ObjectId): Promise<IStats[]> {
         const today = new Date();
-        const yearlyObject: YearlyPurchases[] = [];
+        const yearlyObject: IStats[] = [];
 
         //Calculate the start date (7 years ago)
         const startDate = new Date(today);
@@ -128,8 +128,8 @@ export class TransactionsService {
         for (let i = 0; i < 7; i++) {
             const year = startDate.getFullYear() + i;
             yearlyObject.push({
-                year: year,
-                sumAmount: 0,
+                label: year.toString(),
+                value: 0,
             });
 
             //get the transactions  for the year object
@@ -140,9 +140,9 @@ export class TransactionsService {
 
             last7YearsPurchases.forEach((purchase) => {
                 const purchaseYear = purchase.createdAt.getFullYear();
-                const matchingYear = yearlyObject.find((year) => year.year === purchaseYear);
+                const matchingYear = yearlyObject.find((year) => year.label == purchaseYear.toString());
                 if (matchingYear) {
-                    matchingYear.sumAmount += purchase.amountToCharge;
+                    matchingYear.value += purchase.amountToCharge;
                 }
             })
         }
