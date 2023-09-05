@@ -1,4 +1,4 @@
-import { BadRequestException, Logger, NotFoundException, NotImplementedException } from '@nestjs/common';
+import { BadRequestException, Logger, NotFoundException} from '@nestjs/common';
 import { ITransaction, Transaction } from './schemas/transaction.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
@@ -68,126 +68,201 @@ export class TransactionsService {
 
         return await this.PaymentPipeline(dto);
     }
-    //TODO: Check Analytics Functions
     async getWeeklyPurchases(id: mongoose.Types.ObjectId): Promise<DailyPurchases[]> {
-        const lastWeeklyPurchases = await this.transactionModel.find({ userId: id, createdAt: { $gt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } }); // number of milliseconds in seven days
-        const weekObject: DailyPurchases[] = [
-            {
-                day: DayOfWeek.Sun,
-                amount: 0
-            },
-            {
-                day: DayOfWeek.Mon,
-                amount: 0
-            },
-            {
-                day: DayOfWeek.Tue,
-                amount: 0
-            },
-            {
-                day: DayOfWeek.Wed,
-                amount: 0
-            },
-            {
-                day: DayOfWeek.Thu,
-                amount: 0
-            },
-            {
-                day: DayOfWeek.Fri,
-                amount: 0
-            },
-            {
-                day: DayOfWeek.Sat,
-                amount: 0
-            },
-        ]
+        const today = new Date();
+        const weekObject: DailyPurchases[] = [];
+    
+        // Calculate the start date (last Wednesday)
+        const startDate = new Date(today);
+        const dayOfWeek = today.getDay();
+        startDate.setDate(today.getDate() - 7);
+        Logger.debug(`Start Date: ${startDate.toDateString()}`)
+        // Initialize the weekObject with default values
+        for (let i = 0; i < 7; i++) {
+            const day = (dayOfWeek + 6 - i) % 7; // Calculate the day of the week (0 to 6)
+            weekObject.push({
+                day: DayOfWeek[day], // Assuming DayOfWeek is an enum
+                sumAmount: 0,
+                date: moment(today).subtract(i+1, 'days').format('DD-MM-YY')
+            });
+        }
+    
+        const lastWeeklyPurchases = await this.transactionModel.find({
+            userId: id,
+            createdAt: { $gte: startDate, $lte: today }, // Filter by date range
+        });
+    
         lastWeeklyPurchases.forEach((purchase) => {
-            const dayNumber: number = purchase.createdAt.getDay();
-            weekObject[dayNumber].amount += 1
-        })
-        return weekObject;
+            const dayNumber: number = (purchase.createdAt.getDay() + 6) % 7; // Adjust day of the week
+            weekObject[dayNumber].sumAmount += purchase.amountToCharge;
+        });
+    
+        return weekObject.reverse();
     }
-    async getMonthlyPurchases(id: mongoose.Types.ObjectId): Promise<MonthlyPurchases[]> {
-        const now = new Date();
-        const startDate = new Date(now.getFullYear(), 0, 1);
-        const endDate = new Date(now.getFullYear() + 1, 0, 1);
-        const lastYearPurchases = await this.transactionModel.find({ userId: id, createdAt: { $gte: startDate, $lt: endDate } });
+    async getMonthlyPurchases(id: mongoose.Types.ObjectId): Promise<MonthlyPurchases[]>{
+        const today = new Date();
+        const monthObject: MonthlyPurchases[] = [];
 
-        const monthsObjects: MonthlyPurchases[] = [
-            {
-                month: Month.Jan,
-                amount: 0
-            },
-            {
-                month: Month.Feb,
-                amount: 0
-            },
-            {
-                month: Month.Mar,
-                amount: 0
-            },
-            {
-                month: Month.Apr,
-                amount: 0
-            },
-            {
-                month: Month.May,
-                amount: 0
-            },
-            {
-                month: Month.Jun,
-                amount: 0
-            },
-            {
-                month: Month.Jul,
-                amount: 0
-            },
-            {
-                month: Month.Aug,
-                amount: 0
-            },
-            {
-                month: Month.Sep,
-                amount: 0
-            },
-            {
-                month: Month.Oct,
-                amount: 0
-            },
-            {
-                month: Month.Nov,
-                amount: 0
-            },
-            {
-                month: Month.Dec,
-                amount: 0
-            },
-        ]
-        lastYearPurchases.forEach((purchase) => {
-            const monthNumber: number = purchase.createdAt.getMonth();
-            monthsObjects[monthNumber].amount += 1
-        })
-        return monthsObjects;
-    }
-    async getYearlyPurchases(id: mongoose.Types.ObjectId): Promise<YearlyPurchases[]> {
-        const userTransaction = await this.transactionModel.find({ userId: id })
-        const yearlyPurchases: YearlyPurchases[] = [];
-
-        userTransaction.forEach((transaction) => {
-            const yearOfTransaction = transaction.createdAt.getFullYear();
-            if (!yearlyPurchases[yearOfTransaction]) {
-                yearlyPurchases[yearOfTransaction] = {
-                    year: yearOfTransaction,
-                    amount: 0
+        // Calculate the start date (12 months ago from today)
+        const startDate = new Date(today);
+        startDate.setMonth(today.getMonth() - 11); // Subtract 11 months to go back 12 months
+        startDate.setDate(1); // Set the day to the 1st day of the month
+        Logger.debug(`Start Date: ${startDate.toDateString()}`)
+        // Initialize the monthObject with default values for each month
+        for (let i = 0; i < 12; i++) {
+            const year = startDate.getFullYear();
+            const month = startDate.getMonth() + 1; // Months are 0-based, so add 1
+            monthObject.push({
+                year: year,
+                month: Month[month-1],
+                sumAmount: 0,
+            });
+               // Move to the next month
+               startDate.setMonth(startDate.getMonth() + 1);
+            }
+            const last12MonthsPurchases = await this.transactionModel.find({
+                userId: id,
+                createdAt: { $gte: startDate, $lte: today }, // Filter by date range
+            });
+        
+            last12MonthsPurchases.forEach((purchase) => {
+                const purchaseYear = purchase.createdAt.getFullYear();
+                const purchaseMonth = purchase.createdAt.getMonth() + 1; // Months are 0-based, so add 1
+                Logger.debug(`purchaseYear: ${purchaseYear}`)
+                Logger.debug(`purchaseMonth: ${purchaseMonth}`)
+        
+                // Find the corresponding month in the monthObject and update the sumAmount
+                const matchingMonth = monthObject.find(
+                    (month) => month.year === purchaseYear && month.month === Month[purchaseMonth]
+                );
+        
+                if (matchingMonth) {
+                    matchingMonth.sumAmount += purchase.amountToCharge;
                 }
-            }
-            else {
-                yearlyPurchases[yearOfTransaction].amount += 1
-            }
-
-        })
-        return yearlyPurchases;
+            });
+        
+        return monthObject;
     }
+    // //TODO: Check Analytics Functions
+    // async getWeeklyPurchases(id: mongoose.Types.ObjectId): Promise<DailyPurchases[]> {
+    //     const lastWeeklyPurchases = await this.transactionModel.find({ userId: id, createdAt: { $gt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } }); // number of milliseconds in seven days
+    //     const weekObject: DailyPurchases[] = [
+    //         {
+    //             day: DayOfWeek.Sun,
+    //             sumAmount: 0
+    //         },
+    //         {
+    //             day: DayOfWeek.Mon,
+    //             sumAmount: 0
+    //         },
+    //         {
+    //             day: DayOfWeek.Tue,
+    //             sumAmount: 0
+    //         },
+    //         {
+    //             day: DayOfWeek.Wed,
+    //             sumAmount: 0
+    //         },
+    //         {
+    //             day: DayOfWeek.Thu,
+    //             sumAmount: 0
+    //         },
+    //         {
+    //             day: DayOfWeek.Fri,
+    //             sumAmount: 0
+    //         },
+    //         {
+    //             day: DayOfWeek.Sat,
+    //             sumAmount: 0
+    //         },
+    //     ]
+    //     lastWeeklyPurchases.forEach((purchase) => {
+    //         const dayNumber: number = purchase.createdAt.getDay();
+    //         weekObject[dayNumber].sumAmount += purchase.amountToCharge
+    //     })
+    //     return weekObject;
+    // }
+    // async getMonthlyPurchases(id: mongoose.Types.ObjectId): Promise<MonthlyPurchases[]> {
+    //     const now = new Date();
+    //     const startDate = new Date(now.getFullYear(), 0, 1);
+    //     const endDate = new Date(now.getFullYear() + 1, 0, 1);
+    //     const lastYearPurchases = await this.transactionModel.find({ userId: id, createdAt: { $gte: startDate, $lt: endDate } });
+
+    //     const monthsObjects: MonthlyPurchases[] = [
+    //         {
+    //             month: Month.Jan,
+    //             amount: 0
+    //         },
+    //         {
+    //             month: Month.Feb,
+    //             amount: 0
+    //         },
+    //         {
+    //             month: Month.Mar,
+    //             amount: 0
+    //         },
+    //         {
+    //             month: Month.Apr,
+    //             amount: 0
+    //         },
+    //         {
+    //             month: Month.May,
+    //             amount: 0
+    //         },
+    //         {
+    //             month: Month.Jun,
+    //             amount: 0
+    //         },
+    //         {
+    //             month: Month.Jul,
+    //             amount: 0
+    //         },
+    //         {
+    //             month: Month.Aug,
+    //             amount: 0
+    //         },
+    //         {
+    //             month: Month.Sep,
+    //             amount: 0
+    //         },
+    //         {
+    //             month: Month.Oct,
+    //             amount: 0
+    //         },
+    //         {
+    //             month: Month.Nov,
+    //             amount: 0
+    //         },
+    //         {
+    //             month: Month.Dec,
+    //             amount: 0
+    //         },
+    //     ]
+    //     lastYearPurchases.forEach((purchase) => {
+    //         const monthNumber: number = purchase.createdAt.getMonth();
+    //         monthsObjects[monthNumber].amount += 1
+    //     })
+    //     return monthsObjects;
+    // }
+    // async getYearlyPurchases(id: mongoose.Types.ObjectId): Promise<YearlyPurchases[]> {
+    //     const userTransaction = await this.transactionModel.find({ userId: id })
+    //     const yearlyPurchases: YearlyPurchases[] = [];
+
+    //     userTransaction.forEach((transaction) => {
+    //         const yearOfTransaction = transaction.createdAt.getFullYear();
+    //         if (!yearlyPurchases[yearOfTransaction]) {
+    //             yearlyPurchases[yearOfTransaction] = {
+    //                 year: yearOfTransaction,
+    //                 amount: 0
+    //             }
+    //         }
+    //         else {
+    //             yearlyPurchases[yearOfTransaction].amount += 1
+    //         }
+
+    //     })
+    //     return yearlyPurchases;
+    // }
     async PaymentPipeline(dto: CreateTransactionDto): Promise<Transaction> {
         const session = await this.userModel.db.startSession();
         session.startTransaction();
@@ -313,8 +388,8 @@ export class TransactionsService {
         const transaction: ITransaction = {
             _id: new mongoose.Types.ObjectId(),
             userId,
-            cardNumber: await this.globalService.encryptText(card.cardNumber),
-            cardType: await this.globalService.encryptText(card.cardType),
+            cardNumber: card.cardNumber,
+            cardType: card.cardType,
             createdAt: new Date(),
             formattedDate: moment().format('DD-MM-YYYY'),
             schemaVersion: TRANSACTION_SCHEMA_VERSION,
@@ -361,10 +436,7 @@ export class TransactionsService {
     }
 
     private async validateCard(user: User, cardId: mongoose.Types.ObjectId) {
-        console.log(cardId);
         const card = user.creditCards.filter(card => card._id.toString() == cardId.toString());
-        console.log(card.length);
-
         if (!card)
             throw new NotFoundException(`card with the id ${cardId} was not found`);
         //TODO: Uncomment the validation of creditcards

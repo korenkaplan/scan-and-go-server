@@ -1,16 +1,18 @@
-import { Month, DayOfWeek } from "./global.enum"
+import { Month} from "./global.enum"
 
 export interface MonthlyPurchases{
-    month:Month,
-    amount: number
+    year: number
+    month:string,
+    sumAmount: number
 }
 export interface YearlyPurchases{
     year:number,
-    amount: number
+    sumAmount: number
 }
 export interface DailyPurchases{
-    day:DayOfWeek,
-    amount: number
+    day:string,
+    sumAmount: number
+    date:string
    }
    export interface EmailItem {
     name: string

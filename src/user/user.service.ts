@@ -16,6 +16,7 @@ import { ItemInCart } from './schemas/item-in-cart.interface';
 import { RemoveItemFromCartDto } from './dto/remove-from-cart.dto';
 import { INfcTag, NfcTag } from 'src/nfc_tag/schemas/nfc-tag.schema';
 import { Item } from 'src/item/schemas/item.schema';
+import { RecentTransaction } from './schemas/recent-transactions.interface';
 
 @Injectable()
 export class UserService {
@@ -173,11 +174,11 @@ export class UserService {
         }
         return CreditCard
     }
-    decryptUserCreditCards(user: User): User {
-        user.creditCards = user.creditCards.map((card) => {
+    decryptUserCreditCards(creditCards: CreditCard[]): CreditCard[] {
+        const decryptedCreditCards = creditCards.map((card) => {
             return this.decryptCreditCard(card);
         });
-        return user;
+        return decryptedCreditCards;
     }
     async setDefaultCard(dto: ChangeDefaultCardDto): Promise<string> {
         const { userId, cardId } = dto;
@@ -269,13 +270,13 @@ export class UserService {
 
         const users = await this.userModel.find(query, projection);
         return await Promise.all(users.map(async (user) => {
-            return user.creditCards ? this.decryptUserCreditCards(user) : user
+            return this.decryptUser(user)
         }))
     }
     async getOne(dto: GetQueryDto<User>): Promise<User> {
         const { query, projection } = dto
         const user = await this.userModel.findOne(query, projection);
-        return user.creditCards ? this.decryptUserCreditCards(user) : user
+        return this.decryptUser(user)
     }
     async updateOne(dto: UpdateQueryDto<User>): Promise<User> {
         const { query, updateQuery } = dto
@@ -283,7 +284,7 @@ export class UserService {
         if (!user)
             throw new NotFoundException('the query did\'nt found any user ')
 
-        return await this.decryptUserCreditCards(user)
+        return this.decryptUser(user)
     }
     async updateMany(dto: UpdateQueryDto<User>): Promise<number> {
         const { query, updateQuery } = dto
@@ -294,11 +295,25 @@ export class UserService {
         const user = await this.userModel.findOneAndDelete(query);
         if (!user)
             throw new NotFoundException('the query did\'nt found any user ')
-        return await this.decryptUserCreditCards(user)
+            return this.decryptUser(user)
     }
     async deleteMany(query: FilterQuery<User>): Promise<number> {
         return (await this.userModel.deleteMany(query)).deletedCount;
 
+    }
+    decryptUser(user: User): User {
+    if(user.creditCards)
+    user.creditCards =this.decryptUserCreditCards(user.creditCards);
+    if(user.recentTransactions)
+    user.recentTransactions = this.decryptUserRecentTransactions(user.recentTransactions);
+    return user;
+    }
+    decryptUserRecentTransactions(recentTransactions: RecentTransaction[]):RecentTransaction[]{
+        const decryptedTransactions = recentTransactions.map(transaction => {
+            transaction.cardType = this.globalService.decryptText(transaction.cardType);
+            return transaction;
+        })
+        return decryptedTransactions
     }
     //#endregion
 }
