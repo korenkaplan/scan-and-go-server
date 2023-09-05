@@ -4,7 +4,7 @@ import { Transaction } from './schemas/transaction.schema';
 import { GetQueryDto } from 'src/global/global.dto';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Types } from 'mongoose';
-import { DailyPurchases, MonthlyPurchases } from 'src/global/global.interface';
+import { DailyPurchases, MonthlyPurchases, YearlyPurchases } from 'src/global/global.interface';
 
 @Controller('transactions')
 export class TransactionsController {
@@ -32,12 +32,16 @@ export class TransactionsController {
   async deleteAll(): Promise<number>{
     return await this.transactionService.deleteAll();
   }
-    @Get('/lastWeekTransactions')
+    @Get('/dailyPurchases')
     async getTransactionsWeek(@Query('id') id: Types.ObjectId): Promise<DailyPurchases[]> {
      return await this.transactionService.getWeeklyPurchases(id)   
     }
-    @Get('/lastYearTransactions')
+    @Get('/monthlyPurchases')
     async getTransactionsMonthly(@Query('id') id: Types.ObjectId): Promise<MonthlyPurchases[]> {
      return await this.transactionService.getMonthlyPurchases(id)   
+    }
+    @Get('/yearlyPurchases')
+    async getTransactionsYearly(@Query('id') id: Types.ObjectId): Promise<YearlyPurchases[]> {
+     return await this.transactionService.getYearlyPurchases(id)   
     }
 }

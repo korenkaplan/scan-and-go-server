@@ -1,4 +1,4 @@
-import { BadRequestException, Logger, NotFoundException} from '@nestjs/common';
+import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
 import { ITransaction, Transaction } from './schemas/transaction.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
@@ -71,7 +71,7 @@ export class TransactionsService {
     async getWeeklyPurchases(id: mongoose.Types.ObjectId): Promise<DailyPurchases[]> {
         const today = new Date();
         const weekObject: DailyPurchases[] = [];
-    
+
         // Calculate the start date (last Wednesday)
         const startDate = new Date(today);
         const dayOfWeek = today.getDay();
@@ -83,23 +83,23 @@ export class TransactionsService {
             weekObject.push({
                 day: DayOfWeek[day], // Assuming DayOfWeek is an enum
                 sumAmount: 0,
-                date: moment(today).subtract(i+1, 'days').format('DD-MM-YY')
+                date: moment(today).subtract(i + 1, 'days').format('DD-MM-YY')
             });
         }
-    
+
         const lastWeeklyPurchases = await this.transactionModel.find({
             userId: id,
             createdAt: { $gte: startDate, $lte: today }, // Filter by date range
         });
-    
+
         lastWeeklyPurchases.forEach((purchase) => {
             const dayNumber: number = (purchase.createdAt.getDay() + 6) % 7; // Adjust day of the week
             weekObject[dayNumber].sumAmount += purchase.amountToCharge;
         });
-    
+
         return weekObject.reverse();
     }
-    async getMonthlyPurchases(id: mongoose.Types.ObjectId): Promise<MonthlyPurchases[]>{
+    async getMonthlyPurchases(id: mongoose.Types.ObjectId): Promise<MonthlyPurchases[]> {
         const today = new Date();
         const monthObject: MonthlyPurchases[] = [];
 
@@ -107,41 +107,70 @@ export class TransactionsService {
         const startDate = new Date(today);
         startDate.setMonth(today.getMonth() - 11); // Subtract 11 months to go back 12 months
         startDate.setDate(1); // Set the day to the 1st day of the month
-        Logger.debug(`Start Date: ${startDate.toDateString()}`)
         // Initialize the monthObject with default values for each month
         for (let i = 0; i < 12; i++) {
             const year = startDate.getFullYear();
-            const month = startDate.getMonth() + 1; // Months are 0-based, so add 1
+            const month = startDate.getMonth(); // Months are 0-based, so add 1
             monthObject.push({
                 year: year,
-                month: Month[month-1],
+                month: Month[month],
                 sumAmount: 0,
             });
-               // Move to the next month
-               startDate.setMonth(startDate.getMonth() + 1);
+            // Move to the next month
+            startDate.setMonth(startDate.getMonth() + 1);
+        }
+        startDate.setMonth(today.getMonth() - 11); // Subtract 11 months to go back 12 months
+        const last12MonthsPurchases = await this.transactionModel.find({
+            userId: id,
+            createdAt: { $gte: startDate, $lte: today }, // Filter by date range
+        });
+
+        last12MonthsPurchases.forEach((purchase) => {
+            const purchaseYear = purchase.createdAt.getFullYear();
+            const purchaseMonth = purchase.createdAt.getMonth(); // Months are 0-based, so add 1
+            // Find the corresponding month in the monthObject and update the sumAmount
+            const matchingMonth = monthObject.find(
+                (month) => month.year == purchaseYear && month.month == Month[purchaseMonth]
+            );
+
+            if (matchingMonth) {
+                matchingMonth.sumAmount += purchase.amountToCharge;
             }
-            const last12MonthsPurchases = await this.transactionModel.find({
+        });
+
+        return monthObject;
+    }
+    async getYearlyPurchases(id: mongoose.Types.ObjectId): Promise<YearlyPurchases[]> {
+        const today = new Date();
+        const yearlyObject: YearlyPurchases[] = [];
+
+        //Calculate the start date (7 years ago)
+        const startDate = new Date(today);
+        startDate.setFullYear(today.getFullYear() - 6);
+
+        //initialize the years object
+        for (let i = 0; i < 7; i++) {
+            const year = startDate.getFullYear() + i;
+            yearlyObject.push({
+                year: year,
+                sumAmount: 0,
+            });
+
+            //get the transactions  for the year object
+            const last7YearsPurchases = await this.transactionModel.find({
                 userId: id,
                 createdAt: { $gte: startDate, $lte: today }, // Filter by date range
             });
-        
-            last12MonthsPurchases.forEach((purchase) => {
+
+            last7YearsPurchases.forEach((purchase) => {
                 const purchaseYear = purchase.createdAt.getFullYear();
-                const purchaseMonth = purchase.createdAt.getMonth() + 1; // Months are 0-based, so add 1
-                Logger.debug(`purchaseYear: ${purchaseYear}`)
-                Logger.debug(`purchaseMonth: ${purchaseMonth}`)
-        
-                // Find the corresponding month in the monthObject and update the sumAmount
-                const matchingMonth = monthObject.find(
-                    (month) => month.year === purchaseYear && month.month === Month[purchaseMonth]
-                );
-        
-                if (matchingMonth) {
-                    matchingMonth.sumAmount += purchase.amountToCharge;
+                const matchingYear = yearlyObject.find((year) => year.year === purchaseYear);
+                if (matchingYear) {
+                    matchingYear.sumAmount += purchase.amountToCharge;
                 }
-            });
-        
-        return monthObject;
+            })
+        }
+        return yearlyObject;
     }
     // //TODO: Check Analytics Functions
     // async getWeeklyPurchases(id: mongoose.Types.ObjectId): Promise<DailyPurchases[]> {
@@ -477,8 +506,10 @@ export class TransactionsService {
         return decryptedTransactions
     }
     private decryptTransaction(transaction: Transaction): Transaction {
-        transaction.cardNumber = this.globalService.decryptText(transaction.cardNumber)
-        transaction.cardType = this.globalService.decryptText(transaction.cardType)
+        if (transaction.cardNumber)
+            transaction.cardNumber = this.globalService.decryptText(transaction.cardNumber)
+        if (transaction.cardType)
+            transaction.cardType = this.globalService.decryptText(transaction.cardType)
         return transaction
     }
     async sendOrderConfirmationEmail(email: string, products: ITransactionItem[], name: string): Promise<string> {

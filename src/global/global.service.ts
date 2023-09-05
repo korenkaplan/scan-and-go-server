@@ -19,7 +19,6 @@ export class GlobalService {
         const { CRYPTO_KEY } = process.env
         const bytes = CryptoJS.AES.decrypt(ciphertext, CRYPTO_KEY);
         const originalText = bytes.toString(CryptoJS.enc.Utf8);
-        console.log('original text:'+ originalText);
         
         return originalText;
     }
