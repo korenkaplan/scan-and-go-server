@@ -26,3 +26,8 @@ export interface EmailItem {
     price: number
     imageSource: string
 }
+export interface UserFullStats {
+    weekly: IStats[]
+    monthly: IStats[]
+    yearly: IStats[]
+}

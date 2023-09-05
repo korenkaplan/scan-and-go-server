@@ -17,7 +17,7 @@ import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { ITransactionItem } from './dto/transaction-item.interface';
 import { MailService } from 'src/mail/mail.service';
 import { DayOfWeek, Month } from 'src/global/global.enum';
-import { DailyPurchases, EmailItem, IStats, MonthlyPurchases, YearlyPurchases } from 'src/global/global.interface';
+import { DailyPurchases, EmailItem, IStats, MonthlyPurchases, UserFullStats, YearlyPurchases } from 'src/global/global.interface';
 
 export interface Rest {
     amountToCharge: number;
@@ -383,5 +383,15 @@ export class TransactionsService {
         const deleted = await this.transactionModel.deleteMany({});
         return deleted.deletedCount
     }
-
+    async getAllStats(id: Types.ObjectId): Promise<UserFullStats>{
+        const weekly = await this.getWeeklyPurchases(id);
+        const monthly = await this.getMonthlyPurchases(id);
+        const yearly = await this.getYearlyPurchases(id);
+        const stats = {
+            weekly,
+            monthly,
+            yearly
+        }
+        return stats;
+    }
 }
