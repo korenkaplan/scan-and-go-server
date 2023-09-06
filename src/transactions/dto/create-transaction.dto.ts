@@ -5,6 +5,6 @@ export class CreateTransactionDto {
     userId: mongoose.Types.ObjectId;
     cardId: mongoose.Types.ObjectId;
     couponId?: mongoose.Types.ObjectId;
-    amountToCharge: number
+    totalAmount: number
     products: ITransactionItem[]
 }

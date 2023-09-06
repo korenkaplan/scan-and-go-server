@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
 export class RecentTransaction {
-    transactionId: mongoose.Types.ObjectId
-    amount: number
+    _id: mongoose.Types.ObjectId
+    totalAmount: number
     formattedDate: string
     cardType: string
 }

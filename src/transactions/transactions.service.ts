@@ -21,7 +21,7 @@ import { EmailItem, IStats, UserFullStats } from 'src/global/global.interface';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 export interface Rest {
-    amountToCharge: number;
+    totalAmount: number;
     products: ITransactionItem[];
 }
 export class TransactionsService {
@@ -71,7 +71,7 @@ export class TransactionsService {
             const purchaseDate = purchase.createdAt.getDate()
             const matchingDay = weekObject.find((day) => day.date.getDate() == purchaseDate)
             if (matchingDay) {
-                matchingDay.value += purchase.amountToCharge
+                matchingDay.value += purchase.totalAmount
             }
         });
 
@@ -112,7 +112,7 @@ export class TransactionsService {
             );
 
             if (matchingMonth) {
-                matchingMonth.value += purchase.amountToCharge;
+                matchingMonth.value += purchase.totalAmount;
             }
         });
 
@@ -144,7 +144,7 @@ export class TransactionsService {
                 const purchaseYear = purchase.createdAt.getFullYear();
                 const matchingYear = yearlyObject.find((year) => year.label == purchaseYear.toString());
                 if (matchingYear) {
-                    matchingYear.value += purchase.amountToCharge;
+                    matchingYear.value += purchase.totalAmount;
                 }
             })
         }
@@ -175,7 +175,7 @@ export class TransactionsService {
                 //* Step 1.3: update coupon and transaction price
                 dto = this.discountCouponFromPrice(coupon, dto);
                 Logger.debug('Validated Coupon: ' + coupon.code)
-                rest.amountToCharge = dto.amountToCharge;
+                rest.totalAmount = dto.totalAmount;
             }
 
             //* Step 1.4: charge the credit card
@@ -205,7 +205,7 @@ export class TransactionsService {
             //#endregion
 
             //send the order confirmation email after the transaction has been committed successfully
-            await this.mailService.sendOrderConfirmationEmail(user.email, transaction.products, user.fullName, transaction.amountToCharge)
+            await this.mailService.sendOrderConfirmationEmail(user.email, transaction.products, user.fullName, transaction.totalAmount)
             Logger.debug('Sent order confirmation email')
             //commit the transaction
             await session.commitTransaction();
@@ -255,8 +255,8 @@ export class TransactionsService {
 
     private createAbstractObjectsForUserArrays(newTransaction: Transaction, transaction: ITransaction) {
         const latestTransaction: RecentTransaction = {
-            transactionId: newTransaction._id,
-            amount: transaction.amountToCharge,
+            _id: newTransaction._id,
+            totalAmount: transaction.totalAmount,
             formattedDate: transaction.formattedDate,
             cardType: transaction.cardType
         };
@@ -289,15 +289,15 @@ export class TransactionsService {
         return { transactionDocument: transactionDocument, transaction }
     }
     private async chargeCreditCard(card: CreditCard, dto: CreateTransactionDto) {
-        const isCharged = await this.globalService.chargeCreditCard(card, dto.amountToCharge);
+        const isCharged = await this.globalService.chargeCreditCard(card, dto.totalAmount);
         if (!isCharged)
             throw new BadRequestException(`Problem charging credit card: ${card._id}`);
     }
 
     private discountCouponFromPrice(coupon: Coupon, dto: CreateTransactionDto) {
         const discountPercentage = coupon.discountPercentage;
-        const amountToCharge = dto.amountToCharge;
-        dto.amountToCharge = amountToCharge - (amountToCharge * (discountPercentage / 100));
+        const amountToCharge = dto.totalAmount;
+        dto.totalAmount = amountToCharge - (amountToCharge * (discountPercentage / 100));
         return dto;
     }
 
@@ -341,19 +341,19 @@ export class TransactionsService {
     }
     //#endregion
     async getManyPagination(dto: GetQueryPaginationDto<Transaction>): Promise<PaginationResponseDto<Transaction>> {
-        const { query, projection,currentPage } = dto;
-        const { limit, sort} = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG)
+        const { query, projection, currentPage } = dto;
+        const { limit, sort } = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG)
         const skipAmount = currentPage * limit
         const transactions = await this.transactionModel.find(query, projection).skip(skipAmount).limit(limit + 1).sort(sort);
 
         // Check for more records
         const isMore = transactions.length > limit;
 
-        if(isMore) {
+        if (isMore) {
             transactions.pop()
         }
         const decryptedTransactions = this.decryptTransactions(transactions)
-        const res:PaginationResponseDto<Transaction> = {
+        const res: PaginationResponseDto<Transaction> = {
             list: decryptedTransactions,
             pageNumber: currentPage,
             isMore
@@ -401,9 +401,9 @@ export class TransactionsService {
     async getAllStats(id: Types.ObjectId): Promise<UserFullStats> {
         const cachedItem: UserFullStats = await this.cacheManager.get(`stats-${id.toString()}`)
         Logger.debug('cachedItem: ' + JSON.stringify(cachedItem))
-         if(cachedItem) {
-         Logger.debug('found cache item')
-        return cachedItem;    
+        if (cachedItem) {
+            Logger.debug('found cache item')
+            return cachedItem;
         }
         const weekly = await this.getWeeklyPurchases(id);
         const monthly = await this.getMonthlyPurchases(id);
@@ -413,7 +413,7 @@ export class TransactionsService {
             monthly,
             yearly
         }
-        await this.cacheManager.set(`stats-${id}`,stats,60)
+        await this.cacheManager.set(`stats-${id}`, stats, 60)
         Logger.debug('not found cache item')
         return stats;
     }
