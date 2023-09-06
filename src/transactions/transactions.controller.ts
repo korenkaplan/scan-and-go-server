@@ -17,7 +17,7 @@ export class TransactionsController {
     return await this.transactionService.getMany(dto);
   }
   @Public()//TODO: Temporary public
-  @Get('/getManyPagination')
+  @Post('/getManyPagination')
   async getTransactionsPagination(@Body() dto: GetQueryPaginationDto<Transaction>): Promise<PaginationResponseDto<Transaction>> {
     return await this.transactionService.getManyPagination(dto);
   }

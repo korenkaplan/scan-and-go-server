@@ -1,5 +1,6 @@
-2. Remove the nfc chip from collection only after store exit
-3. Create the Payment Gateway resource (for the card validations);
-4 add send coupon tom users email every month
-5. check why create transaction is commited if failed 
+*  Remove the nfc chip from collection only after store exit
+* Create the Payment Gateway resource (for the card validations);
+* add send coupon tom users email every month
+* check why create transaction is committed if failed 
+* fix stats functions to be more efficient
 

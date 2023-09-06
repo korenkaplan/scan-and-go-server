@@ -348,7 +348,7 @@ export class TransactionsService {
 
         // Check for more records
         const isMore = transactions.length > limit;
-
+        Logger.debug(`isMore: ${isMore})
         if (isMore) {
             transactions.pop()
         }
