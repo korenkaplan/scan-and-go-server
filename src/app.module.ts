@@ -16,7 +16,6 @@ import { PaidItemModule } from './paid-item/paid-item.module';
 import { GlobalModule } from './global/global.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CacheModule } from '@nestjs/cache-manager';
-
 @Module({
   imports: [ 
     CacheModule.register({

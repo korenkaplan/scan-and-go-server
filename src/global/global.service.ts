@@ -25,8 +25,7 @@ export class GlobalService {
     configPagination<T>(dto: GetQueryDto<T>, locals: LocalPaginationConfig): LocalPaginationConfig {
         const sort = dto?.sort || locals.sort;
         const limit = dto?.limit || locals.limit;
-        const currentPage = dto?.currentPage || locals.currentPage;
-        const result: LocalPaginationConfig = { sort, limit, currentPage }
+        const result: LocalPaginationConfig = { sort, limit}
         return result
     }
      validateCreditCart(card:CreditCard): boolean {

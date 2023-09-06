@@ -105,6 +105,7 @@ export class UserService {
         user.cart.push(itemInCart)
 
         //save the updates
+        user.markModified('cart')
         await user.save()
 
         //return the updated cart
@@ -295,20 +296,20 @@ export class UserService {
         const user = await this.userModel.findOneAndDelete(query);
         if (!user)
             throw new NotFoundException('the query did\'nt found any user ')
-            return this.decryptUser(user)
+        return this.decryptUser(user)
     }
     async deleteMany(query: FilterQuery<User>): Promise<number> {
         return (await this.userModel.deleteMany(query)).deletedCount;
 
     }
     decryptUser(user: User): User {
-    if(user.creditCards)
-    user.creditCards =this.decryptUserCreditCards(user.creditCards);
-    if(user.recentTransactions)
-    user.recentTransactions = this.decryptUserRecentTransactions(user.recentTransactions);
-    return user;
+        if (user.creditCards)
+            user.creditCards = this.decryptUserCreditCards(user.creditCards);
+        if (user.recentTransactions)
+            user.recentTransactions = this.decryptUserRecentTransactions(user.recentTransactions);
+        return user;
     }
-    decryptUserRecentTransactions(recentTransactions: RecentTransaction[]):RecentTransaction[]{
+    decryptUserRecentTransactions(recentTransactions: RecentTransaction[]): RecentTransaction[] {
         const decryptedTransactions = recentTransactions.map(transaction => {
             transaction.cardType = this.globalService.decryptText(transaction.cardType);
             return transaction;

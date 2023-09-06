@@ -7,13 +7,21 @@ export class GetQueryDto<T> {
     limit?: number
     sort?: Record<string, -1 | 1>
 }
-
+export class GetQueryPaginationDto<T> {
+    query: FilterQuery<T>
+    projection: ProjectionFields<T>
+    currentPage: number
+}
+export class PaginationResponseDto<T> {
+    list: T[]
+    pageNumber: number
+    isMore: boolean
+}
 export class UpdateQueryDto<T> {
     query: FilterQuery<T>
     updateQuery: UpdateQuery<T>
 }
 export class LocalPaginationConfig {
-    currentPage: number
     limit: number
     sort: Record<string, -1 | 1>
 }

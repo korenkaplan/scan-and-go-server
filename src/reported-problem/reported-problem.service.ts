@@ -9,14 +9,14 @@ import { REPORTED_PROBLEM_SCHEMA_VERSION } from 'src/global/global.schema-versio
 import { ProblemType, Status } from './reported-problem.enum';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { GetQueryDto, LocalPaginationConfig } from 'src/global/global.dto';
+import { GetQueryDto, GetQueryPaginationDto, LocalPaginationConfig } from 'src/global/global.dto';
 import { GlobalService } from 'src/global/global.service';
 @Injectable()
 export class ReportedProblemService {
     private readonly s3Client = new S3Client({ region: this.configService.getOrThrow('AWS_S3_REGION') });
     // Image url Example: https://scan-and-go.s3.eu-north-1.amazonaws.com/donwload.jpeg
     private s3PrefixUrl = `https://${this.configService.getOrThrow('AWS_BUCKET_NAME')}.s3.${this.configService.getOrThrow('AWS_S3_REGION')}.amazonaws.com/`
-    private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 15, currentPage: 0 }
+    private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 15 }
     
     constructor(
         private readonly configService: ConfigService,
@@ -54,9 +54,9 @@ export class ReportedProblemService {
 
 
     }
-    async getAllProblemsPagination(dto: GetQueryDto<ReportedProblem>): Promise<ReportedProblem[]> {
-        const { query, projection } = dto;
-        const { limit, sort, currentPage } = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG)
+    async getAllProblemsPagination(dto: GetQueryPaginationDto<ReportedProblem>): Promise<ReportedProblem[]> {
+        const { query, projection, currentPage } = dto;
+        const { limit, sort } = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG)
         const skipAmount = currentPage * limit
         return await this.reportedProblemModel.find(query, projection).skip(skipAmount).limit(limit).sort(sort)
     }

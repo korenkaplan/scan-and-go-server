@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Logger, NotFoundException } from '@nestjs/
 import { ITransaction, Transaction } from './schemas/transaction.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
-import { GetQueryDto, LocalPaginationConfig } from 'src/global/global.dto';
+import { GetQueryDto, GetQueryPaginationDto, LocalPaginationConfig, PaginationResponseDto } from 'src/global/global.dto';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { PAID_ITEM_SCHEMA_VERSION, TRANSACTION_SCHEMA_VERSION } from 'src/global/global.schema-versions';
 import moment from 'moment';
@@ -25,7 +25,7 @@ export interface Rest {
     products: ITransactionItem[];
 }
 export class TransactionsService {
-    private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 10, currentPage: 0 }
+    private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 10 }
     private readonly logger: Logger = new Logger(TransactionsService.name)
     constructor(
         @InjectModel(Transaction.name)
@@ -340,12 +340,25 @@ export class TransactionsService {
         return user;
     }
     //#endregion
-    async getManyPagination(dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
-        const { query, projection } = dto;
-        const { limit, sort, currentPage } = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG)
+    async getManyPagination(dto: GetQueryPaginationDto<Transaction>): Promise<PaginationResponseDto<Transaction>> {
+        const { query, projection,currentPage } = dto;
+        const { limit, sort} = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG)
         const skipAmount = currentPage * limit
-        const transactions = await this.transactionModel.find(query, projection).skip(skipAmount).limit(limit).sort(sort);
-        return this.decryptTransactions(transactions)
+        const transactions = await this.transactionModel.find(query, projection).skip(skipAmount).limit(limit + 1).sort(sort);
+
+        // Check for more records
+        const isMore = transactions.length > limit;
+
+        if(isMore) {
+            transactions.pop()
+        }
+        const decryptedTransactions = this.decryptTransactions(transactions)
+        const res:PaginationResponseDto<Transaction> = {
+            list: decryptedTransactions,
+            pageNumber: currentPage,
+            isMore
+        }
+        return res;
     }
     async getMany(dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
         const { query, projection } = dto;
@@ -400,7 +413,7 @@ export class TransactionsService {
             monthly,
             yearly
         }
-        await this.cacheManager.set(`stats-${id}`,stats)
+        await this.cacheManager.set(`stats-${id}`,stats,60)
         Logger.debug('not found cache item')
         return stats;
     }
