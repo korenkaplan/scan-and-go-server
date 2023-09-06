@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Delete, UseInterceptors } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { Transaction } from './schemas/transaction.schema';
 import { GetQueryDto } from 'src/global/global.dto';
@@ -6,6 +6,7 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Types } from 'mongoose';
 import { DailyPurchases, IStats, MonthlyPurchases, UserFullStats, YearlyPurchases } from 'src/global/global.interface';
 import { Public } from 'src/auth/decorators/public-guard.decorator';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
 @Controller('transactions')
 export class TransactionsController {
@@ -41,8 +42,10 @@ export class TransactionsController {
     async getTransactionsYearly(@Query('id') id: Types.ObjectId): Promise<IStats[]> {
      return await this.transactionService.getYearlyPurchases(id)   
     }
+
     @Public() //TODO: Temporary public
     @Get('/allStats')
+    @UseInterceptors(CacheInterceptor)
     async getAllStats(@Query('id') id: Types.ObjectId):Promise<UserFullStats>{
       return await this.transactionService.getAllStats(id)
     }

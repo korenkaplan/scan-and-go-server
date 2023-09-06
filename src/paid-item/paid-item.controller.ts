@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { PaidItemService } from './paid-item.service';
 import { Public } from 'src/auth/decorators/public-guard.decorator';
 import { CreatePaidItemDto } from './dto/create-pad-item.dto';
@@ -16,6 +16,10 @@ export class PaidItemController {
     @Post('/create')
     async create(@Body() dto: CreatePaidItemDto) {
         return await this.paidItemService.create(dto);
+    }
+    @Delete('/destroy')
+    async destroy():Promise<string>{
+        return await this.paidItemService.cleanCollection();
     }
 
 }

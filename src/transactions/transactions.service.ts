@@ -1,4 +1,4 @@
-import { BadRequestException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Logger, NotFoundException } from '@nestjs/common';
 import { ITransaction, Transaction } from './schemas/transaction.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
@@ -17,8 +17,9 @@ import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { ITransactionItem } from './dto/transaction-item.interface';
 import { MailService } from 'src/mail/mail.service';
 import { DayOfWeek, Month } from 'src/global/global.enum';
-import { DailyPurchases, EmailItem, IStats, MonthlyPurchases, UserFullStats, YearlyPurchases } from 'src/global/global.interface';
-
+import { EmailItem, IStats, UserFullStats } from 'src/global/global.interface';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 export interface Rest {
     amountToCharge: number;
     products: ITransactionItem[];
@@ -39,12 +40,13 @@ export class TransactionsService {
         private paidItemModel: Model<PaidItem>,
         private globalService: GlobalService,
         private mailService: MailService,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
     //#region user Analytics
     async getWeeklyPurchases(id: mongoose.Types.ObjectId): Promise<IStats[]> {
         const today = new Date();
         const weekObject: IStats[] = [];
-        
+
         // Calculate the start date (last Wednesday)
         const startDate = new Date(today);
         const dayOfWeek = today.getDay();
@@ -52,8 +54,8 @@ export class TransactionsService {
         // Initialize the weekObject with default values
         for (let i = 0; i < 7; i++) {
             const day = (dayOfWeek + 6 - i) % 7; // Calculate the day of the week (0 to 6)
-        today.setDate(today.getDate() - 1);
-         
+            today.setDate(today.getDate() - 1);
+
             weekObject.push({
                 label: DayOfWeek[day], // Assuming DayOfWeek is an enum
                 value: 0,
@@ -67,7 +69,7 @@ export class TransactionsService {
         });
         lastWeeklyPurchases.forEach((purchase) => {
             const purchaseDate = purchase.createdAt.getDate()
-            const matchingDay = weekObject.find((day)=> day.date.getDate() == purchaseDate)
+            const matchingDay = weekObject.find((day) => day.date.getDate() == purchaseDate)
             if (matchingDay) {
                 matchingDay.value += purchase.amountToCharge
             }
@@ -238,9 +240,9 @@ export class TransactionsService {
 
     private async updateTheUser(user: User, latestTransaction: RecentTransaction, latestItems: RecentItem[]) {
         user.recentTransactions.unshift(latestTransaction);
-        user.recentTransactions.splice(20);
+        user.recentTransactions.splice(10);
         user.recentItems.unshift(...latestItems);
-        user.recentItems.splice(20);
+        user.recentItems.splice(10);
         user.transactionsAmount = user.transactionsAmount + 1;
         //* Step 3.3: update the user's cart and save user
         user.cart = [];
@@ -383,7 +385,13 @@ export class TransactionsService {
         const deleted = await this.transactionModel.deleteMany({});
         return deleted.deletedCount
     }
-    async getAllStats(id: Types.ObjectId): Promise<UserFullStats>{
+    async getAllStats(id: Types.ObjectId): Promise<UserFullStats> {
+        const cachedItem: UserFullStats = await this.cacheManager.get(`stats-${id.toString()}`)
+        Logger.debug('cachedItem: ' + JSON.stringify(cachedItem))
+         if(cachedItem) {
+         Logger.debug('found cache item')
+        return cachedItem;    
+        }
         const weekly = await this.getWeeklyPurchases(id);
         const monthly = await this.getMonthlyPurchases(id);
         const yearly = await this.getYearlyPurchases(id);
@@ -392,6 +400,8 @@ export class TransactionsService {
             monthly,
             yearly
         }
+        await this.cacheManager.set(`stats-${id}`,stats)
+        Logger.debug('not found cache item')
         return stats;
     }
 }

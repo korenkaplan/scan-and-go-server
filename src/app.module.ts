@@ -20,7 +20,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 @Module({
   imports: [ 
     CacheModule.register({
-      isGlobal: true
+      isGlobal: true,
+      ttl:60*60*24
     }),
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
