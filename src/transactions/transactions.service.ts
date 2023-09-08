@@ -153,14 +153,13 @@ export class TransactionsService {
     //#endregion
     async PaymentPipeline(dto: CreateTransactionDto): Promise<Transaction> {
         const session = await this.userModel.db.startSession();
-        session.startTransaction();
+         session.startTransaction();
         try {
             //#region the payment and transaction pipeline
             //* Step 1: Validation
             const { userId, cardId, couponId, ...rest } = dto
             //* Step 1.1: validate user and card
             // validate the user
-            Logger.debug('userId: ' + userId)
             const user = await this.validateUser(userId);
             Logger.debug('Validated User: ' + user.fullName)
             // validate the card
@@ -181,7 +180,6 @@ export class TransactionsService {
             //* Step 1.4: charge the credit card
             // charge the credit card
             await this.chargeCreditCard(card, dto);
-            Logger.debug('Charged credit card')
 
             //* Step 2: Create Transaction
 
@@ -230,7 +228,6 @@ export class TransactionsService {
                 createdAt: new Date(),
                 schemaVersion: PAID_ITEM_SCHEMA_VERSION,
             };
-            Logger.debug(paidItem)
 
             return paidItem;
         });
@@ -286,7 +283,6 @@ export class TransactionsService {
         }
 
         const transactionDocument = await this.transactionModel.create(transaction)
-        Logger.debug('made it here')
         return { transactionDocument: transactionDocument, transaction }
     }
     private async chargeCreditCard(card: CreditCard, dto: CreateTransactionDto) {

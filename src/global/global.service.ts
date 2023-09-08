@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt'
 import * as CryptoJS from 'crypto-js'
 import { GetQueryDto, LocalPaginationConfig } from './global.dto';
@@ -6,6 +6,7 @@ import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { CardType, CardValidationRegex } from './global.enum';
 @Injectable()
 export class GlobalService {
+    private readonly Logger: Logger = new Logger();
     constructor() { }
     async hashPassword(password: string): Promise<string> {
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -52,7 +53,7 @@ export class GlobalService {
     }
     async chargeCreditCard(card:CreditCard,amountToCharge: number): Promise<boolean> {
        //simulate credit card charging
-       console.log(`Card charge: ${card.cardNumber} with amount: ${amountToCharge}`);
+       Logger.debug(`Card charge: ${card.cardNumber} with amount: ${amountToCharge}`);
        return await true; 
     }
 
