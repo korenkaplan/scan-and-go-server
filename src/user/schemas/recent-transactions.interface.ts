@@ -6,4 +6,5 @@ export class RecentTransaction {
     formattedDate: string
     cardType: string
     cardNumber: string
+    couponDiscountAmount?: number
 }

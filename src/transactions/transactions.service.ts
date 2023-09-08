@@ -23,6 +23,7 @@ import { Cache } from 'cache-manager';
 export interface Rest {
     totalAmount: number;
     products: ITransactionItem[];
+    couponDiscountAmount?: number
 }
 export class TransactionsService {
     private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 10 }
@@ -174,6 +175,7 @@ export class TransactionsService {
                 //* Step 1.3: update coupon and transaction price
                 dto = this.discountCouponFromPrice(coupon, dto);
                 Logger.debug('Validated Coupon: ' + coupon.code)
+                rest.couponDiscountAmount = dto.couponDiscountAmount;
                 rest.totalAmount = dto.totalAmount;
             }
 
@@ -251,13 +253,14 @@ export class TransactionsService {
     }
 
     private createAbstractObjectsForUserArrays(newTransaction: Transaction, transaction: ITransaction) {
-        const latestTransaction: RecentTransaction = {
+        const latestTransaction: RecentTransaction =  {
             _id: newTransaction._id,
             totalAmount: transaction.totalAmount,
             formattedDate: transaction.formattedDate,
             cardType: transaction.cardType,
-            cardNumber: transaction.cardNumber
-        };
+            cardNumber: transaction.cardNumber,
+            ...(transaction.couponDiscountAmount && { couponDiscountAmount: transaction.couponDiscountAmount }),
+        }
         const latestItems: RecentItem[] = transaction.products.map(product => {
             const recentItem: RecentItem = {
                 itemId: product.itemId,
@@ -294,7 +297,9 @@ export class TransactionsService {
     private discountCouponFromPrice(coupon: Coupon, dto: CreateTransactionDto) {
         const discountPercentage = coupon.discountPercentage;
         const amountToCharge = dto.totalAmount;
-        dto.totalAmount = amountToCharge - (amountToCharge * (discountPercentage / 100));
+        const amountToDiscount = Math.floor(amountToCharge * (discountPercentage / 100));
+        dto.totalAmount = amountToCharge - amountToDiscount;
+        dto.couponDiscountAmount = amountToDiscount;
         return dto;
     }
 

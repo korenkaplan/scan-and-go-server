@@ -34,6 +34,9 @@ export class Transaction {
 
     @Prop()
     createdAt: Date
+    
+    @Prop()
+    couponDiscountAmount?: number
 }
 export interface ITransaction {
     _id?: mongoose.Types.ObjectId
@@ -45,6 +48,8 @@ export interface ITransaction {
     schemaVersion: number
     formattedDate: string
     createdAt: Date
+    couponDiscountAmount?: number
+
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);

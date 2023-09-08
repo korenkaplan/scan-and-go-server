@@ -7,4 +7,6 @@ export class CreateTransactionDto {
     couponId?: mongoose.Types.ObjectId;
     totalAmount: number
     products: ITransactionItem[]
+    couponDiscountAmount?: number
+
 }
