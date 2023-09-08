@@ -106,8 +106,8 @@ export enum CardValidationRegex {
   DISCOVER = "/^(?:6011\d{12})|(?:65\d{14})$/"
 }
 export enum CardType {
-  MASTERCARD = 'Mastercard',
-  VISA = 'Visa',
-  AMERICAN_EXPRESS = 'American Express',
-  DISCOVER = 'Discover'
+  MASTERCARD = 'mastercard',
+  VISA = 'visa',
+  AMERICAN_EXPRESS = 'amex',
+  DISCOVER = 'discover'
 }

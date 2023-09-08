@@ -312,6 +312,7 @@ export class UserService {
     decryptUserRecentTransactions(recentTransactions: RecentTransaction[]): RecentTransaction[] {
         const decryptedTransactions = recentTransactions.map(transaction => {
             transaction.cardType = this.globalService.decryptText(transaction.cardType);
+            transaction.cardNumber = this.globalService.decryptText(transaction.cardNumber);
             return transaction;
         })
         return decryptedTransactions

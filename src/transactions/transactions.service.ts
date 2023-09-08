@@ -258,7 +258,8 @@ export class TransactionsService {
             _id: newTransaction._id,
             totalAmount: transaction.totalAmount,
             formattedDate: transaction.formattedDate,
-            cardType: transaction.cardType
+            cardType: transaction.cardType,
+            cardNumber: transaction.cardNumber
         };
         const latestItems: RecentItem[] = transaction.products.map(product => {
             const recentItem: RecentItem = {
@@ -341,25 +342,35 @@ export class TransactionsService {
     }
     //#endregion
     async getManyPagination(dto: GetQueryPaginationDto<Transaction>): Promise<PaginationResponseDto<Transaction>> {
+        // Extract relevant information from the input DTO
         const { query, projection, currentPage } = dto;
-        const { limit, sort } = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG)
-        const skipAmount = currentPage * limit
+        
+        // Configure pagination settings based on global service and local configuration
+        const { limit, sort } = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG);
+        const skipAmount = currentPage * limit;
+    
+        // Retrieve transactions from the database based on query, projection, pagination, and sorting
         const transactions = await this.transactionModel.find(query, projection).skip(skipAmount).limit(limit + 1).sort(sort);
-
-        // Check for more records
+    
+        // Check if there are more records than the specified limit
         const isMore = transactions.length > limit;
-        Logger.debug(`isMore: ${isMore}`)
         if (isMore) {
-            transactions.pop()
+            transactions.pop(); // Remove extra record used for pagination check
         }
-        const decryptedTransactions = this.decryptTransactions(transactions)
+    
+        // Decrypt the retrieved transactions for further processing
+        const decryptedTransactions = this.decryptTransactions(transactions);
+    
+        // Prepare the response object with the decrypted transactions
         const res: PaginationResponseDto<Transaction> = {
             list: decryptedTransactions,
             pageNumber: currentPage,
             isMore
         }
-        return res;
+    
+        return res; // Return the paginated response
     }
+    
     async getMany(dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
         const { query, projection } = dto;
         const transactions = await this.transactionModel.find(query, projection)

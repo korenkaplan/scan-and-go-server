@@ -5,4 +5,5 @@ export class RecentTransaction {
     totalAmount: number
     formattedDate: string
     cardType: string
+    cardNumber: string
 }
