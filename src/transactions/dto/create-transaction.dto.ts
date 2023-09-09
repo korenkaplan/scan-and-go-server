@@ -8,5 +8,4 @@ export class CreateTransactionDto {
     totalAmount: number
     products: ITransactionItem[]
     couponDiscountAmount?: number
-
 }
