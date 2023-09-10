@@ -21,6 +21,7 @@ import { EmailItem, IStats, UserFullStats } from 'src/global/global.interface';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { FilterUserTransactionDto } from './dto/Filter-user-transactions.dto';
 export interface Rest {
     totalAmount: number;
     products: ITransactionItem[];
@@ -28,6 +29,7 @@ export interface Rest {
 }
 export class TransactionsService {
     private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 10 }
+    private NUMBER_OF_LAST_YEARS_FOR_YEARLY_STATS = 7
     private readonly logger: Logger = new Logger(TransactionsService.name)
     constructor(
         @InjectModel(Transaction.name)
@@ -44,16 +46,12 @@ export class TransactionsService {
         private mailService: MailService,
         @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
-    //#region user Analytics
-    async getWeeklyPurchases(id: mongoose.Types.ObjectId): Promise<IStats[]> {
-        const today = new Date();
+    //#region Analytics
+    private initWeeklyObject():IStats[]{
         const weekObject: IStats[] = [];
-
-        // Calculate the start date (last Wednesday)
-        const startDate = new Date(today);
+        const today = new Date();
         const dayOfWeek = today.getDay();
-        startDate.setDate(today.getDate() - 7);
-        // Initialize the weekObject with default values
+
         for (let i = 0; i < 7; i++) {
             const day = (dayOfWeek + 6 - i) % 7; // Calculate the day of the week (0 to 6)
             today.setDate(today.getDate() - 1);
@@ -64,94 +62,149 @@ export class TransactionsService {
                 date: new Date(today), // Initialize date property
             });
         }
-
-        const lastWeeklyPurchases = await this.transactionModel.find({
-            userId: id,
-            createdAt: { $gte: startDate, $lte: new Date() }, // Filter by date range
-        });
-        lastWeeklyPurchases.forEach((purchase) => {
-            const purchaseDate = purchase.createdAt.getDate()
-            const matchingDay = weekObject.find((day) => day.date.getDate() == purchaseDate)
-            if (matchingDay) {
-                matchingDay.value += purchase.totalAmount
-            }
-        });
-
-        return weekObject.reverse();
+        return weekObject;
     }
-    async getMonthlyPurchases(id: mongoose.Types.ObjectId): Promise<IStats[]> {
+
+    private initMonthlyObject():IStats[]{
         const today = new Date();
         const monthObject: IStats[] = [];
-
-        // Calculate the start date (12 months ago from today)
-        const startDate = new Date(today);
-        startDate.setMonth(today.getMonth() - 11); // Subtract 11 months to go back 12 months
-        startDate.setDate(1); // Set the day to the 1st day of the month
-        // Initialize the monthObject with default values for each month
+        const monthlyStartDate = new Date(today);
+        monthlyStartDate.setDate(today.getMonth() - 11);
+        monthlyStartDate.setDate(1)
         for (let i = 0; i < 12; i++) {
-            const year = startDate.getFullYear();
-            const month = startDate.getMonth(); // Months are 0-based, so add 1
+            const year = monthlyStartDate.getFullYear()-1;
+            const month = monthlyStartDate.getMonth()+2; // Months are 0-based, so add 1
             monthObject.push({
                 year: year,
                 label: Month[month],
                 value: 0,
             });
             // Move to the next month
-            startDate.setMonth(startDate.getMonth() + 1);
+            monthlyStartDate.setMonth(monthlyStartDate.getMonth() + 1);
         }
-        startDate.setMonth(today.getMonth() - 11); // Subtract 11 months to go back 12 months
-        const last12MonthsPurchases = await this.transactionModel.find({
-            userId: id,
-            createdAt: { $gte: startDate, $lte: today }, // Filter by date range
-        });
-
-        last12MonthsPurchases.forEach((purchase) => {
-            const purchaseYear = purchase.createdAt.getFullYear();
-            const purchaseMonth = purchase.createdAt.getMonth(); // Months are 0-based, so add 1
-            // Find the corresponding month in the monthObject and update the sumAmount
-            const matchingMonth = monthObject.find(
-                (month) => month.year == purchaseYear && month.label == Month[purchaseMonth]
-            );
-
-            if (matchingMonth) {
-                matchingMonth.value += purchase.totalAmount;
-            }
-        });
-
         return monthObject;
     }
-    async getYearlyPurchases(id: mongoose.Types.ObjectId): Promise<IStats[]> {
+    private initYearlyObject():IStats[]{
         const today = new Date();
         const yearlyObject: IStats[] = [];
-
-        //Calculate the start date (7 years ago)
-        const startDate = new Date(today);
-        startDate.setFullYear(today.getFullYear() - 6);
-
-        //initialize the years object
-        for (let i = 0; i < 7; i++) {
-            const year = startDate.getFullYear() + i;
+          //get the last 7 years date
+          const yearlyStartDate = new Date(today);
+          yearlyStartDate.setFullYear(today.getFullYear() - 6);
+          for (let i = 0; i < 7; i++) {
+            const year = yearlyStartDate.getFullYear() + i;
             yearlyObject.push({
                 label: year.toString(),
                 value: 0,
             });
 
-            //get the transactions  for the year object
-            const last7YearsPurchases = await this.transactionModel.find({
-                userId: id,
-                createdAt: { $gte: startDate, $lte: today }, // Filter by date range
-            });
-
-            last7YearsPurchases.forEach((purchase) => {
-                const purchaseYear = purchase.createdAt.getFullYear();
-                const matchingYear = yearlyObject.find((year) => year.label == purchaseYear.toString());
-                if (matchingYear) {
-                    matchingYear.value += purchase.totalAmount;
-                }
-            })
         }
         return yearlyObject;
     }
+    private initWeeklyStartDate():Date{
+        const today = new Date();
+        const weeklyStartDate = new Date(today);
+        weeklyStartDate.setDate(today.getDate() - 7);
+        return weeklyStartDate;
+    }
+    private initMonthlyStartDate():Date{
+        const today = new Date();
+        const monthlyStartDate = new Date(today);
+        monthlyStartDate.setDate(today.getMonth() - 11);
+        monthlyStartDate.setDate(1)
+        return monthlyStartDate;
+    }
+    private initYearlyStartDate(yearsBack:number):Date{
+        const today = new Date();
+        const yearlyStartDate = new Date(today);
+        yearlyStartDate.setFullYear(today.getFullYear() - 1 - yearsBack);
+        return yearlyStartDate;
+    }
+    private async getUserTransactions(id: mongoose.Types.ObjectId):Promise<Transaction[]>{
+        const transactions = await this.transactionModel.find({userId: id});
+        
+        if(!transactions){
+            throw new NotFoundException('No transactions found');
+        }
+        return transactions;
+    }
+    filterTheTransactionsToObjects(dto:FilterUserTransactionDto):UserFullStats{
+        const {weekObject,monthObject,yearlyObject,weeklyStartDate,monthlyStartDate,yearlyStartDate,userTransactions} = dto;
+        userTransactions.forEach((transaction) =>{
+            const transactionDate = transaction.createdAt;
+            if( transactionDate > weeklyStartDate) //if the transaction ocurred in the last week
+            {   
+                 const transactionDate = transaction.createdAt.getDate()
+                 const matchingDay = weekObject.find((day) => day.date.getDate() == transactionDate)
+                 if (matchingDay) {
+                    matchingDay.value += transaction.totalAmount
+                 }
+            }
+
+            if(transactionDate > monthlyStartDate)// if the transaction ocurred in the last year
+            {   
+                const transactionYear = transaction.createdAt.getFullYear();
+                const transactionMonth = transaction.createdAt.getMonth(); // Months are 0-based, so add 1
+                // Find the corresponding month in the monthObject and update the sumAmount
+                const matchingMonth = monthObject.find(
+                    (month) => month.year == transactionYear && month.label == Month[transactionMonth]
+                );
+                if (matchingMonth) {
+                    matchingMonth.value += transaction.totalAmount;
+                }
+            }
+            if(transactionDate > yearlyStartDate) // if the transaction ocurred in the last 7 years
+            {
+                const transactionYear = transaction.createdAt.getFullYear();
+                const matchingYear = yearlyObject.find((year) => year.label == transactionYear.toString());
+                if (matchingYear) {
+                    matchingYear.value += transaction.totalAmount;
+                }
+            }
+
+        })
+        const stats:UserFullStats = {
+            weekly:weekObject.reverse(),
+            monthly:monthObject,
+            yearly:yearlyObject
+         }
+         return stats;
+    }
+    async createAnalytics(id: mongoose.Types.ObjectId):Promise<UserFullStats>{
+        //#1 get the user transactions
+        const userTransactions = await this.getUserTransactions(id); 
+
+        //2# create the start dates of the last week, last year and last x years
+        const weeklyStartDate = this.initWeeklyStartDate();
+        const monthlyStartDate = this.initMonthlyStartDate();
+        const yearlyStartDate = this.initYearlyStartDate(this.NUMBER_OF_LAST_YEARS_FOR_YEARLY_STATS);
+     
+        //#region create the objects to holds the data (IStats)
+        const weekObject: IStats[] = this.initWeeklyObject();
+        const monthObject: IStats[] = this.initMonthlyObject();
+        const yearlyObject: IStats[] = this.initYearlyObject();
+        const dto:FilterUserTransactionDto = {
+            weekObject,
+            monthObject,
+            yearlyObject,
+            weeklyStartDate,
+            monthlyStartDate,
+            yearlyStartDate,
+            userTransactions
+        }
+        //iterate through the user's transactions and check the created at timestamp and filter the transaction.
+        return this.filterTheTransactionsToObjects(dto);
+    }
+
+    async getAllStats(id: Types.ObjectId): Promise<UserFullStats> {
+    const cachedItem: UserFullStats = await this.cacheManager.get(`stats-${id.toString()}`)
+    if (cachedItem) {
+        return cachedItem;
+    }
+    const stats = this.createAnalytics(id);
+    await this.cacheManager.set(`stats-${id}`, stats, 60)
+    Logger.debug('not found cache item')
+    return stats;
+}
     //#endregion
     async PaymentPipeline(dto: CreateTransactionDto): Promise<Transaction> {
         const session = await this.userModel.db.startSession();
@@ -410,25 +463,7 @@ export class TransactionsService {
         const deleted = await this.transactionModel.deleteMany({});
         return deleted.deletedCount
     }
-    async getAllStats(id: Types.ObjectId): Promise<UserFullStats> {
-        const cachedItem: UserFullStats = await this.cacheManager.get(`stats-${id.toString()}`)
-        Logger.debug('cachedItem: ' + JSON.stringify(cachedItem))
-        if (cachedItem) {
-            Logger.debug('found cache item')
-            return cachedItem;
-        }
-        const weekly = await this.getWeeklyPurchases(id);
-        const monthly = await this.getMonthlyPurchases(id);
-        const yearly = await this.getYearlyPurchases(id);
-        const stats = {
-            weekly,
-            monthly,
-            yearly
-        }
-        await this.cacheManager.set(`stats-${id}`, stats, 60)
-        Logger.debug('not found cache item')
-        return stats;
-    }
+  
     //#region Send a report on a daily / weekly / monthly bases.
     @Cron(CronExpression.EVERY_DAY_AT_9PM)
     async sendDailyTransactionsRecap(): Promise<void> {
