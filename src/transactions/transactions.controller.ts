@@ -39,24 +39,12 @@ export class TransactionsController {
   async deleteAll(): Promise<number> {
     return await this.transactionService.deleteAll();
   }
-  @Get('/dailyPurchases')
-  async getTransactionsWeek(@Query('id') id: Types.ObjectId): Promise<IStats[]> {
-    return await this.transactionService.getWeeklyPurchases(id)
-  }
-  @Get('/monthlyPurchases')
-  async getTransactionsMonthly(@Query('id') id: Types.ObjectId): Promise<IStats[]> {
-    return await this.transactionService.getMonthlyPurchases(id)
-  }
-  @Get('/yearlyPurchases')
-  async getTransactionsYearly(@Query('id') id: Types.ObjectId): Promise<IStats[]> {
-    return await this.transactionService.getYearlyPurchases(id)
-  }
 
   @Public() //TODO: Temporary public
   @Get('/allStats')
   @UseInterceptors(CacheInterceptor)
   async getAllStats(@Query('id') id: Types.ObjectId): Promise<UserFullStats> {
-    return await this.transactionService.getAllStats(id)
+    return await this.transactionService.getAllStats(id);
   }
 
 

@@ -17,6 +17,7 @@ import { RemoveItemFromCartDto } from './dto/remove-from-cart.dto';
 import { INfcTag, NfcTag } from 'src/nfc_tag/schemas/nfc-tag.schema';
 import { Item } from 'src/item/schemas/item.schema';
 import { RecentTransaction } from './schemas/recent-transactions.interface';
+import { log } from 'console';
 
 @Injectable()
 export class UserService {
@@ -270,9 +271,9 @@ export class UserService {
         const { query, projection } = dto
 
         const users = await this.userModel.find(query, projection);
-        return await Promise.all(users.map(async (user) => {
+        return users.map((user) => {
             return this.decryptUser(user)
-        }))
+        })
     }
     async getOne(dto: GetQueryDto<User>): Promise<User> {
         const { query, projection } = dto
@@ -303,14 +304,16 @@ export class UserService {
 
     }
     decryptUser(user: User): User {
-        if (user.creditCards)
+        if (user.creditCards && user.creditCards.length > 0)
             user.creditCards = this.decryptUserCreditCards(user.creditCards);
-        if (user.recentTransactions)
+        if (user.recentTransactions && user.recentTransactions.length > 0)
             user.recentTransactions = this.decryptUserRecentTransactions(user.recentTransactions);
         return user;
     }
     decryptUserRecentTransactions(recentTransactions: RecentTransaction[]): RecentTransaction[] {
         const decryptedTransactions = recentTransactions.map(transaction => {
+            log('Card Number: ' + JSON.stringify(transaction));
+
             transaction.cardType = this.globalService.decryptText(transaction.cardType);
             transaction.cardNumber = this.globalService.decryptText(transaction.cardNumber);
             return transaction;

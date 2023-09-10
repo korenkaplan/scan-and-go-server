@@ -3,7 +3,6 @@
 * add send coupon to users email every month
 * check why create transaction is committed if failed 
 * fix stats functions to be more efficient
-* create and send daily weekly and monthly reports of sales to the admin email.
 * think how to solve the coming in and out of the store and the Paid items collection.
-* fix .env file uploading
+
 

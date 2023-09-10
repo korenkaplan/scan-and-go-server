@@ -11,7 +11,11 @@ export enum Role {
   USER = "user",
   ADMIN = "admin",
 }
-
+export enum TimePeriods {
+  WEEKLY = "weekly",
+  MONTHLY = "monthly",
+  YEARLY = "yearly",
+}
 export enum Category {
   Jeans = "Jeans",
   Jackets = "Jackets",
