@@ -1,15 +1,27 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Inject, Injectable, forwardRef, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { randomInt } from 'crypto';
 import { UserService } from 'src/user/user.service';
 import { VerificationEmailResponse } from './dto/verification-respond.dto';
 import { User } from 'src/user/schemas/user.schema';
 import { GetQueryDto } from 'src/global/global.dto';
-import mongoose from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { EmailItem } from 'src/global/global.interface';
+import { InjectModel } from '@nestjs/mongoose';
+import { Transaction } from 'src/transactions/schemas/transaction.schema';
+import excelJs, { Workbook, Worksheet } from 'exceljs';
+import moment from 'moment';
+import { SendExcelDto } from './dto/send-excel.dto';
+import * as fs from 'fs';
+import { join } from 'path';
 @Injectable()
 export class MailService {
-    constructor(private mailerService: MailerService, @Inject(forwardRef(() => UserService)) private userService: UserService) { }
+    private readonly Logger: Logger = new Logger();
+    constructor(
+        private mailerService: MailerService,
+        @Inject(forwardRef(() => UserService)) private userService: UserService,
+        @InjectModel(Transaction.name) private readonly transactionModel: Model<Transaction>,
+    ) { }
 
     async sendResetPasswordEmail(email: string): Promise<VerificationEmailResponse> {
         const [isExist, userId] = await this.verifyEmail(email);
@@ -28,8 +40,31 @@ export class MailService {
         });
         return this.createResObject(isExist, number, userId);
     }
-   
-    async sendOrderConfirmationEmail(email: string, purchasedItems: EmailItem[], name: string, amountToCharge:number): Promise<void> {
+    async sendExcelFile(dto:SendExcelDto) {
+        const {email, fileName,filePath,timePeriod,startDate,endDate} = dto;
+        if (fs.existsSync(filePath)) {
+            await this.mailerService.sendMail({
+                to: email,
+                subject: `Scan & Go Transactions ${timePeriod} Report`,
+                from: 'No Reply <The Scan & Go Team>',
+                template: 'transactionsRecap',
+                context:{
+                    timePeriod,
+                    startDate,
+                    endDate
+                },
+                attachments:
+                    [
+                        {
+                            filename: fileName,
+                            path: filePath,
+                        },
+                    ]
+
+            });
+        }
+    }
+    async sendOrderConfirmationEmail(email: string, purchasedItems: EmailItem[], name: string, amountToCharge: number): Promise<void> {
         await this.mailerService.sendMail({
             to: email,
             subject: 'Scan & Go Order Confirmation',
@@ -39,10 +74,10 @@ export class MailService {
                 items: purchasedItems,
                 year: new Date().getFullYear(),
                 name: name,
-                totalPrice:amountToCharge
+                totalPrice: amountToCharge
             }
         });
-    } 
+    }
     async verifyEmail(email: string): Promise<[boolean, mongoose.Types.ObjectId]> {
         const dto: GetQueryDto<User> = {
             query: { email },
@@ -61,6 +96,89 @@ export class MailService {
             userId
         }
         return res;
+    }
+    async createDirectoryIfNotExists(directoryPath) {
+        if (!fs.existsSync(directoryPath)) {
+            fs.mkdirSync(directoryPath, { recursive: true });
+            Logger.debug(`Directory "${directoryPath}" created successfully.`);
+        } else {
+            Logger.debug(`Directory "${directoryPath}" already exists.`);
+        }
+    }
+    async sendTransactionRecap(startDate: Date, endDate: Date,timePeriod:string): Promise<void> {
+        const { workBook, sheet } = this.createTransactionWorkbook();
+        const formattedStartDate = moment(startDate).format('DD.MM.YYYY')
+        const formattedEndDate = moment(endDate).format('DD.MM.YYYY')
+        const folderPath = join(__dirname, 'templates', 'xlsx') // Correct file path
+        await this.createDirectoryIfNotExists(folderPath)
+        const fileName = `${formattedStartDate}-${formattedEndDate}_Transactions.xlsx`
+        const filePath = join(folderPath, fileName)
+        const transactions = await this.transactionModel.find({ createdAt: { $gte: startDate, $lte: endDate } });
+        transactions.map((transaction) => {
+            transaction.products.map((product) => {
+                sheet.addRow({
+                    _id: transaction._id.toString(),
+                    userId: transaction.userId.toString(),
+                    itemId: product.itemId,
+                    nfcTagCode: product.nfcTagCode,
+                    name: product.name,
+                    price: product.price,
+                    formattedDate: transaction.formattedDate
+                }).alignment = { vertical: 'middle', horizontal: 'center' }; // Set alignment 
+            });
+        })
+        await workBook.xlsx.writeFile(filePath);
+        await this.checkFileExists(filePath);
+        const storeManagerEmail = process.env.STORE_MANAGER_MAIL;
+        const dto:SendExcelDto = {
+            email: storeManagerEmail,
+            fileName,
+            filePath,
+            startDate:formattedStartDate,
+            endDate: formattedEndDate,
+            timePeriod
+        }
+        await this.sendExcelFile(dto);
+        fs.unlink(filePath,(err:any)=>{
+            if(err)
+            Logger.error('Error deleting file: ' + err.message);
+        })
+    }
+    private createTransactionWorkbook() {
+        const workBook: Workbook = new excelJs.Workbook();
+        const sheet: Worksheet = workBook.addWorksheet('Transactions');
+        sheet.columns = [
+            { header: 'Transaction ID', key: '_id', width: 30, alignment: { vertical: 'middle', horizontal: 'center' } },
+            { header: 'User ID', key: 'userId', width: 30, alignment: { vertical: 'middle', horizontal: 'center' } },
+            { header: 'Item ID', key: 'itemId', width: 30, alignment: { vertical: 'middle', horizontal: 'center' } },
+            { header: 'NFC Tag ID', key: 'nfcTagCode', width: 20, alignment: { vertical: 'middle', horizontal: 'center' } },
+            { header: 'Name', key: 'name', width: 30, alignment: { vertical: 'middle', horizontal: 'center' } },
+            { header: 'Price', key: 'price', width: 10, alignment: { vertical: 'middle', horizontal: 'center' } },
+            { header: 'Date', key: 'formattedDate', width: 15, alignment: { vertical: 'middle', horizontal: 'center' } },
+        ]
+        sheet.getRow(1).eachCell((cell) => {
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'C4D79B' },
+            }
+            cell.alignment = { vertical: 'middle', horizontal: 'center' }; // Set alignment after setting background color
+        })
+        return { workBook, sheet };
+    }
+    private async checkFileExists(filePath) {
+        try {
+             fs.access(filePath,(err:any) => {
+                if(err)
+                Logger.error(err);
+             });
+        } catch (error) {
+            if (error.code === 'ENOENT') {
+                console.log('checkFileExists: File does not exist');
+            } else {
+                throw error;
+            }
+        }
     }
 }
 

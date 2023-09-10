@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 5px;
+      box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      text-align: center;
+      color: #4285f4;
+    }
+
+    .message {
+      margin: 20px 0;
+      padding: 20px;
+      background-color: #f0f0f0;
+      border-radius: 5px;
+      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+      direction: rtl; /* Right-to-left text direction */
+      text-align: center; /* Center text within the message */
+    }
+
+    .reset-code {
+      font-size: 32px;
+      font-weight: bold;
+      color: #FF5733; /* Emphasize digits with a different color */
+    }
+
+    .expiry-note {
+      font-style: italic;
+      color: #777;
+    }
+
+    .signature {
+      margin-top: 20px;
+      text-align: center;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Transactions {{timePeriod}} Report</h2>
+    </div>
+    <div class="message">
+      <p>This is your {{timePeriod}} report, for {{startDate}} - {{endDate}}</p>
+    </div>
+    <div class="signature">
+      <p>Best regards,</p>
+      <p>Scan and Go Team</p>
+    </div>
+  </div>
+</body>
+</html>

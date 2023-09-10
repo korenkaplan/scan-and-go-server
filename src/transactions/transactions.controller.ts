@@ -12,6 +12,11 @@ import { CacheInterceptor } from '@nestjs/cache-manager';
 export class TransactionsController {
 
   constructor(private transactionService: TransactionsService) { }
+  @Public()
+  @Get('/testEmailExcel')
+  async sendTestEmailExcel():Promise<void>{
+     await this.transactionService.testSendEmail();
+  }
   @Get('/getMany')
   async getUsers(@Body() dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
     return await this.transactionService.getMany(dto);
@@ -53,4 +58,6 @@ export class TransactionsController {
   async getAllStats(@Query('id') id: Types.ObjectId): Promise<UserFullStats> {
     return await this.transactionService.getAllStats(id)
   }
+
+
 }

@@ -20,6 +20,7 @@ import { DayOfWeek, Month } from 'src/global/global.enum';
 import { EmailItem, IStats, UserFullStats } from 'src/global/global.interface';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { Cron, CronExpression } from '@nestjs/schedule';
 export interface Rest {
     totalAmount: number;
     products: ITransactionItem[];
@@ -371,7 +372,6 @@ export class TransactionsService {
     
         return res; // Return the paginated response
     }
-    
     async getMany(dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
         const { query, projection } = dto;
         const transactions = await this.transactionModel.find(query, projection)
@@ -429,4 +429,37 @@ export class TransactionsService {
         Logger.debug('not found cache item')
         return stats;
     }
+    //#region Send a report on a daily / weekly / monthly bases.
+    @Cron(CronExpression.EVERY_DAY_AT_9PM)
+    async sendDailyTransactionsRecap(): Promise<void> {
+        const today = new Date();
+        const startDate = new Date();
+        const timePeriod = 'Daily'
+        startDate.setDate(today.getDate() - 1);
+        return this.mailService.sendTransactionRecap(startDate,today,timePeriod)
+    }
+    @Cron(CronExpression.EVERY_WEEK)
+    async sendWeeklyTransactionsRecap(): Promise<void> {
+        const today = new Date();
+        const startDate = new Date();
+        const timePeriod = 'Weekly'
+        startDate.setDate(today.getDate() - 7);
+        return this.mailService.sendTransactionRecap(startDate,today,timePeriod)
+    }
+    @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
+    async sendMonthlyTransactionsRecap(): Promise<void> {
+        const today = new Date();
+        const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1); // Start of last month
+        const endDate = new Date(today.getFullYear(), today.getMonth(), 0); // End of last month
+        const timePeriod = 'Monthly'
+        return this.mailService.sendTransactionRecap(startDate, endDate,timePeriod);
+    }
+    async testSendEmail(): Promise<void>{
+        const today = new Date();
+        const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1); // Start of last month
+        const endDate = new Date(today.getFullYear(), today.getMonth(), 0); // End of last month
+        const timePeriod = 'Monthly'
+        return this.mailService.sendTransactionRecap(startDate, endDate,timePeriod);
+    }
+    //#endregion
 }

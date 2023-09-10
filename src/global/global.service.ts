@@ -4,10 +4,13 @@ import * as CryptoJS from 'crypto-js'
 import { GetQueryDto, LocalPaginationConfig } from './global.dto';
 import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { CardType, CardValidationRegex } from './global.enum';
+
+
 @Injectable()
 export class GlobalService {
     private readonly Logger: Logger = new Logger();
-    constructor() { }
+    constructor(  ) { }
+  
     async hashPassword(password: string): Promise<string> {
         const hashedPassword = await bcrypt.hash(password, 10);
         return hashedPassword
@@ -56,6 +59,6 @@ export class GlobalService {
        Logger.debug(`Card charge: ${card.cardNumber} with amount: ${amountToCharge}`);
        return await true; 
     }
-
     
+
 }
