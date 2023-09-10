@@ -1,8 +1,6 @@
-* Remove the nfc chip from collection only after store exit
 * Create the Payment Gateway resource (for the card validations);
-* add send coupon to users email every month
 * check why create transaction is committed if failed 
-* fix stats functions to be more efficient
 * think how to solve the coming in and out of the store and the Paid items collection.
+* Create send coupon every month function(think of logic)
 
 

@@ -22,7 +22,7 @@ export class MailService {
         @Inject(forwardRef(() => UserService)) private userService: UserService,
         @InjectModel(Transaction.name) private readonly transactionModel: Model<Transaction>,
     ) { }
-
+    //TODO: Create send coupon function(think of logic)
     async sendResetPasswordEmail(email: string): Promise<VerificationEmailResponse> {
         const [isExist, userId] = await this.verifyEmail(email);
         if (!isExist) {

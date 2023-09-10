@@ -6,7 +6,6 @@ import { Public } from 'src/auth/decorators/public-guard.decorator';
 import { CreateProblemDto } from './dto/create-problem-dto';
 import { GetQueryDto } from 'src/global/global.dto';
 import { ReportedProblem } from './schema/reported-problem.schema';
-  //TODO: Fix env is uploading to github. add AWS env variables to render
 @Controller('reportedProblem')
 export class ReportedProblemController {
   constructor(private reportedProblemService: ReportedProblemService) { }

@@ -18,10 +18,6 @@ export class PaidItemService {
             throw new NotFoundException(`Paid item not found with the code ${nfcTagCode}`);
         return paidItem
     }
-    //TODO: Add Cron?
-    // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT,{
-    //     timeZone:'Asia/Jerusalem'
-    // })
     async cleanCollection(): Promise<string> {
         const deletedAmount: number = (await this.paidItemsModel.deleteMany({})).deletedCount;
         return `Deleted ${deletedAmount} items`;

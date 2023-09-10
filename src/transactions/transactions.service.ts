@@ -178,10 +178,11 @@ export class TransactionsService {
         const monthlyStartDate = this.initMonthlyStartDate();
         const yearlyStartDate = this.initYearlyStartDate(this.NUMBER_OF_LAST_YEARS_FOR_YEARLY_STATS);
      
-        //#region create the objects to holds the data (IStats)
+        // create the objects to holds the data (IStats)
         const weekObject: IStats[] = this.initWeeklyObject();
         const monthObject: IStats[] = this.initMonthlyObject();
         const yearlyObject: IStats[] = this.initYearlyObject();
+        
         const dto:FilterUserTransactionDto = {
             weekObject,
             monthObject,
@@ -195,6 +196,8 @@ export class TransactionsService {
         return this.filterTheTransactionsToObjects(dto);
     }
 
+  //#endregion
+
     async getAllStats(id: Types.ObjectId): Promise<UserFullStats> {
     const cachedItem: UserFullStats = await this.cacheManager.get(`stats-${id.toString()}`)
     if (cachedItem) {
@@ -205,7 +208,6 @@ export class TransactionsService {
     Logger.debug('not found cache item')
     return stats;
 }
-    //#endregion
     async PaymentPipeline(dto: CreateTransactionDto): Promise<Transaction> {
         const session = await this.userModel.db.startSession();
          session.startTransaction();
