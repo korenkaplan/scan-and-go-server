@@ -22,12 +22,14 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { FilterUserTransactionDto } from './dto/Filter-user-transactions.dto';
+import { logger } from 'handlebars';
 export interface Rest {
     totalAmount: number;
     products: ITransactionItem[];
     couponDiscountAmount?: number
 }
 export class TransactionsService {
+    private readonly Logger = new Logger();
     private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 10 }
     private NUMBER_OF_LAST_YEARS_FOR_YEARLY_STATS = 7
     private readonly logger: Logger = new Logger(TransactionsService.name)
@@ -68,21 +70,31 @@ export class TransactionsService {
         const today = new Date();
         const monthObject: IStats[] = [];
         const monthlyStartDate = new Date(today);
-        monthlyStartDate.setDate(today.getMonth() - 11);
-        monthlyStartDate.setDate(1)
+    
+        // Calculate starting month
+        monthlyStartDate.setFullYear(today.getFullYear() - 1); // Go back one year
+        monthlyStartDate.setMonth(today.getMonth() + 1); // Go to the month after the current month
+    
+        // Set the day to 1 for consistency
+        monthlyStartDate.setDate(1);
+    
         for (let i = 0; i < 12; i++) {
-            const year = monthlyStartDate.getFullYear() - 1;
-            const month = monthlyStartDate.getMonth() + 2; // Months are 0-based, so add 1
+            const year = monthlyStartDate.getFullYear();
+            const month = monthlyStartDate.getMonth(); // Months are 0-based, so add 1
+    
             monthObject.push({
                 year: year,
                 label: Month[month],
                 value: 0,
             });
+    
             // Move to the next month
             monthlyStartDate.setMonth(monthlyStartDate.getMonth() + 1);
         }
+    
         return monthObject;
     }
+
     private initYearlyObject(): IStats[] {
         const today = new Date();
         const yearlyObject: IStats[] = [];
