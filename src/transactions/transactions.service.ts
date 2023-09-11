@@ -432,9 +432,14 @@ export class TransactionsService {
         const transactions = await this.transactionModel.find(query, projection)
         return this.decryptTransactions(transactions)
     }
-    async getOne(dto: GetQueryDto<Transaction>): Promise<Transaction> {
-        const { query, projection } = dto
-        const transaction = await this.transactionModel.findOne(query, projection);
+    async getOneById(id:string): Promise<Transaction> {
+        Logger.debug('id: ' + id)
+        const objId = new Types.ObjectId(id)
+        const transaction = await this.transactionModel.findById(objId);
+        Logger.debug(JSON.stringify(transaction))
+        if(!transaction)
+            throw new NotFoundException(`transaction with the id ${id} is not found`)
+
         return this.decryptTransaction(transaction)
     }
     private decryptTransactions(transactions: Transaction[]): Transaction[] {

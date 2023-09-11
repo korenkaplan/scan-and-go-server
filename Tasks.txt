@@ -1,6 +1,4 @@
-* Create the Payment Gateway resource (for the card validations);
 * check why create transaction is committed if failed 
 * think how to solve the coming in and out of the store and the Paid items collection.
-* Create send coupon every month function(think of logic)
 
 

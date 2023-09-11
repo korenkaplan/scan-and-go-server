@@ -14,11 +14,11 @@ export class TransactionsController {
   constructor(private transactionService: TransactionsService) { }
   @Public()
   @Get('/testEmailExcel')
-  async sendTestEmailExcel():Promise<void>{
-     await this.transactionService.testSendEmail();
+  async sendTestEmailExcel(): Promise<void> {
+    await this.transactionService.testSendEmail();
   }
-  @Get('/getMany')
-  async getUsers(@Body() dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
+  @Post('/getMany')
+  async getTransactions(@Body() dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
     return await this.transactionService.getMany(dto);
   }
   @Public()//TODO: Temporary public
@@ -26,9 +26,9 @@ export class TransactionsController {
   async getTransactionsPagination(@Body() dto: GetQueryPaginationDto<Transaction>): Promise<PaginationResponseDto<Transaction>> {
     return await this.transactionService.getManyPagination(dto);
   }
-  @Get('/getOne')
-  async getTransactions(@Body() dto: GetQueryDto<Transaction>): Promise<Transaction> {
-    return await this.transactionService.getOne(dto);
+  @Get('/getOneById')
+  async getTransaction(@Query('id') id: string): Promise<Transaction> {
+    return await this.transactionService.getOneById(id);
   }
   @Post('/createTransaction')
   async createTransactions(@Body() dto: CreateTransactionDto): Promise<Transaction> {
