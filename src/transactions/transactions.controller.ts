@@ -42,7 +42,7 @@ export class TransactionsController {
 
   @Public() //TODO: Temporary public
   @Get('/allStats')
-  @UseInterceptors(CacheInterceptor)
+ // @UseInterceptors(CacheInterceptor)
   async getAllStats(@Query('id') id: Types.ObjectId): Promise<UserFullStats> {
     return await this.transactionService.getAllStats(id);
   }

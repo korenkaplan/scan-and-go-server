@@ -52,20 +52,22 @@ export class TransactionsService {
     private initWeeklyObject(): IStats[] {
         const weekObject: IStats[] = [];
         const today = new Date();
-        const dayOfWeek = today.getDay();
-
+    
         for (let i = 0; i < 7; i++) {
-            const day = (dayOfWeek + 6 - i) % 7; // Calculate the day of the week (0 to 6)
-            today.setDate(today.getDate() - 1);
-
+            const clonedDate = new Date(today); // Clone the date
+            clonedDate.setDate(today.getDate() - i); // Update the cloned date
+            const day = clonedDate.getDay(); // Calculate the day of the week (0 to 6)
+    
             weekObject.push({
                 label: DayOfWeek[day], // Assuming DayOfWeek is an enum
                 value: 0,
-                date: new Date(today), // Initialize date property
+                date: clonedDate, // Use the cloned date
             });
         }
-        return weekObject;
+    
+        return weekObject // Reverse the array to get the correct order
     }
+    
     private initMonthlyObject(): IStats[] {
         const today = new Date();
         const monthObject: IStats[] = [];
