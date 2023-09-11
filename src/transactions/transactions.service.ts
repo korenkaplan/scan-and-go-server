@@ -208,6 +208,8 @@ export class TransactionsService {
         return stats;
     }
     async PaymentPipeline(dto: CreateTransactionDto): Promise<Transaction> {
+        Logger.debug('Total Amount Before: ' + dto.totalAmount)
+
         const session = await this.userModel.db.startSession();
         session.startTransaction();
         try {
@@ -237,6 +239,7 @@ export class TransactionsService {
             //* Step 1.4: charge the credit card
             // charge the credit card
             await this.chargeCreditCard(card, dto);
+            Logger.debug('Total Amount After coupon: ' + dto.totalAmount)
 
             //* Step 2: Create Transaction
 
@@ -329,8 +332,6 @@ export class TransactionsService {
 
     async createTransactionAndNewTransaction(card: CreditCard, rest: Rest, userId: mongoose.Types.ObjectId) {
         rest.totalAmount = Math.floor(rest.totalAmount)
-        console.log('totalAmount: ', rest.totalAmount);
-        
         const transaction: ITransaction = {
             _id: new mongoose.Types.ObjectId(),
             userId,
@@ -341,6 +342,7 @@ export class TransactionsService {
             schemaVersion: TRANSACTION_SCHEMA_VERSION,
             ...rest
         }
+        Logger.debug('Total Amount After Transaction: ' + rest.totalAmount)
 
         const transactionDocument = await this.transactionModel.create(transaction)
         return { transactionDocument: transactionDocument, transaction }
