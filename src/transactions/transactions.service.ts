@@ -433,10 +433,8 @@ export class TransactionsService {
         return this.decryptTransactions(transactions)
     }
     async getOneById(id:string): Promise<Transaction> {
-        Logger.debug('id: ' + id)
         const objId = new Types.ObjectId(id)
         const transaction = await this.transactionModel.findById(objId);
-        Logger.debug(JSON.stringify(transaction))
         if(!transaction)
             throw new NotFoundException(`transaction with the id ${id} is not found`)
 
