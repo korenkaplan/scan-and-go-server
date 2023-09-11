@@ -47,7 +47,7 @@ export class TransactionsService {
         @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
     //#region Analytics
-    private initWeeklyObject():IStats[]{
+    private initWeeklyObject(): IStats[] {
         const weekObject: IStats[] = [];
         const today = new Date();
         const dayOfWeek = today.getDay();
@@ -64,16 +64,15 @@ export class TransactionsService {
         }
         return weekObject;
     }
-
-    private initMonthlyObject():IStats[]{
+    private initMonthlyObject(): IStats[] {
         const today = new Date();
         const monthObject: IStats[] = [];
         const monthlyStartDate = new Date(today);
         monthlyStartDate.setDate(today.getMonth() - 11);
         monthlyStartDate.setDate(1)
         for (let i = 0; i < 12; i++) {
-            const year = monthlyStartDate.getFullYear()-1;
-            const month = monthlyStartDate.getMonth()+2; // Months are 0-based, so add 1
+            const year = monthlyStartDate.getFullYear() - 1;
+            const month = monthlyStartDate.getMonth() + 2; // Months are 0-based, so add 1
             monthObject.push({
                 year: year,
                 label: Month[month],
@@ -84,13 +83,13 @@ export class TransactionsService {
         }
         return monthObject;
     }
-    private initYearlyObject():IStats[]{
+    private initYearlyObject(): IStats[] {
         const today = new Date();
         const yearlyObject: IStats[] = [];
-          //get the last 7 years date
-          const yearlyStartDate = new Date(today);
-          yearlyStartDate.setFullYear(today.getFullYear() - 6);
-          for (let i = 0; i < 7; i++) {
+        //get the last 7 years date
+        const yearlyStartDate = new Date(today);
+        yearlyStartDate.setFullYear(today.getFullYear() - 6);
+        for (let i = 0; i < 7; i++) {
             const year = yearlyStartDate.getFullYear() + i;
             yearlyObject.push({
                 label: year.toString(),
@@ -100,48 +99,48 @@ export class TransactionsService {
         }
         return yearlyObject;
     }
-    private initWeeklyStartDate():Date{
+    private initWeeklyStartDate(): Date {
         const today = new Date();
         const weeklyStartDate = new Date(today);
         weeklyStartDate.setDate(today.getDate() - 7);
         return weeklyStartDate;
     }
-    private initMonthlyStartDate():Date{
+    private initMonthlyStartDate(): Date {
         const today = new Date();
         const monthlyStartDate = new Date(today);
         monthlyStartDate.setDate(today.getMonth() - 11);
         monthlyStartDate.setDate(1)
         return monthlyStartDate;
     }
-    private initYearlyStartDate(yearsBack:number):Date{
+    private initYearlyStartDate(yearsBack: number): Date {
         const today = new Date();
         const yearlyStartDate = new Date(today);
         yearlyStartDate.setFullYear(today.getFullYear() - 1 - yearsBack);
         return yearlyStartDate;
     }
-    private async getUserTransactions(id: mongoose.Types.ObjectId):Promise<Transaction[]>{
-        const transactions = await this.transactionModel.find({userId: id});
-        
-        if(!transactions){
+    private async getUserTransactions(id: mongoose.Types.ObjectId): Promise<Transaction[]> {
+        const transactions = await this.transactionModel.find({ userId: id });
+
+        if (!transactions) {
             throw new NotFoundException('No transactions found');
         }
         return transactions;
     }
-    filterTheTransactionsToObjects(dto:FilterUserTransactionDto):UserFullStats{
-        const {weekObject,monthObject,yearlyObject,weeklyStartDate,monthlyStartDate,yearlyStartDate,userTransactions} = dto;
-        userTransactions.forEach((transaction) =>{
+    filterTheTransactionsToObjects(dto: FilterUserTransactionDto): UserFullStats {
+        const { weekObject, monthObject, yearlyObject, weeklyStartDate, monthlyStartDate, yearlyStartDate, userTransactions } = dto;
+        userTransactions.forEach((transaction) => {
             const transactionDate = transaction.createdAt;
-            if( transactionDate > weeklyStartDate) //if the transaction ocurred in the last week
-            {   
-                 const transactionDate = transaction.createdAt.getDate()
-                 const matchingDay = weekObject.find((day) => day.date.getDate() == transactionDate)
-                 if (matchingDay) {
+            if (transactionDate > weeklyStartDate) //if the transaction ocurred in the last week
+            {
+                const transactionDate = transaction.createdAt.getDate()
+                const matchingDay = weekObject.find((day) => day.date.getDate() == transactionDate)
+                if (matchingDay) {
                     matchingDay.value += transaction.totalAmount
-                 }
+                }
             }
 
-            if(transactionDate > monthlyStartDate)// if the transaction ocurred in the last year
-            {   
+            if (transactionDate > monthlyStartDate)// if the transaction ocurred in the last year
+            {
                 const transactionYear = transaction.createdAt.getFullYear();
                 const transactionMonth = transaction.createdAt.getMonth(); // Months are 0-based, so add 1
                 // Find the corresponding month in the monthObject and update the sumAmount
@@ -152,7 +151,7 @@ export class TransactionsService {
                     matchingMonth.value += transaction.totalAmount;
                 }
             }
-            if(transactionDate > yearlyStartDate) // if the transaction ocurred in the last 7 years
+            if (transactionDate > yearlyStartDate) // if the transaction ocurred in the last 7 years
             {
                 const transactionYear = transaction.createdAt.getFullYear();
                 const matchingYear = yearlyObject.find((year) => year.label == transactionYear.toString());
@@ -162,28 +161,28 @@ export class TransactionsService {
             }
 
         })
-        const stats:UserFullStats = {
-            weekly:weekObject.reverse(),
-            monthly:monthObject,
-            yearly:yearlyObject
-         }
-         return stats;
+        const stats: UserFullStats = {
+            weekly: weekObject.reverse(),
+            monthly: monthObject,
+            yearly: yearlyObject
+        }
+        return stats;
     }
-    async createAnalytics(id: mongoose.Types.ObjectId):Promise<UserFullStats>{
+    async createAnalytics(id: mongoose.Types.ObjectId): Promise<UserFullStats> {
         //#1 get the user transactions
-        const userTransactions = await this.getUserTransactions(id); 
+        const userTransactions = await this.getUserTransactions(id);
 
         //2# create the start dates of the last week, last year and last x years
         const weeklyStartDate = this.initWeeklyStartDate();
         const monthlyStartDate = this.initMonthlyStartDate();
         const yearlyStartDate = this.initYearlyStartDate(this.NUMBER_OF_LAST_YEARS_FOR_YEARLY_STATS);
-     
+
         // create the objects to holds the data (IStats)
         const weekObject: IStats[] = this.initWeeklyObject();
         const monthObject: IStats[] = this.initMonthlyObject();
         const yearlyObject: IStats[] = this.initYearlyObject();
-        
-        const dto:FilterUserTransactionDto = {
+
+        const dto: FilterUserTransactionDto = {
             weekObject,
             monthObject,
             yearlyObject,
@@ -196,21 +195,21 @@ export class TransactionsService {
         return this.filterTheTransactionsToObjects(dto);
     }
 
-  //#endregion
+    //#endregion
 
     async getAllStats(id: Types.ObjectId): Promise<UserFullStats> {
-    const cachedItem: UserFullStats = await this.cacheManager.get(`stats-${id.toString()}`)
-    if (cachedItem) {
-        return cachedItem;
+        const cachedItem: UserFullStats = await this.cacheManager.get(`stats-${id.toString()}`)
+        if (cachedItem) {
+            return cachedItem;
+        }
+        const stats = this.createAnalytics(id);
+        await this.cacheManager.set(`stats-${id}`, stats, 60)
+        Logger.debug('not found cache item')
+        return stats;
     }
-    const stats = this.createAnalytics(id);
-    await this.cacheManager.set(`stats-${id}`, stats, 60)
-    Logger.debug('not found cache item')
-    return stats;
-}
     async PaymentPipeline(dto: CreateTransactionDto): Promise<Transaction> {
         const session = await this.userModel.db.startSession();
-         session.startTransaction();
+        session.startTransaction();
         try {
             //#region the payment and transaction pipeline
             //* Step 1: Validation
@@ -309,7 +308,7 @@ export class TransactionsService {
     }
 
     private createAbstractObjectsForUserArrays(newTransaction: Transaction, transaction: ITransaction) {
-        const latestTransaction: RecentTransaction =  {
+        const latestTransaction: RecentTransaction = {
             _id: newTransaction._id,
             totalAmount: transaction.totalAmount,
             formattedDate: transaction.formattedDate,
@@ -329,7 +328,7 @@ export class TransactionsService {
     }
 
     async createTransactionAndNewTransaction(card: CreditCard, rest: Rest, userId: mongoose.Types.ObjectId) {
-
+        rest.totalAmount = Math.floor(rest.totalAmount)
         const transaction: ITransaction = {
             _id: new mongoose.Types.ObjectId(),
             userId,
@@ -401,30 +400,30 @@ export class TransactionsService {
     async getManyPagination(dto: GetQueryPaginationDto<Transaction>): Promise<PaginationResponseDto<Transaction>> {
         // Extract relevant information from the input DTO
         const { query, projection, currentPage } = dto;
-        
+
         // Configure pagination settings based on global service and local configuration
         const { limit, sort } = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG);
         const skipAmount = currentPage * limit;
-    
+
         // Retrieve transactions from the database based on query, projection, pagination, and sorting
         const transactions = await this.transactionModel.find(query, projection).skip(skipAmount).limit(limit + 1).sort(sort);
-    
+
         // Check if there are more records than the specified limit
         const isMore = transactions.length > limit;
         if (isMore) {
             transactions.pop(); // Remove extra record used for pagination check
         }
-    
+
         // Decrypt the retrieved transactions for further processing
         const decryptedTransactions = this.decryptTransactions(transactions);
-    
+
         // Prepare the response object with the decrypted transactions
         const res: PaginationResponseDto<Transaction> = {
             list: decryptedTransactions,
             pageNumber: currentPage,
             isMore
         }
-    
+
         return res; // Return the paginated response
     }
     async getMany(dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
@@ -432,10 +431,10 @@ export class TransactionsService {
         const transactions = await this.transactionModel.find(query, projection)
         return this.decryptTransactions(transactions)
     }
-    async getOneById(id:string): Promise<Transaction> {
+    async getOneById(id: string): Promise<Transaction> {
         const objId = new Types.ObjectId(id)
         const transaction = await this.transactionModel.findById(objId);
-        if(!transaction)
+        if (!transaction)
             throw new NotFoundException(`transaction with the id ${id} is not found`)
 
         return this.decryptTransaction(transaction)
@@ -468,7 +467,7 @@ export class TransactionsService {
         const deleted = await this.transactionModel.deleteMany({});
         return deleted.deletedCount
     }
-  
+
     //#region Send a report on a daily / weekly / monthly bases.
     @Cron(CronExpression.EVERY_DAY_AT_9PM)
     async sendDailyTransactionsRecap(): Promise<void> {
@@ -476,7 +475,7 @@ export class TransactionsService {
         const startDate = new Date();
         const timePeriod = 'Daily'
         startDate.setDate(today.getDate() - 1);
-        return this.mailService.sendTransactionRecap(startDate,today,timePeriod)
+        return this.mailService.sendTransactionRecap(startDate, today, timePeriod)
     }
     @Cron(CronExpression.EVERY_WEEK)
     async sendWeeklyTransactionsRecap(): Promise<void> {
@@ -484,7 +483,7 @@ export class TransactionsService {
         const startDate = new Date();
         const timePeriod = 'Weekly'
         startDate.setDate(today.getDate() - 7);
-        return this.mailService.sendTransactionRecap(startDate,today,timePeriod)
+        return this.mailService.sendTransactionRecap(startDate, today, timePeriod)
     }
     @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_MIDNIGHT)
     async sendMonthlyTransactionsRecap(): Promise<void> {
@@ -492,14 +491,14 @@ export class TransactionsService {
         const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1); // Start of last month
         const endDate = new Date(today.getFullYear(), today.getMonth(), 0); // End of last month
         const timePeriod = 'Monthly'
-        return this.mailService.sendTransactionRecap(startDate, endDate,timePeriod);
+        return this.mailService.sendTransactionRecap(startDate, endDate, timePeriod);
     }
-    async testSendEmail(): Promise<void>{
+    async testSendEmail(): Promise<void> {
         const today = new Date();
         const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1); // Start of last month
         const endDate = new Date(today.getFullYear(), today.getMonth(), 0); // End of last month
         const timePeriod = 'Monthly'
-        return this.mailService.sendTransactionRecap(startDate, endDate,timePeriod);
+        return this.mailService.sendTransactionRecap(startDate, endDate, timePeriod);
     }
     //#endregion
 }
