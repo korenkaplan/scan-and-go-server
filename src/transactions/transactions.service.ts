@@ -329,6 +329,8 @@ export class TransactionsService {
 
     async createTransactionAndNewTransaction(card: CreditCard, rest: Rest, userId: mongoose.Types.ObjectId) {
         rest.totalAmount = Math.floor(rest.totalAmount)
+        console.log('totalAmount: ', rest.totalAmount);
+        
         const transaction: ITransaction = {
             _id: new mongoose.Types.ObjectId(),
             userId,
