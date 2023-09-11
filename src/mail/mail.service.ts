@@ -5,7 +5,7 @@ import { UserService } from 'src/user/user.service';
 import { VerificationEmailResponse } from './dto/verification-respond.dto';
 import { User } from 'src/user/schemas/user.schema';
 import { GetQueryDto } from 'src/global/global.dto';
-import mongoose, { Model } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { EmailItem } from 'src/global/global.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import { Transaction } from 'src/transactions/schemas/transaction.schema';
@@ -14,13 +14,17 @@ import moment from 'moment';
 import { SendExcelDto } from './dto/send-excel.dto';
 import * as fs from 'fs';
 import { join } from 'path';
+import { ICoupon } from 'src/coupon/schemas/coupon.schema';
 @Injectable()
 export class MailService {
     private readonly Logger: Logger = new Logger();
+    private readonly fromString: string ='The Scan & Go Team';
     constructor(
         private mailerService: MailerService,
         @Inject(forwardRef(() => UserService)) private userService: UserService,
         @InjectModel(Transaction.name) private readonly transactionModel: Model<Transaction>,
+        @InjectModel(User.name) private readonly userModel: Model<User>,
+
     ) { }
     //TODO: Create send coupon function(think of logic)
     async sendResetPasswordEmail(email: string): Promise<VerificationEmailResponse> {
@@ -32,13 +36,31 @@ export class MailService {
         await this.mailerService.sendMail({
             to: email,
             subject: 'Scan & Go Password Reset',
-            from: 'The Scan & Go Team',
+            from: this.fromString,
             template: 'passwordResetEmail',
             context: {
                 digits: number
             }
         });
         return this.createResObject(isExist, number, userId);
+    }
+    async sendCouponEmail(coupon:ICoupon){
+     const userEmails:{email:string,_id:Types.ObjectId}[] = await this.userModel.find({},{email:1,_id:0})
+     const emails = userEmails.map(user=>user.email)
+     await this.mailerService.sendMail({
+        to:emails,
+        subject: 'Scan & Go Gift Coupon',
+        from: this.fromString,
+        template: 'giftCoupon',
+        context:{
+            couponCode: coupon.code,
+            expirationDate:coupon.validUntil.toDateString(),
+            percent:coupon.discountPercentage,
+            maxAmount:coupon.maxUsageCount
+        }
+
+    })
+
     }
     async sendExcelFile(dto:SendExcelDto) {
         const {email, fileName,filePath,timePeriod,startDate,endDate} = dto;
@@ -68,7 +90,7 @@ export class MailService {
         await this.mailerService.sendMail({
             to: email,
             subject: 'Scan & Go Order Confirmation',
-            from: 'The Scan & Go Team',
+            from: this.fromString,
             template: 'orderConfirmation',
             context: {
                 items: purchasedItems,

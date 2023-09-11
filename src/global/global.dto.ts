@@ -3,14 +3,14 @@ import { FilterQuery, ProjectionFields, UpdateQuery } from "mongoose";
 export class GetQueryDto<T> {
     query: FilterQuery<T>
     projection: ProjectionFields<T>
-    currentPage?: number
-    limit?: number
-    sort?: Record<string, -1 | 1>
 }
 export class GetQueryPaginationDto<T> {
     query: FilterQuery<T>
     projection: ProjectionFields<T>
     currentPage: number
+    limit?: number
+    sort?: Record<string, -1 | 1>
+
 }
 export class PaginationResponseDto<T> {
     list: T[]

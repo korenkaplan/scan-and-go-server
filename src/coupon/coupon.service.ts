@@ -1,18 +1,40 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException,Logger} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Coupon, ICoupon } from './schemas/coupon.schema';
 import mongoose, { Model } from 'mongoose';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { GetQueryDto, UpdateQueryDto } from 'src/global/global.dto';
 import { COUPON_SCHEMA_VERSION } from 'src/global/global.schema-versions';
+import { MailService } from 'src/mail/mail.service';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class CouponService {
+     private readonly GIFT_COUPON_DISCOUNT_PERCENTAGE: number = 10
+     private readonly Logger = new Logger()
     constructor( 
         @InjectModel(Coupon.name) 
         private readonly couponModel:Model<Coupon>,
+        private mailService:MailService
     ) { }
-
+    @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_NOON)
+    async sendGiftCoupon(): Promise<void>{
+    const code: string = this.generateRandomWord(6) + this.GIFT_COUPON_DISCOUNT_PERCENTAGE;
+    const validFrom = new Date();
+    const validUntil =new Date(validFrom);
+    validUntil.setDate(validFrom.getDate() + 7);
+    const maxUsageCount = 1000
+    const dto:CreateCouponDto = {
+        maxUsageCount,
+        code,
+        validFrom,
+        validUntil,
+        discountPercentage: this.GIFT_COUPON_DISCOUNT_PERCENTAGE
+    }
+    const coupon = await this.createCoupon(dto)
+    await this.mailService.sendCouponEmail(coupon)
+    Logger.log('send coupon')
+    }
     async createCoupon(dto:CreateCouponDto):Promise<Coupon>{
         //destructure dto
         const {...rest} = dto
@@ -61,4 +83,15 @@ export class CouponService {
         throw new NotFoundException('No coupon found')
         return updatedCoupon;
     }
+     generateRandomWord(length) {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let randomWord = '';
+    
+        for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * characters.length);
+            randomWord += characters[randomIndex];
+        }
+        return randomWord;
+    }
+    
 }

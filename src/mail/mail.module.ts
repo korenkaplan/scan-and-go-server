@@ -6,10 +6,12 @@ import { join } from 'path';
 import { UserModule } from 'src/user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Transaction, TransactionSchema } from 'src/transactions/schemas/transaction.schema';
+import { User, UserSchema } from 'src/user/schemas/user.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{name:Transaction.name,schema:TransactionSchema}]),
+    MongooseModule.forFeature([{name:Transaction.name,schema:TransactionSchema},
+      {name:User.name,schema:UserSchema}]),
     UserModule,
     MailerModule.forRootAsync({
       useFactory: async () => ({
@@ -39,7 +41,7 @@ import { Transaction, TransactionSchema } from 'src/transactions/schemas/transac
         secure: false,
 
       })
-    })
+    }),
   ],
   providers: [MailService],
   exports: [MailService], // 👈 export for DI

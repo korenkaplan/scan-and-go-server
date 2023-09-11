@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt'
 import * as CryptoJS from 'crypto-js'
-import { GetQueryDto, LocalPaginationConfig } from './global.dto';
+import { GetQueryDto, GetQueryPaginationDto, LocalPaginationConfig } from './global.dto';
 import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { CardType, CardValidationRegex } from './global.enum';
 
@@ -26,7 +26,7 @@ export class GlobalService {
         
         return originalText;
     }
-    configPagination<T>(dto: GetQueryDto<T>, locals: LocalPaginationConfig): LocalPaginationConfig {
+    configPagination<T>(dto: GetQueryPaginationDto<T>, locals: LocalPaginationConfig): LocalPaginationConfig {
         const sort = dto?.sort || locals.sort;
         const limit = dto?.limit || locals.limit;
         const result: LocalPaginationConfig = { sort, limit}

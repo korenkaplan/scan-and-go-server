@@ -1,9 +1,10 @@
-import { Body, Controller, Delete,Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete,Get,Post, Query } from '@nestjs/common';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { CouponService } from './coupon.service';
 import { GetQueryDto } from 'src/global/global.dto';
 import { Coupon } from './schemas/coupon.schema';
 import mongoose from 'mongoose';
+import { Public } from 'src/auth/decorators/public-guard.decorator';
 
 @Controller('coupon')
 export class CouponController {
@@ -23,6 +24,11 @@ constructor(private readonly couponService: CouponService){}
     @Post('getOne')
     async getOne(@Body() dto: GetQueryDto<Coupon>){
         return await this.couponService.getOne(dto);
+    }
+    @Public()
+    @Get('sendGiftCoupon')
+    async sendGiftCoupon(){
+        await this.couponService.sendGiftCoupon();
     }
 
 }
