@@ -1,4 +1,3 @@
-* check why create transaction is committed if failed 
-* think how to solve the coming in and out of the store and the Paid items collection.
-
+*the bucket design pattern: Transactions (user ID), Paid items(item id)
+* Yearly paid items collection
 
