@@ -4,7 +4,6 @@ import { IPaidItem, PaidItem } from './schemas/paid-item.schema';
 import mongoose, { Model } from 'mongoose';
 import { CreatePaidItemDto, GetPaidItemDto } from './dto/paid-item.dto';
 import { PAID_ITEM_SCHEMA_VERSION } from 'src/global/global.schema-versions';
-import { Item } from 'src/item/schemas/item.schema';
 import { MAX_AMOUNT_OF_TAG_CODES } from './paid-item.config';
 //import { Cron, CronExpression } from '@nestjs/schedule';
 
@@ -14,8 +13,6 @@ export class PaidItemService {
     constructor(
         @InjectModel(PaidItem.name)
         private paidItemsModel: Model<PaidItem>,
-        @InjectModel(Item.name)
-        private itemModel: Model<Item>,
     ) { }
     //TODO: Check functionality: getOne()
     async getOne(dto: GetPaidItemDto): Promise<PaidItem> {

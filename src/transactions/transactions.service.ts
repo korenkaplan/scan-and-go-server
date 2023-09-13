@@ -292,7 +292,7 @@ export class TransactionsService {
 
     }
     //#region Sub functions for payment Pipeline
-    private async updatePaidItemsCollection(transaction: ITransaction, id: mongoose.Types.ObjectId, newTransaction: Transaction) {
+    private async updatePaidItemsCollection(transaction: ITransaction, newTransaction: Transaction) {
         const paidItems: IPaidItem[] = transaction.products.map(product => {
             const paidItem: IPaidItem = {
                 nfcTagCode: product.nfcTagCode,
@@ -308,7 +308,22 @@ export class TransactionsService {
 
         await this.paidItemModel.insertMany(paidItems);
     }
+    // private async updatePaidItemsCollection(transaction: ITransaction, newTransaction: Transaction) {
+    //     const paidItems: IPaidItem[] = transaction.products.map(product => {
+    //         const paidItem: IPaidItem = {
+    //             nfcTagCode: product.nfcTagCode,
+    //             userId: id,
+    //             itemId: product.itemId,
+    //             transactionId: newTransaction._id,
+    //             createdAt: new Date(),
+    //             schemaVersion: PAID_ITEM_SCHEMA_VERSION,
+    //         };
 
+    //         return paidItem;
+    //     });
+
+    //     await this.paidItemModel.insertMany(paidItems);
+    // }
     private async updateTheUser(user: User, latestTransaction: RecentTransaction, latestItems: RecentItem[]) {
         user.recentTransactions.unshift(latestTransaction);
         user.recentTransactions.splice(10);
