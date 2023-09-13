@@ -1,39 +1,40 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { Document } from "mongoose";
 import { Item } from "src/item/schemas/item.schema";
-import { Transaction } from "src/transactions/schemas/transaction.schema";
-import { User } from "src/user/schemas/user.schema";
 
 @Schema({
     timestamps: { createdAt: true, updatedAt: false },
-    collection: 'paidItems'
+    collection: 'paidItems',
+
 })
 export class PaidItem extends Document {
-    @Prop({ unique: true })
-    nfcTagCode: string
+    @Prop()
+    tagsCodes: string[]
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Item' })
     itemId: Item
-
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Transaction' })
-    transactionId: Transaction
-
-    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
-    userId: User
 
     @Prop()
     createdAt: Date
 
     @Prop()
     schemaVersion: number
+
+    @Prop()
+    tagsAmount: number
+
+    @Prop()
+    maxTagsAmount: number
+
 }
 export interface IPaidItem {
     _id?: mongoose.Types.ObjectId
-    nfcTagCode: string
-    transactionId: mongoose.Types.ObjectId
+    tagsCodes: string[]
     itemId: mongoose.Types.ObjectId
-    userId: mongoose.Types.ObjectId
     createdAt: Date,
-    schemaVersion: number
+    schemaVersion: number,
+    tagsAmount: number,
+    maxTagsAmount: number,
 }
 export const PaidItemSchema = SchemaFactory.createForClass(PaidItem)
+PaidItemSchema.index({ itemId: 1, tagsCodes: 1 })

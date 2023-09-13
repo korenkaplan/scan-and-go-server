@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt'
 import * as CryptoJS from 'crypto-js'
-import { GetQueryDto, GetQueryPaginationDto, LocalPaginationConfig } from './global.dto';
+import {  GetQueryPaginationDto, LocalPaginationConfig } from './global.dto';
 import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { CardType, CardValidationRegex } from './global.enum';
 

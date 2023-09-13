@@ -1,16 +1,16 @@
-import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Post } from '@nestjs/common';
 import { PaidItemService } from './paid-item.service';
 import { Public } from 'src/auth/decorators/public-guard.decorator';
-import { CreatePaidItemDto } from './dto/create-pad-item.dto';
+import { CreatePaidItemDto, GetPaidItemDto } from './dto/paid-item.dto';
 import { PaidItem } from './schemas/paid-item.schema';
 
 @Controller('paid-item')
 export class PaidItemController {
     constructor(private readonly paidItemService: PaidItemService) { }
     @Public()
-    @Get('/getOne')
-    async getOne(@Query('nfcCode') nfcCode: string): Promise<PaidItem> {
-        return await this.paidItemService.getOne(nfcCode);
+    @Post('/getOne')
+    async getOne(@Body() dto: GetPaidItemDto): Promise<PaidItem> {
+        return await this.paidItemService.getOne(dto);
     }
     @Public()
     @Post('/create')
@@ -18,7 +18,7 @@ export class PaidItemController {
         return await this.paidItemService.create(dto);
     }
     @Delete('/destroy')
-    async destroy():Promise<string>{
+    async destroy(): Promise<string> {
         return await this.paidItemService.cleanCollection();
     }
 
