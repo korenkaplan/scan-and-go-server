@@ -197,7 +197,7 @@ export class UserService {
             else if (card._id == cardId) {
                 card.isDefault = true;
             }
-            console.log(card);
+
 
             return card;
         })

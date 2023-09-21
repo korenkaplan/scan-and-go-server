@@ -43,56 +43,56 @@ export class TransactionsService {
         @InjectModel(NfcTag.name)
         private globalService: GlobalService,
         private mailService: MailService,
-        @Inject(forwardRef(()=>PaidItemService))
-        private paidItemService:PaidItemService,
+        @Inject(forwardRef(() => PaidItemService))
+        private paidItemService: PaidItemService,
         @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
     //#region Analytics
     private initWeeklyObject(): IStats[] {
         const weekObject: IStats[] = [];
         const today = new Date();
-    
+
         for (let i = 0; i < 7; i++) {
             const clonedDate = new Date(today); // Clone the date
             clonedDate.setDate(today.getDate() - i); // Update the cloned date
             const day = clonedDate.getDay(); // Calculate the day of the week (0 to 6)
-    
+
             weekObject.push({
                 label: DayOfWeek[day], // Assuming DayOfWeek is an enum
                 value: 0,
                 date: clonedDate, // Use the cloned date
             });
         }
-    
+
         return weekObject // Reverse the array to get the correct order
     }
-    
+
     private initMonthlyObject(): IStats[] {
         const today = new Date();
         const monthObject: IStats[] = [];
         const monthlyStartDate = new Date(today);
-    
+
         // Calculate starting month
         monthlyStartDate.setFullYear(today.getFullYear() - 1); // Go back one year
         monthlyStartDate.setMonth(today.getMonth() + 1); // Go to the month after the current month
-    
+
         // Set the day to 1 for consistency
         monthlyStartDate.setDate(1);
-    
+
         for (let i = 0; i < 12; i++) {
             const year = monthlyStartDate.getFullYear();
             const month = monthlyStartDate.getMonth(); // Months are 0-based, so add 1
-    
+
             monthObject.push({
                 year: year,
                 label: Month[month],
                 value: 0,
             });
-    
+
             // Move to the next month
             monthlyStartDate.setMonth(monthlyStartDate.getMonth() + 1);
         }
-    
+
         return monthObject;
     }
 
@@ -217,11 +217,11 @@ export class TransactionsService {
         }
         const stats = this.createAnalytics(id);
         await this.cacheManager.set(`stats-${id}`, stats, 60)
-        Logger.debug('not found cache item')
+
         return stats;
     }
     async PaymentPipeline(dto: CreateTransactionDto): Promise<Transaction> {
-        Logger.debug('Total Amount Before: ' + dto.totalAmount)
+
 
         const session = await this.userModel.db.startSession();
         session.startTransaction();
@@ -232,10 +232,10 @@ export class TransactionsService {
             //* Step 1.1: validate user and card
             // validate the user
             const user = await this.validateUser(userId);
-            Logger.debug('Validated User: ' + user.fullName)
+
             // validate the card
             const card = await this.validateCard(user, cardId);
-            Logger.debug('Validated Card: ' + card.cardType)
+
 
             if (couponId) {
                 //* Step 1.2: validate coupon if coupon is used in the transaction
@@ -244,21 +244,21 @@ export class TransactionsService {
 
                 //* Step 1.3: update coupon and transaction price
                 dto = this.discountCouponFromPrice(coupon, dto);
-                Logger.debug('Validated Coupon: ' + coupon.code)
+
                 rest.couponDiscountAmount = dto.couponDiscountAmount;
                 rest.totalAmount = dto.totalAmount;
             }
 
             //* Step 1.4: charge the credit card
             // charge the credit card
-          //  await this.chargeCreditCard(card, dto);
-            Logger.debug('Total Amount After coupon: ' + dto.totalAmount)
+            //  await this.chargeCreditCard(card, dto);
+
 
             //* Step 2: Create Transaction
 
             // create the transaction object and save to the collection
             const { transactionDocument, transaction } = await this.createTransactionAndNewTransaction(card, rest, userId)
-            Logger.debug('Created Transaction: ' + transactionDocument._id)
+
 
             //* Step 3: Update the user 
             //* Step 3.1: create the abstract transaction and recent items from transaction
@@ -266,18 +266,18 @@ export class TransactionsService {
 
             //* Step 3.2: add to the user's latest transaction and latest items arrays
             await this.updateTheUser(user, latestTransaction, latestItems);
-            Logger.debug('updated  user transaction list length:' + user.recentTransactions.length)
+
 
             //* Step 4: Update the paid items collection
             //add the items (nfc chip) to the paid items collection
             await this.updatePaidItemsCollection(transaction);
-            Logger.debug('updated paid collection item')
+
 
             //#endregion
 
             //send the order confirmation email after the transaction has been committed successfully
             await this.mailService.sendOrderConfirmationEmail(user.email, transaction.products, user.fullName, transaction.totalAmount)
-            Logger.debug('Sent order confirmation email')
+
             //commit the transaction
             await session.commitTransaction();
             return transactionDocument
@@ -294,9 +294,9 @@ export class TransactionsService {
 
     //TODO: Check functionality:updatePaidItemsCollection
     private async updatePaidItemsCollection(transaction: ITransaction) {
-        const { products} = transaction;
+        const { products } = transaction;
         products.forEach(product => {
-            const dto:CreatePaidItemDto = {nfcTagCode:product.nfcTagCode, itemId:product.itemId}
+            const dto: CreatePaidItemDto = { nfcTagCode: product.nfcTagCode, itemId: product.itemId }
             this.paidItemService.create(dto);
         });
 
@@ -349,7 +349,7 @@ export class TransactionsService {
             schemaVersion: TRANSACTION_SCHEMA_VERSION,
             ...rest
         }
-        Logger.debug('Total Amount After Transaction: ' + rest.totalAmount)
+
 
         const transactionDocument = await this.transactionModel.create(transaction)
         return { transactionDocument: transactionDocument, transaction }

@@ -18,7 +18,7 @@ import { ICoupon } from 'src/coupon/schemas/coupon.schema';
 @Injectable()
 export class MailService {
     private readonly Logger: Logger = new Logger();
-    private readonly fromString: string ='The Scan & Go Team';
+    private readonly fromString: string = 'The Scan & Go Team';
     constructor(
         private mailerService: MailerService,
         @Inject(forwardRef(() => UserService)) private userService: UserService,
@@ -44,33 +44,33 @@ export class MailService {
         });
         return this.createResObject(isExist, number, userId);
     }
-    async sendCouponEmail(coupon:ICoupon){
-     const userEmails:{email:string,_id:Types.ObjectId}[] = await this.userModel.find({},{email:1,_id:0})
-     const emails = userEmails.map(user=>user.email)
-     await this.mailerService.sendMail({
-        to:emails,
-        subject: 'Scan & Go Gift Coupon',
-        from: this.fromString,
-        template: 'giftCoupon',
-        context:{
-            couponCode: coupon.code,
-            expirationDate:coupon.validUntil.toDateString(),
-            percent:coupon.discountPercentage,
-            maxAmount:coupon.maxUsageCount
-        }
+    async sendCouponEmail(coupon: ICoupon) {
+        const userEmails: { email: string, _id: Types.ObjectId }[] = await this.userModel.find({}, { email: 1, _id: 0 })
+        const emails = userEmails.map(user => user.email)
+        await this.mailerService.sendMail({
+            to: emails,
+            subject: 'Scan & Go Gift Coupon',
+            from: this.fromString,
+            template: 'giftCoupon',
+            context: {
+                couponCode: coupon.code,
+                expirationDate: coupon.validUntil.toDateString(),
+                percent: coupon.discountPercentage,
+                maxAmount: coupon.maxUsageCount
+            }
 
-    })
+        })
 
     }
-    async sendExcelFile(dto:SendExcelDto) {
-        const {email, fileName,filePath,timePeriod,startDate,endDate} = dto;
+    async sendExcelFile(dto: SendExcelDto) {
+        const { email, fileName, filePath, timePeriod, startDate, endDate } = dto;
         if (fs.existsSync(filePath)) {
             await this.mailerService.sendMail({
                 to: email,
                 subject: `Scan & Go Transactions ${timePeriod} Report`,
                 from: 'No Reply <The Scan & Go Team>',
                 template: 'transactionsRecap',
-                context:{
+                context: {
                     timePeriod,
                     startDate,
                     endDate
@@ -122,12 +122,12 @@ export class MailService {
     async createDirectoryIfNotExists(directoryPath) {
         if (!fs.existsSync(directoryPath)) {
             fs.mkdirSync(directoryPath, { recursive: true });
-            Logger.debug(`Directory "${directoryPath}" created successfully.`);
+
         } else {
-            Logger.debug(`Directory "${directoryPath}" already exists.`);
+
         }
     }
-    async sendTransactionRecap(startDate: Date, endDate: Date,timePeriod:string): Promise<void> {
+    async sendTransactionRecap(startDate: Date, endDate: Date, timePeriod: string): Promise<void> {
         const { workBook, sheet } = this.createTransactionWorkbook();
         const formattedStartDate = moment(startDate).format('DD.MM.YYYY')
         const formattedEndDate = moment(endDate).format('DD.MM.YYYY')
@@ -152,18 +152,18 @@ export class MailService {
         await workBook.xlsx.writeFile(filePath);
         await this.checkFileExists(filePath);
         const storeManagerEmail = process.env.STORE_MANAGER_MAIL;
-        const dto:SendExcelDto = {
+        const dto: SendExcelDto = {
             email: storeManagerEmail,
             fileName,
             filePath,
-            startDate:formattedStartDate,
+            startDate: formattedStartDate,
             endDate: formattedEndDate,
             timePeriod
         }
         await this.sendExcelFile(dto);
-        fs.unlink(filePath,(err:any)=>{
-            if(err)
-            Logger.error('Error deleting file: ' + err.message);
+        fs.unlink(filePath, (err: any) => {
+            if (err)
+                Logger.error('Error deleting file: ' + err.message);
         })
     }
     private createTransactionWorkbook() {
@@ -190,13 +190,13 @@ export class MailService {
     }
     private async checkFileExists(filePath) {
         try {
-             fs.access(filePath,(err:any) => {
-                if(err)
-                Logger.error(err);
-             });
+            fs.access(filePath, (err: any) => {
+                if (err)
+                    Logger.error(err);
+            });
         } catch (error) {
             if (error.code === 'ENOENT') {
-                console.log('checkFileExists: File does not exist');
+
             } else {
                 throw error;
             }

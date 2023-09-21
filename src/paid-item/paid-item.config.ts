@@ -1,1 +1,1 @@
-export const  MAX_AMOUNT_OF_TAG_CODES = 100
+export const MAX_AMOUNT_OF_TAG_CODES = 50000

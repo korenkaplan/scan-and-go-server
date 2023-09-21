@@ -59,7 +59,7 @@ export class ItemService {
     ];
 
     await this.itemModel.insertMany(items);
-    console.log('inserted');
+
 
   }
   async getAllItemsForNfcAddition(): Promise<ItemForNfcAddition[]> {
