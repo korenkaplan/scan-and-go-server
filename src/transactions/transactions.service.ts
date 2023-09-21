@@ -1,10 +1,10 @@
-import { BadRequestException, Inject, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Logger, NotFoundException, forwardRef } from '@nestjs/common';
 import { ITransaction, Transaction } from './schemas/transaction.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
 import { GetQueryDto, GetQueryPaginationDto, LocalPaginationConfig, PaginationResponseDto } from 'src/global/global.dto';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { PAID_ITEM_SCHEMA_VERSION, TRANSACTION_SCHEMA_VERSION } from 'src/global/global.schema-versions';
+import { TRANSACTION_SCHEMA_VERSION } from 'src/global/global.schema-versions';
 import moment from 'moment';
 import { GlobalService } from 'src/global/global.service';
 import { User } from 'src/user/schemas/user.schema';
@@ -12,7 +12,6 @@ import { Coupon } from 'src/coupon/schemas/coupon.schema';
 import { RecentTransaction } from 'src/user/schemas/recent-transactions.interface';
 import { RecentItem } from 'src/user/schemas/recent-items.interface';
 import { NfcTag } from 'src/nfc_tag/schemas/nfc-tag.schema';
-import { IPaidItem, PaidItem } from 'src/paid-item/schemas/paid-item.schema';
 import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { ITransactionItem } from './dto/transaction-item.interface';
 import { MailService } from 'src/mail/mail.service';
@@ -22,7 +21,8 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { FilterUserTransactionDto } from './dto/Filter-user-transactions.dto';
-import { logger } from 'handlebars';
+import { PaidItemService } from 'src/paid-item/paid-item.service';
+import { CreatePaidItemDto } from 'src/paid-item/dto/paid-item.dto';
 export interface Rest {
     totalAmount: number;
     products: ITransactionItem[];
@@ -42,10 +42,10 @@ export class TransactionsService {
         private couponModel: Model<Coupon>,
         @InjectModel(NfcTag.name)
         private nfcTagModel: Model<NfcTag>,
-        @InjectModel(PaidItem.name)
-        private paidItemModel: Model<PaidItem>,
         private globalService: GlobalService,
         private mailService: MailService,
+        @Inject(forwardRef(()=>PaidItemService))
+        private paidItemService:PaidItemService,
         @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
     //#region Analytics
@@ -271,7 +271,7 @@ export class TransactionsService {
 
             //* Step 4: Update the paid items collection
             //add the items (nfc chip) to the paid items collection
-            await this.updatePaidItemsCollection(transaction, user._id, transactionDocument);
+            await this.updatePaidItemsCollection(transaction);
             Logger.debug('updated paid collection item')
 
             //#endregion
@@ -292,22 +292,18 @@ export class TransactionsService {
 
     }
     //#region Sub functions for payment Pipeline
-    private async updatePaidItemsCollection(transaction: ITransaction, newTransaction: Transaction) {
-        const paidItems: IPaidItem[] = transaction.products.map(product => {
-            const paidItem: IPaidItem = {
-                nfcTagCode: product.nfcTagCode,
-                userId: id,
-                itemId: product.itemId,
-                transactionId: newTransaction._id,
-                createdAt: new Date(),
-                schemaVersion: PAID_ITEM_SCHEMA_VERSION,
-            };
 
-            return paidItem;
+    //TODO: Check functionality:updatePaidItemsCollection
+    private async updatePaidItemsCollection(transaction: ITransaction) {
+        const { products} = transaction;
+        products.forEach(product => {
+            const dto:CreatePaidItemDto = {nfcTagCode:product.nfcTagCode, itemId:product.itemId}
+            this.paidItemService.create(dto);
         });
 
-        await this.paidItemModel.insertMany(paidItems);
     }
+
+
     // private async updatePaidItemsCollection(transaction: ITransaction, newTransaction: Transaction) {
     //     const paidItems: IPaidItem[] = transaction.products.map(product => {
     //         const paidItem: IPaidItem = {

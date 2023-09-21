@@ -6,6 +6,7 @@ import { PaidItem, PaidItemSchema } from './schemas/paid-item.schema';
 @Module({
   imports: [MongooseModule.forFeature([{ name: PaidItem.name, schema: PaidItemSchema }])],
   providers: [PaidItemService],
-  controllers: [PaidItemController]
+  controllers: [PaidItemController],
+  exports:[PaidItemService]
 })
 export class PaidItemModule { }

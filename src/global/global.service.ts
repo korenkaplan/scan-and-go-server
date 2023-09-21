@@ -4,6 +4,7 @@ import * as CryptoJS from 'crypto-js'
 import {  GetQueryPaginationDto, LocalPaginationConfig } from './global.dto';
 import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { CardType, CardValidationRegex } from './global.enum';
+import { logger } from 'handlebars/runtime';
 
 
 @Injectable()
@@ -33,20 +34,20 @@ export class GlobalService {
         return result
     }
      validateCreditCart(card:CreditCard): boolean {
-        const cardTypeDecrypted = this.decryptText(card.cardType)
-        const cardNumberDecrypted = this.decryptText(card.cardNumber)
-      switch (cardTypeDecrypted) {
+        const {cardType,cardNumber } = card
+      switch (cardType) {
         case CardType.AMERICAN_EXPRESS:{
-            return new RegExp(CardValidationRegex.AMERICAN_EXPRESS).test(cardNumberDecrypted)
+            return new RegExp(CardValidationRegex.AMERICAN_EXPRESS).test(cardNumber)
         }
         case CardType.VISA:{
-            return new RegExp(CardValidationRegex.VISA).test(cardNumberDecrypted)
+            const isValid =  new RegExp(CardValidationRegex.VISA).test(cardNumber)
+            return isValid;
         }
         case CardType.DISCOVER:{
-            return new RegExp(CardValidationRegex.DISCOVER).test(cardNumberDecrypted)
+            return new RegExp(CardValidationRegex.DISCOVER).test(cardNumber)
         }
         case CardType.MASTERCARD:{
-            return new RegExp(CardValidationRegex.MASTERCARD).test(cardNumberDecrypted)
+            return new RegExp(CardValidationRegex.MASTERCARD).test(cardNumber)
         }
         default:{
             return false

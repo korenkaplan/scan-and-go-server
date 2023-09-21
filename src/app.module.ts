@@ -34,9 +34,9 @@ import { CacheModule } from '@nestjs/cache-manager';
      ItemModule, 
      NfcTagModule,
      TransactionsModule, 
+     PaidItemModule,
      CouponModule,
      ReportedProblemModule,
-     PaidItemModule,
      GlobalModule,
   ],
   providers: [ 

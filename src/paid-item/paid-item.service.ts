@@ -5,7 +5,6 @@ import mongoose, { Model } from 'mongoose';
 import { CreatePaidItemDto, GetPaidItemDto } from './dto/paid-item.dto';
 import { PAID_ITEM_SCHEMA_VERSION } from 'src/global/global.schema-versions';
 import { MAX_AMOUNT_OF_TAG_CODES } from './paid-item.config';
-//import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class PaidItemService {
@@ -40,6 +39,9 @@ export class PaidItemService {
 
         //if not found create a new bucket or the bucket is full create a new one
         if (!bucket)
+            return await this.createNewBucketObject(dto);
+        
+        if(bucket.tagsAmount >= bucket.maxTagsAmount)
             return await this.createNewBucketObject(dto);
 
         // push the new code to the bucket
