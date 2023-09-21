@@ -40,11 +40,6 @@ export class PaidItemService {
         if (!bucket)
             return await this.createNewBucketObject(dto);
         
-        if(bucket.tagsAmount >= bucket.maxTagsAmount)
-        {
-            return await this.createNewBucketObject(dto);
-        }
-
         // push the new code to the bucket
         bucket.tagsCodes.push(nfcTagCode)
         bucket.tagsAmount = bucket.tagsCodes.length
@@ -67,7 +62,6 @@ export class PaidItemService {
             createdAt: new Date(),
             schemaVersion: PAID_ITEM_SCHEMA_VERSION,
             tagsAmount: 1,
-            maxTagsAmount: MAX_AMOUNT_OF_TAG_CODES
         }
         return await this.paidItemsModel.create(bucket);
     }

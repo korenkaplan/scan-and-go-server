@@ -10,7 +10,7 @@ import { Item } from "src/item/schemas/item.schema";
 //TODO: Create a yearly paid items collection.
 export class PaidItem extends Document {
     @Prop()
-    tagsCodes: string[]
+    tagsCodes:string[]
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Item' })
     itemId: Item
@@ -24,9 +24,6 @@ export class PaidItem extends Document {
     @Prop()
     tagsAmount: number
 
-    @Prop()
-    maxTagsAmount: number
-
 }
 export interface IPaidItem {
     _id?: mongoose.Types.ObjectId
@@ -35,7 +32,6 @@ export interface IPaidItem {
     createdAt: Date,
     schemaVersion: number,
     tagsAmount: number,
-    maxTagsAmount: number,
 }
 export const PaidItemSchema = SchemaFactory.createForClass(PaidItem)
 
