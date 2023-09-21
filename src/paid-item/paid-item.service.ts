@@ -36,16 +36,18 @@ export class PaidItemService {
 
         //search for a bucket matching the itemId
         const bucket = await this.paidItemsModel.findOne({ itemId: itemId, tagsAmount: { $lt: MAX_AMOUNT_OF_TAG_CODES } });
-
         //if not found create a new bucket or the bucket is full create a new one
         if (!bucket)
             return await this.createNewBucketObject(dto);
         
         if(bucket.tagsAmount >= bucket.maxTagsAmount)
+        {
             return await this.createNewBucketObject(dto);
+        }
 
         // push the new code to the bucket
         bucket.tagsCodes.push(nfcTagCode)
+        bucket.tagsAmount = bucket.tagsCodes.length
 
         //save the updates
         bucket.markModified('tagsCodes');

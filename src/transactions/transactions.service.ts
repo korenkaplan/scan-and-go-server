@@ -41,7 +41,6 @@ export class TransactionsService {
         @InjectModel(Coupon.name)
         private couponModel: Model<Coupon>,
         @InjectModel(NfcTag.name)
-        private nfcTagModel: Model<NfcTag>,
         private globalService: GlobalService,
         private mailService: MailService,
         @Inject(forwardRef(()=>PaidItemService))
@@ -252,7 +251,7 @@ export class TransactionsService {
 
             //* Step 1.4: charge the credit card
             // charge the credit card
-            await this.chargeCreditCard(card, dto);
+          //  await this.chargeCreditCard(card, dto);
             Logger.debug('Total Amount After coupon: ' + dto.totalAmount)
 
             //* Step 2: Create Transaction
@@ -303,23 +302,6 @@ export class TransactionsService {
 
     }
 
-
-    // private async updatePaidItemsCollection(transaction: ITransaction, newTransaction: Transaction) {
-    //     const paidItems: IPaidItem[] = transaction.products.map(product => {
-    //         const paidItem: IPaidItem = {
-    //             nfcTagCode: product.nfcTagCode,
-    //             userId: id,
-    //             itemId: product.itemId,
-    //             transactionId: newTransaction._id,
-    //             createdAt: new Date(),
-    //             schemaVersion: PAID_ITEM_SCHEMA_VERSION,
-    //         };
-
-    //         return paidItem;
-    //     });
-
-    //     await this.paidItemModel.insertMany(paidItems);
-    // }
     private async updateTheUser(user: User, latestTransaction: RecentTransaction, latestItems: RecentItem[]) {
         user.recentTransactions.unshift(latestTransaction);
         user.recentTransactions.splice(10);
