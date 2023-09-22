@@ -13,6 +13,7 @@ import { AddToCartDto } from './dto/add-to-cart.dto';
 import { ItemInCart } from './schemas/item-in-cart.interface';
 import { RemoveItemFromCartDto } from './dto/remove-from-cart.dto';
 import { Public } from 'src/auth/decorators/public-guard.decorator';
+import { CreditCard } from './schemas/credit-card.schema';
 
 @Controller('users')
 export class UserController {
@@ -66,7 +67,7 @@ export class UserController {
         return await this.userService.setDefaultCard(dto);
     }
     @Patch('/paymentMethods/deleteCreditCard')
-    async deleteCreditCard(@Body() dto: DeleteCreditCardDto): Promise<string> {
+    async deleteCreditCard(@Body() dto: DeleteCreditCardDto): Promise<CreditCard[]> {
         return await this.userService.deleteCreditCard(dto);
     }
     @Get('/AddMockItemsToCart')

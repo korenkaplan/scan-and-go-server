@@ -206,7 +206,7 @@ export class UserService {
         await user.save();
         return 'default card changed successfully'
     }
-    async deleteCreditCard(dto: DeleteCreditCardDto): Promise<string> {
+    async deleteCreditCard(dto: DeleteCreditCardDto): Promise<CreditCard[]> {
         const { userId, cardId } = dto
         //find the user
         const user = await this.userModel.findById(userId)
@@ -225,7 +225,7 @@ export class UserService {
 
         //save the user
         await user.save()
-        return 'deleted successfully';
+        return user.creditCards;
     }
     async addMockItemsToCart(userId: string): Promise<User> {
         const user = await this.userModel.findById(userId);
