@@ -59,7 +59,7 @@ export class UserController {
         return await this.userService.resetPassword(dto);
     }
     @Post('/paymentMethods/addCreditCard')
-    async addCreditCard(@Body() dto: CreateCreditCardDto): Promise<string> {
+    async addCreditCard(@Body() dto: CreateCreditCardDto): Promise<CreditCard[]> {
         return await this.userService.addCreditCard(dto);
     }
     @Patch('/paymentMethods/changeDefault')

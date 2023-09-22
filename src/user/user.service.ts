@@ -114,7 +114,7 @@ export class UserService {
     }
     //#endregion
     //#region Credit Cards
-    async addCreditCard(dto: CreateCreditCardDto): Promise<string> {
+    async addCreditCard(dto: CreateCreditCardDto): Promise<CreditCard[]> {
         const { userId, creditCard } = dto;
         //find the user
         const user = await this.userModel.findById(userId);
@@ -147,9 +147,8 @@ export class UserService {
             }
             await this.setDefaultCard(changeCardDto)
         }
-
         await user.save();
-        return 'Credit Card Added successfully';
+        return this.decryptUserCreditCards(user.creditCards);
     }
 
     decryptCreditCard(card: CreditCard): CreditCard {
@@ -225,7 +224,7 @@ export class UserService {
 
         //save the user
         await user.save()
-        return user.creditCards;
+        return this.decryptUserCreditCards(user.creditCards);
     }
     async addMockItemsToCart(userId: string): Promise<User> {
         const user = await this.userModel.findById(userId);
