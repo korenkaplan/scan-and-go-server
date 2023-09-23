@@ -292,7 +292,6 @@ export class TransactionsService {
     }
     //#region Sub functions for payment Pipeline
 
-    //TODO: Check functionality:updatePaidItemsCollection
     private async updatePaidItemsCollection(transaction: ITransaction) {
         const { products } = transaction;
         products.forEach(product => {
@@ -392,13 +391,12 @@ export class TransactionsService {
     }
 
     private async validateCard(user: User, cardId: mongoose.Types.ObjectId) {
-        const card = user.creditCards.filter(card => card._id.toString() == cardId.toString());
+        const card = user.creditCards.find(card => card._id.toString() == cardId.toString())
         if (!card)
             throw new NotFoundException(`card with the id ${cardId} was not found`);
-        //TODO: Uncomment the validation of creditcards
-        // if (!await this.globalService.validateCreditCart(card[0]))
-        //     throw new BadRequestException(`card with the id ${cardId} is invalid`);
-        return card[0];
+        if (! this.globalService.validateCreditCart(card))
+            throw new BadRequestException(`card with the id ${cardId} is invalid`);
+        return card;
     }
 
     private async validateUser(userId: mongoose.Types.ObjectId) {
@@ -480,7 +478,7 @@ export class TransactionsService {
     }
 
     //#region Send a report on a daily / weekly / monthly bases.
-    @Cron(CronExpression.EVERY_DAY_AT_9PM)
+    @Cron(CronExpression.EVERY_DAY_AT_10PM)
     async sendDailyTransactionsRecap(): Promise<void> {
         const today = new Date();
         const startDate = new Date();

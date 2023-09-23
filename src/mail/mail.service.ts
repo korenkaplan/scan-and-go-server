@@ -26,7 +26,6 @@ export class MailService {
         @InjectModel(User.name) private readonly userModel: Model<User>,
 
     ) { }
-    //TODO: Create send coupon function(think of logic)
     async sendResetPasswordEmail(email: string): Promise<VerificationEmailResponse> {
         const [isExist, userId] = await this.verifyEmail(email);
         if (!isExist) {

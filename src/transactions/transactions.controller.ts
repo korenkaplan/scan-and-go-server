@@ -1,12 +1,11 @@
-import { Body, Controller, Get, Post, Query, Delete, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Delete} from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { Transaction } from './schemas/transaction.schema';
 import { GetQueryDto, GetQueryPaginationDto, PaginationResponseDto } from 'src/global/global.dto';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Types } from 'mongoose';
-import { IStats, UserFullStats } from 'src/global/global.interface';
+import {UserFullStats } from 'src/global/global.interface';
 import { Public } from 'src/auth/decorators/public-guard.decorator';
-import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @Controller('transactions')
 export class TransactionsController {
@@ -21,7 +20,6 @@ export class TransactionsController {
   async getTransactions(@Body() dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
     return await this.transactionService.getMany(dto);
   }
-  @Public()//TODO: Temporary public
   @Post('/getManyPagination')
   async getTransactionsPagination(@Body() dto: GetQueryPaginationDto<Transaction>): Promise<PaginationResponseDto<Transaction>> {
     return await this.transactionService.getManyPagination(dto);
@@ -40,7 +38,6 @@ export class TransactionsController {
     return await this.transactionService.deleteAll();
   }
 
-  @Public() //TODO: Temporary public
   @Get('/allStats')
  // @UseInterceptors(CacheInterceptor)
   async getAllStats(@Query('id') id: Types.ObjectId): Promise<UserFullStats> {

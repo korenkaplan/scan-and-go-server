@@ -1,15 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable} from '@nestjs/common';
 import * as bcrypt from 'bcrypt'
 import * as CryptoJS from 'crypto-js'
 import { GetQueryPaginationDto, LocalPaginationConfig } from './global.dto';
 import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { CardType, CardValidationRegex } from './global.enum';
-import { logger } from 'handlebars/runtime';
 
 
 @Injectable()
 export class GlobalService {
-    private readonly Logger: Logger = new Logger();
     constructor() { }
 
     async hashPassword(password: string): Promise<string> {
@@ -40,8 +38,7 @@ export class GlobalService {
                 return new RegExp(CardValidationRegex.AMERICAN_EXPRESS).test(cardNumber)
             }
             case CardType.VISA: {
-                const isValid = new RegExp(CardValidationRegex.VISA).test(cardNumber)
-                return isValid;
+                return new RegExp(CardValidationRegex.VISA).test(cardNumber)
             }
             case CardType.DISCOVER: {
                 return new RegExp(CardValidationRegex.DISCOVER).test(cardNumber)
@@ -57,7 +54,6 @@ export class GlobalService {
     }
     async chargeCreditCard(card: CreditCard, amountToCharge: number): Promise<boolean> {
         //simulate credit card charging
-
         return await true;
     }
 

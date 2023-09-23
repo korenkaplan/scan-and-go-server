@@ -150,7 +150,6 @@ export class UserService {
         await user.save();
         return this.decryptUserCreditCards(user.creditCards);
     }
-
     decryptCreditCard(card: CreditCard): CreditCard {
         const decryptCreditCard: CreditCard = {
             cardNumber: this.globalService.decryptText(card.cardNumber),
@@ -263,9 +262,8 @@ export class UserService {
 
         return user;
     }
-
     //#endregion
-    //#region CRUD OPERA.creditCards
+    //#region CRUD
     async getMany(dto: GetQueryDto<User>): Promise<User[]> {
         const { query, projection } = dto
 

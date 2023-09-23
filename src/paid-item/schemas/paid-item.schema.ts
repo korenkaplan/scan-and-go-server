@@ -7,7 +7,6 @@ import { Item } from "src/item/schemas/item.schema";
     collection: 'paidItems',
 
 })
-//TODO: Create a yearly paid items collection.
 export class PaidItem extends Document {
     @Prop()
     tagsCodes:string[]
@@ -35,5 +34,4 @@ export interface IPaidItem {
 }
 export const PaidItemSchema = SchemaFactory.createForClass(PaidItem)
 
-//TODO: Check index is created successfully.
 PaidItemSchema.index({ itemId: 1, tagsCodes: 1 })

@@ -1,25 +1,31 @@
-import { Injectable, NotFoundException, Logger, } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, Inject, } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IPaidItem, PaidItem } from './schemas/paid-item.schema';
 import mongoose, { Model } from 'mongoose';
 import { CreatePaidItemDto, GetPaidItemDto } from './dto/paid-item.dto';
 import { PAID_ITEM_SCHEMA_VERSION } from 'src/global/global.schema-versions';
 import { MAX_AMOUNT_OF_TAG_CODES } from './paid-item.config';
-import { log } from 'console';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class PaidItemService {
     private readonly logger: Logger = new Logger();
+    private readonly TTL = 60 * 60 * 2; //2 hours the time the nfc tag code that went through the scanner will be in the cache
     constructor(
         @InjectModel(PaidItem.name)
         private paidItemsModel: Model<PaidItem>,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
-    //TODO: Check functionality: getOne()
     async getOne(dto: GetPaidItemDto): Promise<PaidItem> {
-        log(dto)
+        const key = dto.nfcTagCode;
+        const cachedPaidItem: PaidItem = await this.cacheManager.get(key);
+        if(cachedPaidItem)
+            return cachedPaidItem;
         const paidItem = await this.paidItemsModel.findOne({ itemId: dto.itemId, 'tagsCodes': dto.nfcTagCode },{_id:1});
         if (!paidItem)
             throw new NotFoundException(`Paid item not found with the code ${dto.nfcTagCode}`);
+        await this. cacheManager.set(key, paidItem,this.TTL);
         return paidItem;
     }
     async cleanCollection(): Promise<string> {
@@ -32,7 +38,6 @@ export class PaidItemService {
             throw new NotFoundException(`Paid item not found with id ${id}`);
         return deletedPaidItem;
     }
-    //TODO: Check functionality: create()
     async create(dto: CreatePaidItemDto): Promise<PaidItem> {
         const { nfcTagCode, itemId } = dto
 
@@ -54,7 +59,6 @@ export class PaidItemService {
         return bucket;
 
     }
-    //TODO: Check functionality: createNewBucketObject()
     async createNewBucketObject(dto: CreatePaidItemDto): Promise<PaidItem> {
         const { nfcTagCode, itemId } = dto
         const tagsCodes: string[] = [nfcTagCode]
@@ -67,7 +71,6 @@ export class PaidItemService {
         }
         return await this.paidItemsModel.create(bucket);
     }
-
 }
 
 

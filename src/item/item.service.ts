@@ -1,25 +1,46 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Item } from './schemas/item.schema';
-import { Model } from 'mongoose';
-import { GetQueryDto } from 'src/global/global.dto';
+import mongoose, { Model } from 'mongoose';
+import { GetQueryDto, UpdateQueryDto } from 'src/global/global.dto';
 import { Category, Fabric, Season, Color, ClothingGender } from 'src/global/global.enum';
 import { ItemForNfcAddition } from './item.dto';
+import { CreateItemDto } from './schemas/create-item.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { log } from 'console';
 
 @Injectable()
 export class ItemService {
-  constructor(@InjectModel(Item.name) private itemModel: Model<Item>) { }
+  private readonly TTL = 60 * 60 * 24  // 24 hours
+  constructor(@InjectModel(Item.name) private itemModel: Model<Item>,@Inject(CACHE_MANAGER) private cacheManager:Cache) { }
 
   async getMany(dto: GetQueryDto<Item>): Promise<Item[]> {
     const { query, projection } = dto
-
-    const users = await this.itemModel.find(query, projection);
-    return users
+    const items = await this.itemModel.find(query, projection);
+    if(!items)
+    throw new NotFoundException(`Items not found`)
+  return items
   }
   async getOne(dto: GetQueryDto<Item>): Promise<Item> {
     const { query, projection } = dto
-
-    return await this.itemModel.findOne(query, projection);
+    const item = await this.itemModel.findOne(query, projection);
+    if(!item)
+    throw new NotFoundException(`Item not found`)
+    
+    return item;
+  }
+  async getById(id: mongoose.Types.ObjectId): Promise<Item> {
+    const cachedItem: Item = await this.cacheManager.get(id.toString())
+    if(cachedItem)
+    {
+      return cachedItem
+    }
+    const item = await this.itemModel.findById(id);
+    if(!item)
+    throw new NotFoundException(`Item not found`)
+    await this.cacheManager.set(id.toString(),item,this.TTL)
+    return item;
   }
   async createMock() {
     const items = [
@@ -74,4 +95,21 @@ export class ItemService {
     });
     return itemsForNfcAddition;
   }
+  async createItem(dto: CreateItemDto): Promise<Item> {
+    const item = await this.itemModel.create(dto);
+    return item;
+  }
+  async deleteItem(id: mongoose.Types.ObjectId): Promise<Item> {
+    const item = await this.itemModel.findByIdAndDelete(id);
+    if(!item)
+    throw new NotFoundException(`Item not found`)
+    return item;
+  }
+  async updateItem(dto: UpdateQueryDto<Item>):Promise<Item> {
+    const {query, updateQuery} = dto
+    const item = await this.itemModel.findOneAndUpdate(query, updateQuery, {new: true});
+    if(!item)
+    throw new NotFoundException(`Item not found`)
+    return item;
+}
 }
