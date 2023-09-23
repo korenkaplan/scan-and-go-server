@@ -394,8 +394,12 @@ export class TransactionsService {
         const card = user.creditCards.find(card => card._id.toString() == cardId.toString())
         if (!card)
             throw new NotFoundException(`card with the id ${cardId} was not found`);
-        if (! this.globalService.validateCreditCart(card))
+        const result = this.globalService.validateCreditCart(card);
+        Logger.debug('validation result:' + result);
+        
+        if (!result)
             throw new BadRequestException(`card with the id ${cardId} is invalid`);
+
         return card;
     }
 
