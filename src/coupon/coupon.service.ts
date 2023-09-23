@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException,Logger} from '@nestjs/common';
+import { Injectable, NotFoundException,Logger, BadRequestException} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Coupon, ICoupon } from './schemas/coupon.schema';
 import mongoose, { Model } from 'mongoose';
@@ -57,7 +57,7 @@ export class CouponService {
         if(!coupon)
         throw new NotFoundException('No coupon found')
 
-        return coupon;
+        return this.validateCoupon(coupon);;
     
     }
     async getMany(dto:GetQueryDto<Coupon>):Promise<Coupon[]>{
@@ -93,5 +93,28 @@ export class CouponService {
         }
         return randomWord;
     }
-    
+     async validateCoupon(coupon:Coupon) {
+        const currantDate = new Date();
+        if (!coupon.isActive)
+            throw new BadRequestException(`coupon with the id ${coupon._id} is not active`);
+        else if (!(coupon.validFrom < currantDate && coupon.validUntil > currantDate)) {
+            console.log('here date invalid');
+            coupon.isActive = false;
+            coupon.markModified('isActive');
+            await coupon.save();
+            throw new BadRequestException(`coupon with the id ${coupon._id} date is invalid and now is not active`);
+        }
+        else if (coupon.maxUsageCount <= coupon.currentUsageCount) {
+            console.log('here max usage invalid');
+            coupon.isActive = false;
+            coupon.markModified('isActive');
+            await coupon.save();
+            throw new BadRequestException(`coupon with the id ${coupon._id} has reached max usages and now  is not active`);
+        }
+        else {
+            coupon.currentUsageCount = coupon.currentUsageCount + 1;
+            coupon.markModified('currentUsageCount');
+            return coupon;
+        }
+    }
 }
