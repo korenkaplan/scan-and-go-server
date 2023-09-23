@@ -57,7 +57,7 @@ export class CouponService {
         if(!coupon)
         throw new NotFoundException('No coupon found')
 
-        return this.validateCoupon(coupon);;
+        return this.validateCoupon(coupon);
     
     }
     async getMany(dto:GetQueryDto<Coupon>):Promise<Coupon[]>{
@@ -95,6 +95,7 @@ export class CouponService {
     }
      async validateCoupon(coupon:Coupon) {
         const currantDate = new Date();
+        Logger.debug('Coupon' + coupon);
         if (!coupon.isActive)
             throw new BadRequestException(`coupon with the id ${coupon._id} is not active`);
         else if (!(coupon.validFrom < currantDate && coupon.validUntil > currantDate)) {
