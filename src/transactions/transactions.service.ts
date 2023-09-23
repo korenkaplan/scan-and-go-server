@@ -40,7 +40,6 @@ export class TransactionsService {
         private userModel: Model<User>,
         @InjectModel(Coupon.name)
         private couponModel: Model<Coupon>,
-        @InjectModel(NfcTag.name)
         private globalService: GlobalService,
         private mailService: MailService,
         @Inject(forwardRef(() => PaidItemService))
@@ -394,9 +393,8 @@ export class TransactionsService {
         const card = user.creditCards.find(card => card._id.toString() == cardId.toString())
         if (!card)
             throw new NotFoundException(`card with the id ${cardId} was not found`);
-        const result = this.globalService.validateCreditCart(card);
-        Logger.debug('validation result:' + result);
-        
+        const decryptedCard = this.globalService.decryptCreditCard(card);
+        const result = this.globalService.validateCreditCart(decryptedCard);
         if (!result)
             throw new BadRequestException(`card with the id ${cardId} is invalid`);
 

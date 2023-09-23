@@ -4,6 +4,7 @@ import * as CryptoJS from 'crypto-js'
 import { GetQueryPaginationDto, LocalPaginationConfig } from './global.dto';
 import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { CardType, CardValidationRegex } from './global.enum';
+import { log } from 'console';
 
 
 @Injectable()
@@ -55,6 +56,18 @@ export class GlobalService {
     async chargeCreditCard(card: CreditCard, amountToCharge: number): Promise<boolean> {
         //simulate credit card charging
         return await true;
+    }
+    decryptCreditCard(card: CreditCard): CreditCard {
+        const decryptCreditCard: CreditCard = {
+            cardNumber: this.decryptText(card.cardNumber),
+            expirationDate: this.decryptText(card.expirationDate),
+            cardholderName: this.decryptText(card.cardholderName),
+            cvv: this.decryptText(card.cvv),
+            cardType: this.decryptText(card.cardType),
+            isDefault: card.isDefault,
+            _id: card._id
+        }
+        return decryptCreditCard;
     }
 
 

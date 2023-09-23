@@ -19,6 +19,7 @@ import { PaidItemModule } from 'src/paid-item/paid-item.module';
     {name:NfcTag.name,schema:NfcTagSchema},
   ]),
 PaidItemModule,
+GlobalModule,
 ],
   providers: [TransactionsService,PaidItemModule],
   controllers: [TransactionsController],
