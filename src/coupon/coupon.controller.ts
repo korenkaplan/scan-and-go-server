@@ -1,4 +1,4 @@
-import { Body, Controller, Delete,Get,Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete,Get,HttpCode,Post, Query } from '@nestjs/common';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { CouponService } from './coupon.service';
 import { GetQueryDto } from 'src/global/global.dto';
@@ -22,6 +22,7 @@ constructor(private readonly couponService: CouponService){}
         return await this.couponService.deleteOne(id);
     }
     @Post('getOne')
+    @HttpCode(200)
     async getOne(@Body() dto: GetQueryDto<Coupon>){
         return await this.couponService.getOne(dto);
     }
