@@ -33,7 +33,6 @@ export class CouponService {
     }
     const coupon = await this.createCoupon(dto)
     await this.mailService.sendCouponEmail(coupon)
-    Logger.log('send coupon')
     }
     async createCoupon(dto:CreateCouponDto):Promise<Coupon>{
         //destructure dto
@@ -74,7 +73,6 @@ export class CouponService {
         throw new NotFoundException('No coupon found')
         return deletedCoupon;
     }
-
     async updateOne(dto: UpdateQueryDto<Coupon>):Promise<Coupon>{
         const {query, updateQuery} = dto;
 

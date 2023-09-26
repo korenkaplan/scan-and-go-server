@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import mongoose, { FilterQuery, Types, UpdateWriteOpResult } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
@@ -22,6 +22,7 @@ import { log } from 'console';
 @Injectable()
 export class UserService {
     private MAX_AMOUNT_OF_CREDIT_CARDS = 5
+    private readonly Logger: Logger = new Logger();
     constructor(
         @InjectModel(User.name)
         private userModel: mongoose.Model<User>,
@@ -135,18 +136,21 @@ export class UserService {
         encryptedCard._id = new mongoose.Types.ObjectId();
 
         if (user.creditCards.length == 0)
-            encryptedCard.isDefault = true;
-        //update the user credit cards array
-        user.creditCards.push(encryptedCard);
+        encryptedCard.isDefault = true;
 
         //check if default set the other as not default
         if (creditCard.isDefault) {
-            const changeCardDto: ChangeDefaultCardDto = {
-                userId: user.id,
-                cardId: encryptedCard._id
-            }
-            await this.setDefaultCard(changeCardDto)
+           user.creditCards = user.creditCards.map((creditCard) =>{
+            creditCard.isDefault = false;
+            return creditCard;
+           })
         }
+      
+
+         //update the user credit cards array
+         user.creditCards.push(encryptedCard);
+         
+        user.markModified('creditCards');
         await user.save();
         return this.decryptUserCreditCards(user.creditCards);
     }
@@ -221,7 +225,15 @@ export class UserService {
         if (user.creditCards.length == beforeLength)
             throw new NotFoundException(`Credit card not found with id: ${cardId}`);
 
+        //if the removed card is default assign the default to first card on the list
+        if(user.creditCards.length > 0)
+        {
+            const defaultCard = user.creditCards.find(card => card.isDefault == true);
+            if(!defaultCard)
+                user.creditCards[0].isDefault = true;
+        }
         //save the user
+       user.markModified('creditCards');
         await user.save()
         return this.decryptUserCreditCards(user.creditCards);
     }
