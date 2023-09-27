@@ -1,4 +1,4 @@
-import { Category, Color, Fabric, Gender, Season } from "src/global/global.enum";
+import { Category, ClothingGender, Color, Fabric,  Season } from "src/global/global.enum";
 
 export class CreateItemDto {
     name: string;
@@ -6,7 +6,7 @@ export class CreateItemDto {
     price: number;
     imageSource: string;
     fabric: Fabric;
-    gender: Gender;
+    gender: ClothingGender;
     season: Season;
     colors: Color[]
 }

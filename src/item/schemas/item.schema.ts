@@ -1,21 +1,15 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose, { Document } from "mongoose";
-import { Category, Color, Fabric, Season } from "src/global/global.enum";
-
-enum Gender {
-    M= "male",
-    F= "female",
-    U= "unisex"
-}
+import mongoose from "mongoose";
+import { Category, ClothingGender, Color, Fabric, Season } from "src/global/global.enum";
 @Schema({
     timestamps: { createdAt: true, updatedAt: false },
 })
 
-export class Item extends Document {
+export class Item {
 
     @Prop()
     _id?: mongoose.Types.ObjectId;
-    
+
     @Prop({ unique: true })
     name: string;
 
@@ -32,7 +26,7 @@ export class Item extends Document {
     fabric: Fabric
 
     @Prop()
-    gender: Gender
+    gender: ClothingGender
 
     @Prop()
     season: Season
@@ -50,7 +44,7 @@ export class IItem {
     price: number;
     imageSource: string;
     fabric: Fabric;
-    gender: Gender;
+    gender: ClothingGender;
     season: Season;
     colors: Color[]
     createdAt: Date

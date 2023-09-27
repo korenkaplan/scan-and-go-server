@@ -106,6 +106,7 @@ export class ItemService {
     const item: IItem = {
       ...dto,
       createdAt: new Date(),
+      _id:new mongoose.Types.ObjectId()
     }
     const createdItem = await this.itemModel.create(item);
     return createdItem;

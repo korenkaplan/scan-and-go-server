@@ -9,24 +9,25 @@ import { ReportedProblem } from './schema/reported-problem.schema';
 @Controller('reportedProblem')
 export class ReportedProblemController {
   constructor(private reportedProblemService: ReportedProblemService) { }
-  //TODO: 
+  @Public()
   @Post('uploadFile')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     return await this.reportedProblemService.uploadToS3(file)
   }
-
+  @Public()
   @Post('createProblem')
   async createProblem(@Body() dto: CreateProblemDto) {
-  return await this.reportedProblemService.createProblem(dto)
+    return await this.reportedProblemService.createProblem(dto)
   }
+  @Public()
   @Get('getAll')
-  async getAllProblems(@Body() dto: GetQueryDto<ReportedProblem>){
-  return await this.reportedProblemService.getAllProblems(dto);
+  async getAllProblems(@Body() dto: GetQueryDto<ReportedProblem>) {
+    return await this.reportedProblemService.getAllProblems(dto);
   }
-
+  @Public()
   @Get('getAllTypeCategories')
-  async getAllTypeCategories(){
-      return this.reportedProblemService.getAllTypeCategories();
+  async getAllTypeCategories() {
+    return this.reportedProblemService.getAllTypeCategories();
   }
 }

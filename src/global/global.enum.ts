@@ -23,6 +23,7 @@ export enum Category {
   Dresses = "Dresses",
   Skirts = "Skirts",
   Pants = "Pants",
+  ButtonShirts = "Button Shirts",
   Sweaters = "Sweaters",
   Accessories = "Accessories",
   Outerwear = "Outerwear",
@@ -51,11 +52,7 @@ export enum Fabric {
   Knit = "Knit",
   Synthetic = "Synthetic",
 }
-export enum ClotheGender {
-  Male = "Male",
-  Female = "Female",
-  Unisex = "Unisex",
-}
+
 export enum Season {
   SpringSummer = "Spring/Summer",
   FallWinter = "Fall/Winter",
