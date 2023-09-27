@@ -23,11 +23,11 @@ export class ItemController {
     async getUsers(@Body() dto: GetQueryDto<Item>): Promise<Item[]> {
         return await this.itemService.getMany(dto);
     }
-
     @Post('/getOne')
     async getItems(@Body() dto: GetQueryDto<Item>): Promise<Item> {
         return await this.itemService.getOne(dto);
     }
+    @Public()
     @Get('/getById')
     @UseInterceptors(CacheInterceptor)
     async getById(@Query('id') id: mongoose.Types.ObjectId): Promise<Item> {

@@ -12,6 +12,7 @@ import { uploadToS3ResDto } from 'src/reported-problem/dto/upload-to-s3-res.dto'
 import { UploadToS3Dto } from 'src/reported-problem/dto/upload-to-s3-dto';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
+import { log } from 'console';
 
 @Injectable()
 export class ItemService {
@@ -43,7 +44,9 @@ export class ItemService {
     if (cachedItem) {
       return cachedItem
     }
-    const item = await this.itemModel.findById(id);
+    const _id = new mongoose.Types.ObjectId(id)
+    log(_id)
+    const item = await this.itemModel.findById(_id);
     if (!item)
       throw new NotFoundException(`Item not found`)
     await this.cacheManager.set(id.toString(), item, this.TTL)
