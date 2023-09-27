@@ -14,8 +14,9 @@ import { GlobalService } from 'src/global/global.service';
 @Injectable()
 export class ReportedProblemService {
     private readonly s3Client = new S3Client({ region: this.configService.getOrThrow('AWS_S3_REGION') });
-    // Image url Example: https://scan-and-go.s3.eu-north-1.amazonaws.com/donwload.jpeg
-    private s3PrefixUrl = `https://${this.configService.getOrThrow('AWS_BUCKET_NAME')}.s3.${this.configService.getOrThrow('AWS_S3_REGION')}.amazonaws.com/`
+    private readonly folder = "Problems/"
+    // Image url Example: https://scan-and-go.s3.eu-north-1.amazonaws.com/Problems/donwload.jpeg
+    private s3PrefixUrl = `https://${this.configService.getOrThrow('AWS_BUCKET_NAME')}.s3.${this.configService.getOrThrow('AWS_S3_REGION')}.amazonaws.com/${this.folder}`
     private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 15 }
     
     constructor(
@@ -47,12 +48,10 @@ export class ReportedProblemService {
         const { fileName, file } = dto;
         await this.s3Client.send(new PutObjectCommand({
             Bucket: 'scan-and-go',
-            Key: fileName,
+            Key: this.folder + fileName,
             Body: file,
             ContentType: 'image/jpeg'
         }))
-
-
     }
     async getAllProblemsPagination(dto: GetQueryPaginationDto<ReportedProblem>): Promise<ReportedProblem[]> {
         const { query, projection, currentPage } = dto;

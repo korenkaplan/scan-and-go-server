@@ -13,6 +13,9 @@ enum Gender {
 
 export class Item extends Document {
 
+    @Prop()
+    _id?: mongoose.Types.ObjectId;
+    
     @Prop({ unique: true })
     name: string;
 

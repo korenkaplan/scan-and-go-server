@@ -1,45 +1,52 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Item } from './schemas/item.schema';
+import { IItem, Item } from './schemas/item.schema';
 import mongoose, { Model } from 'mongoose';
-import { GetQueryDto, UpdateQueryDto } from 'src/global/global.dto';
+import { GetQueryDto, LocalPaginationConfig, UpdateQueryDto } from 'src/global/global.dto';
 import { Category, Fabric, Season, Color, ClothingGender } from 'src/global/global.enum';
 import { ItemForNfcAddition } from './item.dto';
 import { CreateItemDto } from './schemas/create-item.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { log } from 'console';
+import { uploadToS3ResDto } from 'src/reported-problem/dto/upload-to-s3-res.dto';
+import { UploadToS3Dto } from 'src/reported-problem/dto/upload-to-s3-dto';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ItemService {
   private readonly TTL = 60 * 60 * 24  // 24 hours
-  constructor(@InjectModel(Item.name) private itemModel: Model<Item>,@Inject(CACHE_MANAGER) private cacheManager:Cache) { }
+  private readonly s3Client = new S3Client({ region: this.configService.getOrThrow('AWS_S3_REGION') });
+  private readonly folder = "Products/"
+  // Image url Example: https://scan-and-go.s3.eu-north-1.amazonaws.com/Problems/donwload.jpeg
+  private s3PrefixUrl = `https://${this.configService.getOrThrow('AWS_BUCKET_NAME')}.s3.${this.configService.getOrThrow('AWS_S3_REGION')}.amazonaws.com/${this.folder}`
+  private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 15 }
+  constructor(  private readonly configService: ConfigService,@InjectModel(Item.name) private itemModel: Model<Item>, @Inject(CACHE_MANAGER) private cacheManager: Cache) { }
 
   async getMany(dto: GetQueryDto<Item>): Promise<Item[]> {
     const { query, projection } = dto
     const items = await this.itemModel.find(query, projection);
-    if(!items)
-    throw new NotFoundException(`Items not found`)
-  return items
+    if (!items)
+      throw new NotFoundException(`Items not found`)
+    return items
   }
   async getOne(dto: GetQueryDto<Item>): Promise<Item> {
     const { query, projection } = dto
     const item = await this.itemModel.findOne(query, projection);
-    if(!item)
-    throw new NotFoundException(`Item not found`)
-    
+    if (!item)
+      throw new NotFoundException(`Item not found`)
+
     return item;
   }
   async getById(id: mongoose.Types.ObjectId): Promise<Item> {
     const cachedItem: Item = await this.cacheManager.get(id.toString())
-    if(cachedItem)
-    {
+    if (cachedItem) {
       return cachedItem
     }
     const item = await this.itemModel.findById(id);
-    if(!item)
-    throw new NotFoundException(`Item not found`)
-    await this.cacheManager.set(id.toString(),item,this.TTL)
+    if (!item)
+      throw new NotFoundException(`Item not found`)
+    await this.cacheManager.set(id.toString(), item, this.TTL)
     return item;
   }
   async createMock() {
@@ -96,20 +103,40 @@ export class ItemService {
     return itemsForNfcAddition;
   }
   async createItem(dto: CreateItemDto): Promise<Item> {
-    const item = await this.itemModel.create(dto);
-    return item;
+    const item: IItem = {
+      ...dto,
+      createdAt: new Date(),
+    }
+    const createdItem = await this.itemModel.create(item);
+    return createdItem;
+
   }
   async deleteItem(id: mongoose.Types.ObjectId): Promise<Item> {
     const item = await this.itemModel.findByIdAndDelete(id);
-    if(!item)
-    throw new NotFoundException(`Item not found`)
+    if (!item)
+      throw new NotFoundException(`Item not found`)
     return item;
   }
-  async updateItem(dto: UpdateQueryDto<Item>):Promise<Item> {
-    const {query, updateQuery} = dto
-    const item = await this.itemModel.findOneAndUpdate(query, updateQuery, {new: true});
-    if(!item)
-    throw new NotFoundException(`Item not found`)
+  async updateItem(dto: UpdateQueryDto<Item>): Promise<Item> {
+    const { query, updateQuery } = dto
+    const item = await this.itemModel.findOneAndUpdate(query, updateQuery, { new: true });
+    if (!item)
+      throw new NotFoundException(`Item not found`)
     return item;
+  }
+  async uploadToS3(file: Express.Multer.File): Promise<uploadToS3ResDto> {
+    const dto: UploadToS3Dto = { fileName: Date.now().toString() + ".jpeg", file: file.buffer }
+    await this.uploadToS3Action(dto)
+    const resDto: uploadToS3ResDto = { "imageUrl": this.s3PrefixUrl + dto.fileName }
+    return resDto
+}
+private async uploadToS3Action(dto: UploadToS3Dto): Promise<void> {
+    const { fileName, file } = dto;
+    await this.s3Client.send(new PutObjectCommand({
+        Bucket: 'scan-and-go',
+        Key: this.folder + fileName,
+        Body: file,
+        ContentType: 'image/jpeg'
+    }))
 }
 }
