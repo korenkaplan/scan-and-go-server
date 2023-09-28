@@ -21,6 +21,7 @@ import { PaidItemModule } from 'src/paid-item/paid-item.module';
 PaidItemModule,
 GlobalModule,
 ],
+
   providers: [TransactionsService,PaidItemModule],
   controllers: [TransactionsController],
   exports:[TransactionsService]

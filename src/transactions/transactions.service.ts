@@ -471,7 +471,7 @@ export class TransactionsService {
 
     //TODO: Cron Jobs
     //#region Send a report on a daily / weekly / monthly bases.
-    @Cron(CronExpression.EVERY_DAY_AT_1AM)
+    @Cron(CronExpression.EVERY_DAY_AT_10PM)
     async sendDailyTransactionsRecap(): Promise<void> {
         const today = new Date();
         const startDate = new Date();
@@ -479,6 +479,7 @@ export class TransactionsService {
         startDate.setDate(today.getDate() - 1);
         return this.mailService.sendTransactionRecap(startDate, today, timePeriod)
     }
+
     @Cron(CronExpression.EVERY_WEEK)
     async sendWeeklyTransactionsRecap(): Promise<void> {
         const today = new Date();
