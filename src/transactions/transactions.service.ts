@@ -29,10 +29,8 @@ export interface Rest {
     couponDiscountAmount?: number
 }
 export class TransactionsService {
-    private readonly Logger = new Logger();
     private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 10 }
     private NUMBER_OF_LAST_YEARS_FOR_YEARLY_STATS = 7
-    private readonly logger: Logger = new Logger(TransactionsService.name)
     constructor(
         @InjectModel(Transaction.name)
         private transactionModel: Model<Transaction>,
@@ -118,7 +116,6 @@ export class TransactionsService {
     private initMonthlyStartDate(): Date {
         const today = moment();
         const monthlyStartDate = moment(today).subtract(11, 'months').startOf('month');
-        Logger.debug("Monthly start date initMonthlyStartDate Function After: " + monthlyStartDate.format());
         return monthlyStartDate.toDate();
     }
     private initYearlyStartDate(yearsBack: number): Date {
@@ -203,6 +200,7 @@ export class TransactionsService {
         return this.filterTheTransactionsToObjects(dto);
     }
     //#endregion
+    //TODO: Cache Implementation
     async getAllStats(id: Types.ObjectId): Promise<UserFullStats> {
         const cachedItem: UserFullStats = await this.cacheManager.get(`stats-${id.toString()}`)
         if (cachedItem) {
@@ -281,6 +279,7 @@ export class TransactionsService {
         }
 
     }
+    //TODO: Transaction Pagination
     //#region Sub functions for payment Pipeline
     private async updatePaidItemsCollection(transaction: ITransaction) {
         const { products } = transaction;
@@ -400,33 +399,33 @@ export class TransactionsService {
     }
     //#endregion
     async getManyPagination(dto: GetQueryPaginationDto<Transaction>): Promise<PaginationResponseDto<Transaction>> {
-        // Extract relevant information from the input DTO
+        // extract relevant information from the input DTO
         const { query, projection, currentPage } = dto;
 
-        // Configure pagination settings based on global service and local configuration
+        // configure pagination settings based on global service and local configuration
         const { limit, sort } = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG);
         const skipAmount = currentPage * limit;
 
-        // Retrieve transactions from the database based on query, projection, pagination, and sorting
+        // retrieve transactions from the database based on query, projection, pagination, and sorting
         const transactions = await this.transactionModel.find(query, projection).skip(skipAmount).limit(limit + 1).sort(sort);
 
-        // Check if there are more records than the specified limit
+        // check if there are more records than the specified limit
         const isMore = transactions.length > limit;
         if (isMore) {
             transactions.pop(); // Remove extra record used for pagination check
         }
 
-        // Decrypt the retrieved transactions for further processing
+        // decrypt the retrieved transactions for further processing
         const decryptedTransactions = this.decryptTransactions(transactions);
 
-        // Prepare the response object with the decrypted transactions
+        // prepare the response object with the decrypted transactions
         const res: PaginationResponseDto<Transaction> = {
             list: decryptedTransactions,
             pageNumber: currentPage,
             isMore
         }
 
-        return res; // Return the paginated response
+        return res; 
     }
     async getMany(dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
         const { query, projection } = dto;
@@ -472,7 +471,7 @@ export class TransactionsService {
 
     //TODO: Cron Jobs
     //#region Send a report on a daily / weekly / monthly bases.
-    @Cron(CronExpression.EVERY_DAY_AT_10PM)
+    @Cron(CronExpression.EVERY_DAY_AT_1AM)
     async sendDailyTransactionsRecap(): Promise<void> {
         const today = new Date();
         const startDate = new Date();

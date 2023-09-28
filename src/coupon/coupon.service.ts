@@ -94,18 +94,15 @@ export class CouponService {
     }
      async validateCoupon(coupon:Coupon) {
         const currantDate = new Date();
-        Logger.debug('Coupon' + coupon);
         if (!coupon.isActive)
             throw new BadRequestException(`coupon with the id ${coupon._id} is not active`);
         else if (!(coupon.validFrom < currantDate && coupon.validUntil > currantDate)) {
-            console.log('here date invalid');
             coupon.isActive = false;
             coupon.markModified('isActive');
             await coupon.save();
             throw new BadRequestException(`coupon with the id ${coupon._id} date is invalid and now is not active`);
         }
         else if (coupon.maxUsageCount <= coupon.currentUsageCount) {
-            console.log('here max usage invalid');
             coupon.isActive = false;
             coupon.markModified('isActive');
             await coupon.save();

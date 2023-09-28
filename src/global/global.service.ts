@@ -4,13 +4,11 @@ import * as CryptoJS from 'crypto-js'
 import { GetQueryPaginationDto, LocalPaginationConfig } from './global.dto';
 import { CreditCard } from 'src/user/schemas/credit-card.schema';
 import { CardType, CardValidationRegex } from './global.enum';
-import { log } from 'console';
 
 
 @Injectable()
 export class GlobalService {
     constructor() { }
-
     async hashPassword(password: string): Promise<string> {
         const hashedPassword = await bcrypt.hash(password, 10);
         return hashedPassword
@@ -69,6 +67,4 @@ export class GlobalService {
         }
         return decryptCreditCard;
     }
-
-
 }

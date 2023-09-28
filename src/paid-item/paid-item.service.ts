@@ -17,6 +17,7 @@ export class PaidItemService {
         private paidItemsModel: Model<PaidItem>,
         @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
+    //TODO: Cache Implementation
     async getOne(dto: GetPaidItemDto): Promise<PaidItem> {
         const key = dto.nfcTagCode;
         const cachedPaidItem: PaidItem = await this.cacheManager.get(key);

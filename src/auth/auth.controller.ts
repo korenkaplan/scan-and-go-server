@@ -23,6 +23,7 @@ export class AuthController {
         return this.authService.login(dto);
     }
 
+    //TODO: Rate Limit
     @Public()
     @Get('/verifyEmail')
     @Throttle(1,60)

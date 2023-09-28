@@ -22,7 +22,6 @@ import { log } from 'console';
 @Injectable()
 export class UserService {
     private MAX_AMOUNT_OF_CREDIT_CARDS = 5
-    private readonly Logger: Logger = new Logger();
     constructor(
         @InjectModel(User.name)
         private userModel: mongoose.Model<User>,
