@@ -17,6 +17,7 @@ export class CouponService {
         private readonly couponModel:Model<Coupon>,
         private mailService:MailService
     ) { }
+    //TODO: Cron: send coupon to all users.
     @Cron(CronExpression.EVERY_1ST_DAY_OF_MONTH_AT_NOON)
     async sendGiftCoupon(): Promise<void>{
     const code: string = this.generateRandomWord(6) + this.GIFT_COUPON_DISCOUNT_PERCENTAGE;

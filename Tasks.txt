@@ -1,3 +1,0 @@
-*the bucket design pattern: Transactions (user ID), Paid items(item id)
-* Yearly paid items collection
-

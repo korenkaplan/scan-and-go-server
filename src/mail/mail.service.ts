@@ -122,18 +122,26 @@ export class MailService {
         if (!fs.existsSync(directoryPath)) {
             fs.mkdirSync(directoryPath, { recursive: true });
 
-        } else {
-
         }
     }
+    //TODO: Send Transaction recap
     async sendTransactionRecap(startDate: Date, endDate: Date, timePeriod: string): Promise<void> {
+        // create the excel workbook and add the sheet define the headers
         const { workBook, sheet } = this.createTransactionWorkbook();
+
+        //format the start and end dates to a readable format
         const formattedStartDate = moment(startDate).format('DD.MM.YYYY')
         const formattedEndDate = moment(endDate).format('DD.MM.YYYY')
+        
+        //create the folder and file path if it doesn't exist
         const folderPath = join(__dirname, 'templates', 'xlsx') // Correct file path
         await this.createDirectoryIfNotExists(folderPath)
+
+        //create the file name made of the start and end dates, and the full path including the folder path + the file name
         const fileName = `${formattedStartDate}-${formattedEndDate}_Transactions.xlsx`
         const filePath = join(folderPath, fileName)
+
+        //loop through the transactions and add them to the sheet each transaction in a row and add alignment to the cells (center)
         const transactions = await this.transactionModel.find({ createdAt: { $gte: startDate, $lte: endDate } });
         transactions.map((transaction) => {
             transaction.products.map((product) => {
@@ -145,11 +153,15 @@ export class MailService {
                     name: product.name,
                     price: product.price,
                     formattedDate: transaction.formattedDate
-                }).alignment = { vertical: 'middle', horizontal: 'center' }; // Set alignment 
+                }).alignment = { vertical: 'middle', horizontal: 'center' }; 
             });
         })
+
+        //create the xlsx file and check to ensure it exists
         await workBook.xlsx.writeFile(filePath);
         await this.checkFileExists(filePath);
+
+        //create the dto object containing the details for sending the transaction recap to the email address of the store owner.
         const storeManagerEmail = process.env.STORE_MANAGER_MAIL;
         const dto: SendExcelDto = {
             email: storeManagerEmail,
@@ -159,6 +171,8 @@ export class MailService {
             endDate: formattedEndDate,
             timePeriod
         }
+
+        //send the file to the email and delete it after it sends.
         await this.sendExcelFile(dto);
         fs.unlink(filePath, (err: any) => {
             if (err)

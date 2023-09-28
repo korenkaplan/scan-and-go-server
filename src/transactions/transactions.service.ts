@@ -57,25 +57,24 @@ export class TransactionsService {
             const day = clonedDate.getDay(); // Calculate the day of the week (0 to 6)
 
             weekObject.push({
-                label: DayOfWeek[day], // Assuming DayOfWeek is an enum
+                label: DayOfWeek[day], 
                 value: 0,
-                date: clonedDate, // Use the cloned date
+                date: clonedDate, 
             });
         }
 
         return weekObject // Reverse the array to get the correct order
     }
-
     private initMonthlyObject(): IStats[] {
         const today = new Date();
         const monthObject: IStats[] = [];
         const monthlyStartDate = new Date(today);
 
-        // Calculate starting month
+        // calculate starting month
         monthlyStartDate.setFullYear(today.getFullYear() - 1); // Go back one year
         monthlyStartDate.setMonth(today.getMonth() + 1); // Go to the month after the current month
 
-        // Set the day to 1 for consistency
+        // set the day to 1 for consistency
         monthlyStartDate.setDate(1);
 
         for (let i = 0; i < 12; i++) {
@@ -94,7 +93,6 @@ export class TransactionsService {
 
         return monthObject;
     }
-
     private initYearlyObject(): IStats[] {
         const today = new Date();
         const yearlyObject: IStats[] = [];
@@ -118,11 +116,10 @@ export class TransactionsService {
         return weeklyStartDate;
     }
     private initMonthlyStartDate(): Date {
-        const today = new Date();
-        const monthlyStartDate = new Date(today);
-        monthlyStartDate.setDate(today.getMonth() - 11);
-        monthlyStartDate.setDate(1)
-        return monthlyStartDate;
+        const today = moment();
+        const monthlyStartDate = moment(today).subtract(11, 'months').startOf('month');
+        Logger.debug("Monthly start date initMonthlyStartDate Function After: " + monthlyStartDate.format());
+        return monthlyStartDate.toDate();
     }
     private initYearlyStartDate(yearsBack: number): Date {
         const today = new Date();
@@ -150,7 +147,6 @@ export class TransactionsService {
                     matchingDay.value += transaction.totalAmount
                 }
             }
-
             if (transactionDate > monthlyStartDate)// if the transaction ocurred in the last year
             {
                 const transactionYear = transaction.createdAt.getFullYear();
@@ -206,9 +202,7 @@ export class TransactionsService {
         //iterate through the user's transactions and check the created at timestamp and filter the transaction.
         return this.filterTheTransactionsToObjects(dto);
     }
-
     //#endregion
-
     async getAllStats(id: Types.ObjectId): Promise<UserFullStats> {
         const cachedItem: UserFullStats = await this.cacheManager.get(`stats-${id.toString()}`)
         if (cachedItem) {
@@ -270,8 +264,6 @@ export class TransactionsService {
             //* Step 4: Update the paid items collection
             //add the items (nfc chip) to the paid items collection
             await this.updatePaidItemsCollection(transaction);
-
-
             //#endregion
 
             //send the order confirmation email after the transaction has been committed successfully
@@ -290,7 +282,6 @@ export class TransactionsService {
 
     }
     //#region Sub functions for payment Pipeline
-
     private async updatePaidItemsCollection(transaction: ITransaction) {
         const { products } = transaction;
         products.forEach(product => {
@@ -479,6 +470,7 @@ export class TransactionsService {
         return deleted.deletedCount
     }
 
+    //TODO: Cron Jobs
     //#region Send a report on a daily / weekly / monthly bases.
     @Cron(CronExpression.EVERY_DAY_AT_10PM)
     async sendDailyTransactionsRecap(): Promise<void> {
