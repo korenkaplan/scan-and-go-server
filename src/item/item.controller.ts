@@ -12,7 +12,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 @Controller('items')
 export class ItemController {
     constructor(private itemService: ItemService,) { }
-
+    @Public()
     @Post('uploadFile')
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(@UploadedFile() file: Express.Multer.File) {
@@ -39,7 +39,7 @@ export class ItemController {
     async getItemsForNfc(): Promise<ItemForNfcAddition[]> {
         return await this.itemService.getAllItemsForNfcAddition();
     }
-
+    @Public()
     @Post('/create')
     async create(@Body() dto: CreateItemDto): Promise<Item> {
         return await this.itemService.createItem(dto);
