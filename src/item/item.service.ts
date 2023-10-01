@@ -2,7 +2,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { IItem, Item } from './schemas/item.schema';
 import mongoose, { Model } from 'mongoose';
-import { GetQueryDto, LocalPaginationConfig, UpdateQueryDto } from 'src/global/global.dto';
+import { GetQueryDto, GetQueryPaginationDto, LocalPaginationConfig, PaginationResponseDtoAdmin, UpdateQueryDto } from 'src/global/global.dto';
 import { Category, Fabric, Season, Color, ClothingGender } from 'src/global/global.enum';
 import { ItemForNfcAddition } from './item.dto';
 import { CreateItemDto } from './schemas/create-item.dto';
@@ -17,11 +17,11 @@ import { log } from 'console';
 @Injectable()
 export class ItemService {
   private readonly TTL = 60 * 60 * 24  // 24 hours
+  private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { 'createdAt': -1 }, limit: 5 }
   private readonly s3Client = new S3Client({ region: this.configService.getOrThrow('AWS_S3_REGION') });
   private readonly folder = "Products/"
   // Image url Example: https://scan-and-go.s3.eu-north-1.amazonaws.com/Problems/donwload.jpeg
   private s3PrefixUrl = `https://${this.configService.getOrThrow('AWS_BUCKET_NAME')}.s3.${this.configService.getOrThrow('AWS_S3_REGION')}.amazonaws.com/${this.folder}`
-  private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 15 }
   constructor(  private readonly configService: ConfigService,@InjectModel(Item.name) private itemModel: Model<Item>, @Inject(CACHE_MANAGER) private cacheManager: Cache) { }
 
   async getMany(dto: GetQueryDto<Item>): Promise<Item[]> {
@@ -142,5 +142,28 @@ private async uploadToS3Action(dto: UploadToS3Dto): Promise<void> {
         Body: file,
         ContentType: 'image/jpeg'
     }))
+}
+async getManyPaginationAdmin(dto: GetQueryPaginationDto<Item>): Promise<PaginationResponseDtoAdmin<Item>> {
+  // extract relevant information from the input DTO
+  const { query, projection, currentPage } = dto;
+
+  // configure pagination settings based on global service and local configuration
+  const { limit, sort } = this.LOCAL_PAGINATION_CONFIG
+  const skipAmount = currentPage * limit;
+
+  // retrieve transactions from the database based on query, projection, pagination, and sorting
+  const items = await this.itemModel.find(query, projection).skip(skipAmount).limit(limit).sort(sort);
+
+
+  // prepare the response object with the decrypted transactions
+  const res: PaginationResponseDtoAdmin<Item> = {
+      list: items,
+      pageNumber: currentPage,
+  }
+  return res; 
+}
+async getItemsCount (): Promise<number> {
+  const transactionsCount = await this.itemModel.countDocuments({});
+  return transactionsCount;
 }
 }

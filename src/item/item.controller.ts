@@ -1,7 +1,7 @@
 import { ItemService } from './item.service';
 import { Body, Controller, Delete, Get, Patch, UploadedFile, Post, Query, UseInterceptors } from '@nestjs/common';
 import { Item } from './schemas/item.schema';
-import { GetQueryDto, UpdateQueryDto } from 'src/global/global.dto';
+import { GetQueryDto, GetQueryPaginationDto, PaginationResponseDtoAdmin, UpdateQueryDto } from 'src/global/global.dto';
 import { ItemForNfcAddition } from './item.dto';
 import { Public } from 'src/auth/decorators/public-guard.decorator';
 import { CreateItemDto } from './schemas/create-item.dto';
@@ -52,5 +52,15 @@ export class ItemController {
     @Patch('/update')
     async update(@Body() dto: UpdateQueryDto<Item>): Promise<Item> {
         return await this.itemService.updateItem(dto);
+    }
+    @Public()
+    @Get('/itemsCount')
+    async getTransactionsAmount(): Promise<number> {
+        return await this.itemService.getItemsCount();
+    }
+    @Public()
+    @Post('/getManyPaginationAdmin')
+    async getManyPaginationAdmin(@Body() dto: GetQueryPaginationDto<Item>): Promise<PaginationResponseDtoAdmin<Item>> {
+        return await this.itemService.getManyPaginationAdmin(dto)
     }
 }
