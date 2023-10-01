@@ -10,6 +10,7 @@ export enum ClothingGender {
 export enum Role {
   USER = "user",
   ADMIN = "admin",
+  STORE_MANAGER = 'storeManager'
 }
 export enum TimePeriods {
   WEEKLY = "weekly",

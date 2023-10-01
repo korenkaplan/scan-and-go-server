@@ -41,6 +41,18 @@ export class AuthService {
         if (!isPasswordMatch) { throw new BadRequestException(`Invalid email or password`) }
         return this.generateToken(user)
     }
+    async loginAdminSite(dto: LoginDto): Promise<{ token: string }> {
+        const { email, password } = dto;
+        const user = await this.userModel.findOne({ email,'roles':Role.STORE_MANAGER });
+
+        if (!user) { throw new BadRequestException(`Invalid email or password`) }
+
+
+        const isPasswordMatch = await bcrypt.compare(password, user.password)
+
+        if (!isPasswordMatch) { throw new BadRequestException(`Invalid email or password`) }
+        return this.generateToken(user)
+    }
     async generateToken(user: IUser): Promise<{ token: string }> {
         const token = this.jwtService.sign({ id: user._id, roles: user.roles })
         return { token }
