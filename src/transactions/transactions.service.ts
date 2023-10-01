@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Logger, NotFoundException, forwardRef } fr
 import { ITransaction, Transaction } from './schemas/transaction.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
-import { GetQueryDto, GetQueryPaginationDto, LocalPaginationConfig, PaginationResponseDto } from 'src/global/global.dto';
+import { GetQueryDto, GetQueryPaginationDto, LocalPaginationConfig, PaginationResponseDto, PaginationResponseDtoAdmin } from 'src/global/global.dto';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TRANSACTION_SCHEMA_VERSION } from 'src/global/global.schema-versions';
 import moment from 'moment';
@@ -29,7 +29,7 @@ export interface Rest {
     couponDiscountAmount?: number
 }
 export class TransactionsService {
-    private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { '_id': -1 }, limit: 10 }
+    private LOCAL_PAGINATION_CONFIG: LocalPaginationConfig = { sort: { 'createdAt': -1 }, limit: 10 }
     private NUMBER_OF_LAST_YEARS_FOR_YEARLY_STATS = 7
     constructor(
         @InjectModel(Transaction.name)
@@ -426,6 +426,33 @@ export class TransactionsService {
         }
 
         return res; 
+    }
+    async getManyPaginationAdmin(dto: GetQueryPaginationDto<Transaction>): Promise<PaginatioPaginationResponseDtoAdminnResponseDtoAdmin<Transaction>> {
+        // extract relevant information from the input DTO
+        const { query, projection, currentPage } = dto;
+
+        // configure pagination settings based on global service and local configuration
+        const { limit, sort } = this.globalService.configPagination(dto, this.LOCAL_PAGINATION_CONFIG);
+        const skipAmount = currentPage * limit;
+
+        // retrieve transactions from the database based on query, projection, pagination, and sorting
+        const transactions = await this.transactionModel.find(query, projection).skip(skipAmount).limit(limit).sort(sort);
+
+
+        // decrypt the retrieved transactions for further processing
+        const decryptedTransactions = this.decryptTransactions(transactions);
+
+        // prepare the response object with the decrypted transactions
+        const res: PaginationResponseDtoAdmin<Transaction> = {
+            list: decryptedTransactions,
+            pageNumber: currentPage,
+        }
+
+        return res; 
+    }
+    async getTransactionsAmount (): Promise<number> {
+        const transactionsCount = await this.transactionModel.countDocuments({});
+        return transactionsCount;
     }
     async getMany(dto: GetQueryDto<Transaction>): Promise<Transaction[]> {
         const { query, projection } = dto;

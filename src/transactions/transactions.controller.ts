@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query, Delete} from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { Transaction } from './schemas/transaction.schema';
-import { GetQueryDto, GetQueryPaginationDto, PaginationResponseDto } from 'src/global/global.dto';
+import { GetQueryDto, GetQueryPaginationDto, PaginationResponseDto, PaginationResponseDtoAdmin } from 'src/global/global.dto';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Types } from 'mongoose';
 import {UserFullStats } from 'src/global/global.interface';
@@ -43,6 +43,14 @@ export class TransactionsController {
   async getAllStats(@Query('id') id: Types.ObjectId): Promise<UserFullStats> {
     return await this.transactionService.getAllStats(id);
   }
-
-
+@Public()
+@Get('/transactionsAmount')
+async getTransactionsAmount():Promise<number>{
+  return await this.transactionService.getTransactionsAmount();
+}
+@Public()
+@Post('/getManyPaginationAdmin')
+async getManyPaginationAdmin(@Body() dto:GetQueryPaginationDto<Transaction>):Promise<PaginationResponseDtoAdmin<Transaction>>{
+  return await this.transactionService.getManyPaginationAdmin(dto)
+}
 }

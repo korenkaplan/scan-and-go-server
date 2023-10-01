@@ -17,6 +17,10 @@ export class PaginationResponseDto<T> {
     pageNumber: number
     isMore: boolean
 }
+export class PaginationResponseDtoAdmin<T> {
+    list: T[]
+    pageNumber: number
+}
 export class UpdateQueryDto<T> {
     query: FilterQuery<T>
     updateQuery: UpdateQuery<T>
