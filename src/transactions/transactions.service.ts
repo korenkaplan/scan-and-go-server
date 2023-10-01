@@ -427,7 +427,7 @@ export class TransactionsService {
 
         return res; 
     }
-    async getManyPaginationAdmin(dto: GetQueryPaginationDto<Transaction>): Promise<PaginatioPaginationResponseDtoAdminnResponseDtoAdmin<Transaction>> {
+    async getManyPaginationAdmin(dto: GetQueryPaginationDto<Transaction>): Promise<PaginationResponseDtoAdmin<Transaction>> {
         // extract relevant information from the input DTO
         const { query, projection, currentPage } = dto;
 
