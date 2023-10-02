@@ -283,7 +283,7 @@ export class TransactionsService {
     private async updatePaidItemsCollection(transaction: ITransaction) {
         const { products } = transaction;
         products.forEach(product => {
-            const dto: CreatePaidItemDto = { nfcTagCode: product.nfcTagCode, itemId: product.itemId }
+            const dto: CreatePaidItemDto = { nfcTagCode: product.nfcTagCode, itemId: product.itemId, itemName: product.name}
             this.paidItemService.create(dto);
         });
 

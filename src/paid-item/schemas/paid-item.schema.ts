@@ -23,6 +23,9 @@ export class PaidItem extends Document {
     @Prop()
     tagsAmount: number
 
+    @Prop()
+    itemName: string
+
 }
 export interface IPaidItem {
     _id?: mongoose.Types.ObjectId
@@ -31,6 +34,7 @@ export interface IPaidItem {
     createdAt: Date,
     schemaVersion: number,
     tagsAmount: number,
+    itemName: string,
 }
 export const PaidItemSchema = SchemaFactory.createForClass(PaidItem)
 

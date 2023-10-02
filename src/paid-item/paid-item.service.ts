@@ -61,7 +61,7 @@ export class PaidItemService {
 
     }
     async createNewBucketObject(dto: CreatePaidItemDto): Promise<PaidItem> {
-        const { nfcTagCode, itemId } = dto
+        const { nfcTagCode, itemId,itemName } = dto
         const tagsCodes: string[] = [nfcTagCode]
         const bucket: IPaidItem = {
             tagsCodes,
@@ -69,6 +69,7 @@ export class PaidItemService {
             createdAt: new Date(),
             schemaVersion: PAID_ITEM_SCHEMA_VERSION,
             tagsAmount: 1,
+            itemName,
         }
         return await this.paidItemsModel.create(bucket);
     }
