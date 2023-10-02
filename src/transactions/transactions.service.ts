@@ -164,7 +164,6 @@ export class TransactionsService {
                     matchingYear.value += transaction.totalAmount;
                 }
             }
-
         })
         const stats: UserFullStats = {
             weekly: weekObject.reverse(),
