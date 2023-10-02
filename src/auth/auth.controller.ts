@@ -22,7 +22,11 @@ export class AuthController {
     login(@Body() dto: LoginDto): Promise<{ token: string }> {
         return this.authService.login(dto);
     }
-
+    @Public()
+    @Post('/loginAdmin')
+    loginAdmin(@Body() dto: LoginDto): Promise<{ token: string }> {
+        return this.authService.loginAdminSite(dto);
+    }
     //TODO: Rate Limit
     @Public()
     @Get('/verifyEmail')
