@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import mongoose, { FilterQuery, Types, UpdateWriteOpResult } from 'mongoose';
+import mongoose, { FilterQuery, Mongoose, Types, UpdateWriteOpResult } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs'
@@ -242,19 +242,23 @@ export class UserService {
             throw new NotFoundException(`User not found with id: ${userId}`);
         }
 
-        const tags: INfcTag[] = await this.nfcModel.find();
+        const tags: Types.ObjectId[] = [
+             new Types.ObjectId('6513f71567d6d6b0e2a9adfd'),
+             new Types.ObjectId('6513f79667d6d6b0e2a9ae00'),
+             new Types.ObjectId('6513f80167d6d6b0e2a9ae06'),
+        ]
 
         // Use Promise.all to await all the promises and get an array of ItemInCart objects.
         const cartItems: ItemInCart[] = await Promise.all(
             tags.map(async (tag) => {
-                const item = await this.itemModel.findById(tag.itemId);
+                const item = await this.itemModel.findById(tag);
                 if (!item) {
-                    throw new NotFoundException(`Item not found with id: ${tag.itemId}`);
+                    throw new NotFoundException(`Item not found with id: ${tag}`);
                 }
 
                 const itemInCart: ItemInCart = {
-                    nfcTagCode: tag.tagId,
-                    itemId: tag.itemId,
+                    nfcTagCode: tag.toString(),
+                    itemId: tag,
                     name: item.name,
                     imageSource: item.imageSource,
                     price: item.price,

@@ -10,7 +10,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { uploadToS3ResDto } from 'src/reported-problem/dto/upload-to-s3-res.dto';
 import { UploadToS3Dto } from 'src/reported-problem/dto/upload-to-s3-dto';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { log } from 'console';
 
