@@ -4,8 +4,7 @@
 
 # A Little Bit About Me..
 
-Hi my name is **Koren Kaplan**, and I'm a software developer. I enjoy creating application all way from the idea in my head to an app in my phone or a website.
- This project was made as a final project for my academic studies as a Practical Software Engineer. In a group of two people I was responsible for the server side of the project.
+Hello, my name is **Koren Kaplan**, and I'm a software developer. I my goal is bringing applications to life, from the inception of an idea in my mind to its realization as a functional app on my phone or a dynamic website.
 
 # "Scan & Go": Nest.js Server Side REST API
 
