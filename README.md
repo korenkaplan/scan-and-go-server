@@ -20,7 +20,7 @@ Hello, my name is **Koren Kaplan**, and I'm a software developer. I my goal is b
 6. [Contact Information](#contact-information)
 
 ## Demo and Sceenshots
-[Watch the Tutorial Video]([https://www.youtube.com/watch?v=YOUR_VIDEO_ID](https://www.youtube.com/watch?v=m81DBKhZlwA))
+[Watch the Walkthrough Video](https://www.youtube.com/watch?v=m81DBKhZlwA)
 
 
 ## Tech-Stack
